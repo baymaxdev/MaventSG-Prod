@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Mavent",
+    "slug": "maventsg-frontendexpo",
+    "privacy": "public",
+    "sdkVersion": "22.0.0",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "primaryColor": "#0B486B",
+    "icon": "./assets/mavent_logo3.png",
+    "splash": {
+      "image": "./assets/mavent_logo3.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "packagerOpts": {
+      "assetExts": ["ttf", "mp4"]
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "androidStatusBar":{
+      "barStyle": "dark-content",
+      "backgroundColor": "#0A3E5C"
+    },
+    "ios": {
+      "bundleIdentifier": "com.okdev.mavent"
+    },
+    "android": {
+      "package": "com.okdev.mavent"
+    },
+  }
+}
