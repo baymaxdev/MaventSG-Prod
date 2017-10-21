@@ -47,7 +47,6 @@ class Discovery extends React.Component {
     componentWillMount() {
         this.props.getProfileInfo(this.props.auth.token);
         this.getLocationAsync();
-        setTimeout(()=>this.setState({statusBarHeight: Expo.Constants.statusBarHeight-23}),500);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -105,7 +104,7 @@ class Discovery extends React.Component {
             secs = 0;
             timer = setInterval(() => {
                 secs += 1;
-                if (secs == 3) {
+                if (secs == 2) {
                     clearInterval(timer);
                     this.setState({ requestLoading: true });
                     this.props.getNearbyList(this.state.region,this.state.region, this.props.auth.token);
@@ -121,14 +120,14 @@ class Discovery extends React.Component {
     }
     //Sort module.
     sortByVierified(){
-        
+
     }
 
     render() {
         const { nearbyList } = this.props;
         const filteredLists = nearbyList.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
         return (
-            <View style={{ flex: 1, paddingTop: this.state.statusBarHeight }}>
+            <View style={{ flex: 1 }}>
                 <MapView
                     ref={component => this._map = component}
                     provider="google"
@@ -147,14 +146,14 @@ class Discovery extends React.Component {
                     <View pointerEvents="none" style={{position:'absolute', left:0, top:0, height: 0.3 * SCREEN_H, width:SCREEN_W, alignItems: 'center', justifyContent:'center'}}>
                             <Image style={{ width: 32, height: 32, marginTop: -16}} source={require('../../../assets/icons/pin.png')}/>
                     </View>
-                     
+
                     <TouchableOpacity style={{alignItems: 'center', justifyContent: 'center', position:'absolute', right:10, bottom:10, width:55, height:55}} onPress={() => {
                         this.setState({region: myLocation});
-                    }}> 
+                    }}>
                             <View style={{width: 55, height: 55}}></View>
                     </TouchableOpacity>
                 </MapView>
-                
+
                 <View style={styles.listContainer}>
                     <View style={{ backgroundColor: '#f8f8f8', padding: 3 }}>
                         <Search

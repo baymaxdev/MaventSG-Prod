@@ -32,7 +32,7 @@ const imageDetails = [
 
 
 class CategoryView extends Component {
-    
+
     componentDidMount() {
         Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
     }
@@ -40,7 +40,7 @@ class CategoryView extends Component {
     render() {
         return (
             <View style={{flex:1}}>
-                <CarouselComponent/>                
+                <CarouselComponent/>
                 {/* <Container>
                     <Content style={{width:width}}> */}
                         <View style={{flex:1}}>
@@ -58,8 +58,8 @@ class CategoryView extends Component {
                         </View>
                     {/* </Content>
                 </Container> */}
-                
-              
+
+
             </View>
 
         );
@@ -67,7 +67,7 @@ class CategoryView extends Component {
 }
 
 const styles = StyleSheet.create({
-    
+
     list: {
         borderWidth:1, width:width, height:height,backgroundColor:'red',
 

@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   	justifyContent: 'center',
   	alignItems: 'center',
   	width: (width / 2) - HORIZONTAL_PADDING,
-  	flex:0.5
+  	flex:2
   },
   placeholderItemNameStyle: {
   	textAlign: 'center',
