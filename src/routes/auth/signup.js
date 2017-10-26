@@ -67,14 +67,37 @@ class Signup extends Component {
     }
 
     onPrivacy = () => {
-            Actions.PrivacyScreen();
+        Actions.PrivacyScreen();
     }
 
     onTerms = () => {
-            Actions.TermsScreen();
+        Actions.TermsScreen();
     }
 
     register = () => {
+        console.log(this.state.birthDay);
+        if (this.state.password.length < 6) {
+            alert("Password must contain at least 6 characters");
+            return;
+        }
+        if (this.state.phoneNumber.length < 8) {
+            alert("Mobile number must contain at least 8 digits");
+            return;
+        }
+        if (this.state.birthDay.length == 0) {
+            alert("Please select your birthday");
+            return;
+        }
+        let date1 = new Date();
+        let date2 = new Date(this.state.birthDay);
+        let diff = date1 - date2;
+        let diffYear = date1.getFullYear() - date2.getFullYear();
+
+        if (diffYear < 16) {
+            alert("You must be at least 16 years old to use this platform");
+            return;
+        }
+
         let gender = ''
         if (this.state.gender.length > 1) {
             gender = this.state.gender === 'male' ? 1 : 0;
@@ -269,9 +292,7 @@ const mapDispatchToProps = (dispatch) => ({
     requestSignup: (userData) => dispatch(actions.requestSignup(userData)),
     actions: bindActionCreators(actions, dispatch)
 });
-export default connect(
-    mapStateToProps, mapDispatchToProps
-)(Signup)
+export default connect(mapStateToProps, mapDispatchToProps)(Signup)
 
 const styles = StyleSheet.create({
     profileImage: {

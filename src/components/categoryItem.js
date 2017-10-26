@@ -9,6 +9,10 @@ import {
   Dimensions
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actions from '../actions';
+
 const HORIZONTAL_PADDING = 3;
 const { width, height } = Dimensions.get('window');
 const service = [
@@ -123,6 +127,10 @@ class RenderItem extends React.Component {
             break;
         }
         if(id === 'service' || id === 'learn' ){
+          if (id == 'service')
+            this.props.getTopicCount(1, this.props.auth.token);
+          else 
+            this.props.getTopicCount(0, this.props.auth.token);
           Actions.subCategory({data:data, title:this.props.data.name});
         }else{
           Actions.skillList({ category: id === 'provide'?'Provide a Service':'Teach a Skill'});
@@ -141,8 +149,6 @@ class RenderItem extends React.Component {
     }
 }
 
-export default RenderItem;
-
 const styles = StyleSheet.create({
 
   itemImageStyle: {
@@ -160,3 +166,14 @@ const styles = StyleSheet.create({
     backgroundColor:'transparent'
   },
 });
+
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+  profile: state.profile,
+});
+const mapDispatchToProps = (dispatch) => ({
+  getTopicCount: (mainCategory, token) => dispatch(actions.getTopicCount(mainCategory, token)),
+  actions: bindActionCreators(actions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(RenderItem);

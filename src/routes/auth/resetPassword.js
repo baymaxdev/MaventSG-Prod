@@ -37,8 +37,7 @@ class resetPassword extends Component {
 
     componentWillReceiveProps(nextProps) {
       if(nextProps.auth.resetPasswordSuccess){
-        alert("Success!");
-        Actions.login();
+        Actions.main();
       }
       else
       {
@@ -81,7 +80,7 @@ class resetPassword extends Component {
                         <Input
                             ref="password"
                             value={this.state.password}
-                            placeholder="Password"
+                            placeholder="New Password"
                             style={{ height: 40 }}
                             autoCorrect={false}
                             autoCapitalize="none"

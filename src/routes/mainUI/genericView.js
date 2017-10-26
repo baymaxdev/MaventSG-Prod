@@ -92,7 +92,7 @@ class GenericView extends Component {
               tintColorSearch="#a4a4a4"
               tintColorDelete="#e5e5e5"
               titleCancelColor="#a4a4a4"
-              onSearch={this.onSearch} onChangeText={(term) => { this.searchUpdated(term) }} />
+              onSearch={this.onSearch} onChangeText={this.onChangeText} />
           </View>
  };
 
@@ -118,20 +118,12 @@ class GenericView extends Component {
   };
 
   onSearch = (text) => {
-    return new Promise((resolve, reject) => {
-        resolve();
-    });
+    this.setState({ searchTerm: text });
   }
 
   onChangeText = (text) => {
-    return new Promise((resolve, reject) => {
-        resolve();
-    });
+    this.setState({ searchTerm: text });
   }
-
-  searchUpdated(term) {
-    this.setState({ searchTerm: term });
- }
 
   onChangeCategory = (index, value) => {
     this.props.getCatList(key[index], this.props.profile.location, this.props.auth.token);

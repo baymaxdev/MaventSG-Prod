@@ -14,17 +14,18 @@ import {
   TouchableOpacity,
   Button,
   Picker,
-  Animated
+  Animated,
+  Alert
 } from 'react-native';
 import { Icon } from 'native-base';
 import {ImagePicker} from 'expo';
 import ListModal from '../../components/listModal';
-import PickerModal from '../../components/picker';
 import { Actions } from 'react-native-router-flux';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../../actions';
 import LoadingComponent from '../../components/loadingComponent';
+import ActionSheet from 'react-native-actionsheet'
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -98,8 +99,6 @@ class SkillList extends Component {
               evening: false,
               night: false,
               modalData:data,
-              showPicker:false,
-              offSet: new Animated.Value(SCREEN_HEIGHT),
               pictures: [],
               idPictures: [],
               requestLoading: false
@@ -180,17 +179,6 @@ class SkillList extends Component {
         else {
             this.setState({categoryShowModal:false, subcategory:category, categoryId: id});
         }
-  }
-
-  changeValue = (value) => {
-    if(Platform.OS==="android"){
-      if(value === 1) this.takePhoto();
-      else if(value === 2) this._openCameraRoll();
-    }
-    else{
-      if(value === 0) this.takePhoto();
-      else if(value === 1) this._openCameraRoll();
-    }
   }
 
   _openCameraRoll = async () => {
@@ -281,6 +269,51 @@ class SkillList extends Component {
 
   }
 
+  onQuestionMark = (which) => {
+    switch (which) {
+      case 'title':
+        which = 'This is title';
+        break;
+      case 'description':
+        which = 'This is description';
+        break;
+      case 'price':
+        which = 'This is price';
+        break;
+      case 'photos':
+        which = 'This is photos';
+        break;
+      case 'postal code':
+        which = 'This is postal code';
+        break;
+      case 'day availability':
+        which = 'This is day availability';
+        break;
+      case 'time availability':
+        which = 'This is time availability';
+        break;
+      case 'verification':
+        which = 'This is verification';
+        break;
+      default:
+        break;
+    }
+    Alert.alert(
+      'Information',
+      which,
+      [
+        {text: 'Close', onPress: () => {}, style: 'cancel'},
+      ],
+      { cancelable: true }
+    )
+  }
+
+  handlePress = (i) => {
+    if (i === 1)
+      this._openCameraRoll();
+    else if (i === 2)
+      this.takePhoto();
+  }
 
   render() {
     return (
@@ -292,28 +325,35 @@ class SkillList extends Component {
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 10 }}>
                   <Text style={{ marginBottom:5 ,fontSize: 16, fontWeight: '600' }}>Service Category</Text>
                   <TouchableHighlight onPress={(e)=>{this.setState({modalData:data, categoryShowModal:true, isCategory:true})}}>
-                      <TextInput
-                          style={{ backgroundColor:'#fff', borderWidth: 1, borderColor: '#ccc', padding: 10, height: 40 }}
-                          editable={false}
-                          placeholder="Select a Category"
-                          value={this.state.category}
-                      />
+                    <TextInput
+                      pointerEvents="none"
+                      style={{ backgroundColor:'#fff', borderWidth: 1, borderColor: '#ccc', padding: 10, height: 40 }}
+                      editable={false}
+                      placeholder="Select a Category"
+                      value={this.state.category}
+                    />
                   </TouchableHighlight>
                   <TouchableHighlight onPress={(e)=>{ if(this.state.category!=='') this.setState({modalData:this.state.subData, categoryShowModal:true, isCategory:false})}}>
-                      <TextInput
-                          style={{ backgroundColor:'#fff', borderWidth: 1, borderColor: '#ccc', padding: 10, height: 40 }}
-                          editable={false}
-                          placeholder={this.state.category===''?"Select a Category first":'Select a Sub-Category'}
-                          value={this.state.subcategory}
-                      />
+                    <TextInput
+                      pointerEvents="none"
+                      style={{ backgroundColor:'#fff', borderWidth: 1, borderColor: '#ccc', padding: 10, height: 40 }}
+                      editable={false}
+                      placeholder={this.state.category===''?"Select a Category first":'Select a Sub-Category'}
+                      value={this.state.subcategory}
+                    />
                   </TouchableHighlight>
                   {
-                      this.state.categoryShowModal &&
-                          <ListModal data={this.state.modalData} show={this.state.categoryShowModal} handler={this.modalHandler}/>
+                    this.state.categoryShowModal &&
+                      <ListModal data={this.state.modalData} show={this.state.categoryShowModal} handler={this.modalHandler}/>
                   }
                 </View>
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Title</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Title</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('title')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
                     <TextInput
                       placeholderTextColor="rgba(0,0,0,0.3)"
@@ -335,7 +375,12 @@ class SkillList extends Component {
                 </View>
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Description</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Description</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('description')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8 }}>
                     <TextInput
                       placeholderTextColor="rgba(0,0,0,0.3)"
@@ -356,7 +401,12 @@ class SkillList extends Component {
                 </View>
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Price</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Price</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('price')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
                     <TextInput
                       placeholderTextColor="rgba(0,0,0,0.3)"
@@ -378,9 +428,17 @@ class SkillList extends Component {
                 </View>
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Photos</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Photos</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('photos')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3,  flexDirection:'row' }}>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>this.setState({ picNumber:0, showPicker:true})} >
+                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber:0 });
+                      this.ActionSheet.show();
+                      }}>
                       {
                         this.state.picUrl0?
                         <Image source={ this.state.picUrl0 } style={{ width:'100%', height:'100%' }}/>
@@ -388,7 +446,10 @@ class SkillList extends Component {
                         <Icon name="md-add-circle"/>
                       }
                     </TouchableOpacity>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>this.setState({ picNumber:1, showPicker:true})} >
+                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber:1 });
+                      this.ActionSheet.show();
+                      }}>
                       {
                         this.state.picUrl1?
                         <Image source={ this.state.picUrl1 } style={{ width:'100%', height:'100%' }}/>
@@ -396,7 +457,10 @@ class SkillList extends Component {
                         <Icon name="md-add-circle"/>
                       }
                     </TouchableOpacity>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>this.setState({ picNumber:2, showPicker:true})} >
+                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber:2 });
+                      this.ActionSheet.show();
+                      }}>
                       {
                         this.state.picUrl2?
                         <Image source={ this.state.picUrl2 } style={{ width:'100%', height:'100%' }}/>
@@ -408,7 +472,12 @@ class SkillList extends Component {
                 </View>
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Address: Postal Code</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Address: Postal Code</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('postal code')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8 }}>
                     <TextInput
                       placeholderTextColor="rgba(0,0,0,0.3)"
@@ -425,7 +494,12 @@ class SkillList extends Component {
                 </View>
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Day Availability</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Day Availability</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('day availability')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8, flexDirection: 'row', justifyContent: 'space-around' }}>
                     <TouchableHighlight underlayColor='#158BCF' style={this.state.Mon ? styles.buttonPressed : styles.button} onPress={this.onPressMon}>
                       <View style={{ borderWidth: 1, borderColor: '#ccc', height: 40, width: 40, borderRadius: 3, alignItems: 'center', justifyContent: 'center' }}>
@@ -466,7 +540,12 @@ class SkillList extends Component {
                 </View>
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15, height: 140 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>Time Availability</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Time Availability</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('time availability')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, padding: 8, justifyContent: 'space-around' }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                       <TouchableHighlight underlayColor='#158BCF' style={this.state.morning ? styles.buttonPressed : styles.button} onPress={this.onPressMorning}>
@@ -502,9 +581,17 @@ class SkillList extends Component {
                         <Text style={{padding:10, color:'#808080'}}>OPTIONAL</Text>
                         <View style={{flex:1, borderBottomWidth:1, borderColor:'#a9a9a9'}} />
                   </View>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>ID Verification</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={{ fontSize: 16, fontWeight: '600' }}>ID Verification</Text>
+                    <TouchableOpacity onPress={() => this.onQuestionMark('verification')}>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 3,  flexDirection:'row' }}>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>this.setState({ picNumber:3, showPicker:true})} >
+                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber:3 });
+                      this.ActionSheet.show();
+                      }}>
                       {
                         this.state.idPicUrl0?
                         <Image source={ this.state.idPicUrl0 } style={{ width:'100%', height:'100%' }}/>
@@ -512,7 +599,10 @@ class SkillList extends Component {
                         <Icon name="md-add-circle"/>
                       }
                     </TouchableOpacity>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>this.setState({ picNumber:4, showPicker:true})} >
+                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber:4 });
+                      this.ActionSheet.show();
+                      }}>
                       {
                         this.state.idPicUrl1?
                         <Image source={ this.state.idPicUrl1 } style={{ width:'100%', height:'100%' }}/>
@@ -534,10 +624,13 @@ class SkillList extends Component {
               </View>
             </View>
           </ScrollView>
-           {this.state.showPicker ? <PickerModal closeModal={() => this.setState({ showPicker: false })} data={pickerData} offSet={this.state.offSet}  changeValue={this.changeValue} /> : null}
-           {this.state.requestLoading &&
-            <LoadingComponent/>
-           }
+          <ActionSheet
+            ref={o => this.ActionSheet = o}
+            title={null}
+            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            cancelButtonIndex={0}
+            onPress={this.handlePress}
+          />
         </View>
     );
   }

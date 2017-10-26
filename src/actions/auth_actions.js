@@ -141,7 +141,7 @@ export const requestLogin = (email, password) => {
       dispatch({ type: REQUESTED_LOGIN_FAILED });
     })
   }
-} 
+}
 
 export const forgotPassword = (email) => {
 
@@ -151,10 +151,10 @@ export const forgotPassword = (email) => {
   return dispatch => {
     dispatch({ type: FORGOTPASSWORD_SUBMIT });
     const url = `user/forgotPassword?email=${email}`;
-    
+
     request(url, option)
     .then(res => {
-      
+
       if (res.status === 200) dispatch({ type: FORGOTPASSWORD_SUBMIT_SUCCEEDED, status: res.status});
       else dispatch({ type: FORGOTPASSWORD_SUBMIT_FAILED, status: res.status });
     })
@@ -174,7 +174,8 @@ export const resetPasswordfunc = (email, password,otp) => {
     const url = `user/resetPassword?email=${email}&newPassword=${password}&otp=${otp}`;
     request(url, option)
     .then(res => {
-      if (res.status === 200) dispatch({ type: RESET_PASSWORD_SUCCEEDED, status: res.status });
+      console.log(res);
+      if (res.status === 200) dispatch({ type: RESET_PASSWORD_SUCCEEDED, status: res.status, token: res.token });
       else dispatch({ type: RESET_PASSWORD_FAILED, status: res.status });
     })
     .catch(err => {
@@ -212,6 +213,7 @@ const loginWithToken = (token) => {
     const url = `user/login/Facebook`;
     request(url, option)
     .then(res => {
+      console.log(res);
       if (res.status === 200) {
         dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token:res.token });
       }

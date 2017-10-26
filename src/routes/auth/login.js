@@ -27,7 +27,7 @@ class Login extends Component {
      this.state = {
        showLoginModal: false,
        email:'howilliams8837@gmail.com',
-       password:'bbbbbb'
+       password:'dddddd'
      };
    }
 
@@ -96,7 +96,7 @@ class Login extends Component {
 
   onForgotPassword = () => {
         this.setState({showLoginModal:false});
-        Actions.forgotScreen();        
+        Actions.forgotScreen({email: this.state.email});
   }
 
   onFacebookLogin = () => {

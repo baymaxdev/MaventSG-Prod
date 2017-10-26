@@ -26,10 +26,10 @@ class ItemRow extends React.Component {
         Actions.skillPage({ title: `${provider.firstName} ${provider.lastName}`, item: provider, isMe: flag })
       }}>
         <View key={provider.mavenID} style={{ paddingVertical:5, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }}>
-          <View style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
+          <View pointerEvents="none" style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
             <Image source={provider.displayPicture ? {uri: provider.displayPicture} : require('../../assets/images/avatar.png')} style={provider.idVerified?styles.isVerifyStyle:styles.noneVerifyStyle} />
           </View>
-          <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
+          <View pointerEvents="none" style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
             <TextInput defaultValue={provider.title} editable={false} style={{ fontSize:13, color:'#515151', fontWeight:'400', height:17, marginRight: -50}}></TextInput>
             <TextInput defaultValue={categoryData[provider.category]} editable={false} style={{ color:'#145775', height:23, marginRight: -50, fontSize:12, fontWeight:'400' }}></TextInput>
             <Text style={{ fontSize: 12, color:'#b5b5b5' }}>{provider.firstName + " " + provider.lastName}</Text>

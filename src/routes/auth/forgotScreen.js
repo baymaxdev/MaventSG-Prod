@@ -22,13 +22,12 @@ class ForgotScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            email: ''
-
+            email: this.props.email
         };
     }
     componentWillReceiveProps(nextProps) {
       if(nextProps.auth.ValidEmail){
-        Actions.resetPassword({email:this.state.email});
+        Actions.replace('resetPassword', {email:this.state.email});
       }
       else
       {

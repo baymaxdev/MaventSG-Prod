@@ -5,23 +5,23 @@ const { width, height } = Dimensions.get('window');
 
 const CarouselComponent = (props) => {
   return <Carousel
-                    delay={6000}
-                    style={styles.carouselItem}
-                    autoplay
-                    pageinfo
-                >
-                    <View style={styles.carouselItem}>
-                        <Image source={require('../../assets/images/CarouselView/Image2-1.jpg')} style={styles.carouselImage} />
-                    </View>
+            delay={6000}
+            style={styles.carouselItem}
+            autoplay
+            pageinfo
+        >
+            <View style={styles.carouselItem}>
+                <Image source={require('../../assets/images/CarouselView/Image2-1.jpg')} style={styles.carouselImage} />
+            </View>
 
-                    <View style={styles.carouselItem}>
-                        <Image source={require('../../assets/images/CarouselView/Image1.jpg')} style={styles.carouselImage} />
-                    </View>
+            <View style={styles.carouselItem}>
+                <Image source={require('../../assets/images/CarouselView/Image1.jpg')} style={styles.carouselImage} />
+            </View>
 
-                    <View style={styles.carouselItem}>
-                        <Image source={require('../../assets/images/CarouselView/Image3-1.jpg')} style={styles.carouselImage} />
-                    </View>
-                </Carousel>
+            <View style={styles.carouselItem}>
+                <Image source={require('../../assets/images/CarouselView/Image3-1.jpg')} style={styles.carouselImage} />
+            </View>
+        </Carousel>
 };
 const styles = StyleSheet.create({
   carouselItem: {

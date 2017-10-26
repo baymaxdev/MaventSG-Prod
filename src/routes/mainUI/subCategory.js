@@ -13,6 +13,7 @@ import { Actions } from 'react-native-router-flux';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../../actions';
+import  {createFilter} from 'react-search-input';
 import Search from 'react-native-search-box';
 
 const SCREEN_WIDTH = Dimensions
@@ -20,16 +21,22 @@ const SCREEN_WIDTH = Dimensions
   .width;
 const {width, height} = Dimensions.get('window');
 const HORIZONTAL_PADDING = 8;
+var topicCounts = [];
 
 class SubCategory extends Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      searchTerm: ''
     }
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+  }
+
+  componentWillReceiveProps(nextProps) {
+    topicCounts = nextProps.explore.topicCount;
+  }
 
   navigate = (data) => {
     this.props.getCatList(data.id, this.props.profile.location, this.props.auth.token);
@@ -40,22 +47,21 @@ class SubCategory extends Component {
     Actions.topicPage({title: data.name});
   }
 
-
-
   onSearch = (text) => {
-    return new Promise((resolve, reject) => {
-        resolve();
-    });
-}
+    this.setState({ searchTerm: text });
+  }
 
-onChangeText = (text) => {
-    return new Promise((resolve, reject) => {
-        resolve();
-    });
-}
+  onChangeText = (text) => {
+    this.setState({ searchTerm: text });
+  }
 
   renderItem(data) {
-    var rand = Math.floor((Math.random() * 500));
+    var topic = '';
+    for (var i = 0; i < topicCounts.length; i++) {
+      if (topicCounts[i].category == data.id) {
+        topic = topicCounts[i].topicCount;
+      }
+    }
     return (
           <View style={{ width:'50%', alignItems:'center', justifyContent:'center'}}>
             <View style={{ borderRadius:5, borderWidth:1, borderColor:'#b5b5b5', backgroundColor:'#fff'}}>
@@ -70,7 +76,7 @@ onChangeText = (text) => {
               <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', padding:10}}>
                 <View style={{ flexDirection:'row', justifyContent:'center', alignItems:'center' }}>
                   <Icon name="ios-people-outline" style={{ color:'#FFA838', marginRight:5, fontSize: 23}} />
-                  <Text style={{ color:'#FFA838', fontSize: 13 }}>{rand}</Text>
+                  <Text style={{ color:'#FFA838', fontSize: 13 }}>{topic}</Text>
                 </View>
                 <TouchableOpacity onPress={(e)=>{this.goTopic(data)}}
                   style={{ backgroundColor: '#FFA838', paddingVertical:3, paddingHorizontal:5, justifyContent:'center', alignItems:'center', borderRadius:3, height: 30}}>
@@ -83,6 +89,7 @@ onChangeText = (text) => {
   }
 
   render() {
+    const filteredLists = this.props.data.filter(createFilter(this.state.searchTerm, ['name']))
     return (
       <View style={styles.container}>
         <Search
@@ -90,7 +97,7 @@ onChangeText = (text) => {
                     placeholderTextColor="#d3d3d3"
                     tintColorSearch="#fff"
                     tintColorDelete="#fff"
-                onSearch={this.onSearch}  onChangeText={this.onChangeText}     />
+                    onSearch={this.onSearch}  onChangeText={this.onChangeText}     />
         <Container>
           <Content style={{
             width: width
@@ -99,7 +106,7 @@ onChangeText = (text) => {
             <View style={{
               flex: 1
             }}>
-              {this.props.data.map((item, index) => {
+              {filteredLists.map((item, index) => {
                 if (index % 2 == 0) {
                   return <View
                     key={index}
@@ -109,9 +116,9 @@ onChangeText = (text) => {
                     justifyContent: 'flex-start',
                     alignItems: 'flex-start'
                   }}>
-                   {this.renderItem(this.props.data[index])}
+                   {this.renderItem(filteredLists[index])}
                     {
-                      this.props.data[index + 1] && this.renderItem(this.props.data[index + 1])
+                      filteredLists[index + 1] && this.renderItem(filteredLists[index + 1])
                     }
                   </View>
                 }

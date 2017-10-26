@@ -105,6 +105,7 @@ export default function (state = INITIAL_STATE, action) {
         return {
             ...state,
              status: action.status,
+             token: action.token,
              resetPasswordSuccess : true
         }
     case RESET_PASSWORD_FAILED:

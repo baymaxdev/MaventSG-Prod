@@ -47,3 +47,5 @@ export const GET_CAT_LIST = 'get_cat_list';
 export const GET_CAT_LIST_FAILED = 'get_cat_list_failed';
 export const GET_MAVEN_DETAILS = 'get_maven_details';
 export const GET_MAVEN_DETAILS_FAILED = 'get_maven_details_failed';
+export const GET_TOPIC_COUNT = 'get_topic_count';
+export const GET_TOPIC_COUNT_FAILED = 'get_topic_count_failed';
