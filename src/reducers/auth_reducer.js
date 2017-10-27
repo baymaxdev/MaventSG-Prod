@@ -2,6 +2,7 @@
 import {
   FACEBOOK_LOGIN_SUCCESS,
   FACEBOOK_LOGIN_FAIL,
+  FACEBOOK_FETCH_DETAILS,
   EMAIL_LOGIN_CHANGED,
   PASSWORD_LOGIN_CHANGED,
   REQUEST_LOGIN,
@@ -49,6 +50,13 @@ export default function (state = INITIAL_STATE, action) {
       return { token: action.token };
     case FACEBOOK_LOGIN_FAIL:
       return { token: null };
+
+    case FACEBOOK_FETCH_DETAILS:
+        return {                
+            ...state,
+            fbInfo: action.object,
+            fbRegister: true,
+        }
     case REQUEST_LOGIN:      
       return {                
           ...state,

@@ -20,6 +20,7 @@
     "react-native-image-gallery": "^2.1.2",
     "react-native-looped-carousel": "git+https://github.com/phil-r/react-native-looped-carousel.git#e23e1ad41e67ee9e95558e7df00c364fbb1b688b",
     "react-native-maps": "^0.17.1",
+    "react-native-modal": "^4.1.0",
     "react-native-modal-dropdown": "^0.5.0",
     "react-native-router-flux": "^4.0.0-beta.22",
     "react-native-search-box": "0.0.13",
@@ -30,6 +31,7 @@
     "react-search-input": "^0.11.3",
     "redux": "^3.7.2",
     "redux-promise-middleware": "^4.4.1",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "rn-placeholder": "^1.1.0"
   }
 }

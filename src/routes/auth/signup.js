@@ -34,12 +34,24 @@ class Signup extends Component {
             phoneNumber: '',
             birthDay: '',
             gender: '',
+            profileUrl: ''
         };
     }
 
     componentWillMount() {
         if (Platform.OS === 'android') {
 
+        }
+        console.log("signup", this.props.auth.fbInfo);
+        if (this.props.auth.fbRegister) {
+            const info = this.props.auth.fbInfo;
+            this.setState({
+                email: info.email,
+                firstName: info.firstName,
+                lastName: info.lastName,
+                gender: info.gender,
+                profileUrl: info.photo
+            });
         }
     }
 
@@ -110,7 +122,7 @@ class Signup extends Component {
             dob: this.state.birthDay,
             gender: gender,
             phoneNumber: this.state.phoneNumber,
-            photo: this.setState.profileUrl
+            photo: this.state.profileUrl
         }
         let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         if (reg.test(this.state.email) === false) {
@@ -137,6 +149,12 @@ class Signup extends Component {
         }
     }
     render() {
+        if (this.props.auth.fbRegister && this.props.auth.fbRegister == true) {
+            var isFB = true;
+        } else {
+            var isFB = false;
+        }
+        console.log("isFB", isFB);
         return (
             <View style={{ flex: 1, justifyContent: 'center', padding: 10 }}>
                 <Container>
@@ -148,12 +166,12 @@ class Signup extends Component {
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <IconBadge
                                 MainElement={
-                                    <TouchableOpacity onPress={this._openCameraRoll}>
+                                    <TouchableOpacity onPress={this._openCameraRoll} disabled={isFB}>
                                         <Image source={this.state.profileUrl ? { uri: this.state.profileUrl } : require('../../../assets/images/avatar.png')} style={styles.profileImage} />
                                     </TouchableOpacity>
                                 }
                                 BadgeElement={
-                                    <TouchableOpacity onPress={this.takePhoto}>
+                                    <TouchableOpacity onPress={this.takePhoto} disabled={isFB}>
                                         <Icon name='md-camera' style={{ color: '#fff', fontSize: 19 }} />
                                     </TouchableOpacity>
                                 }
@@ -166,6 +184,7 @@ class Signup extends Component {
                                         backgroundColor: '#ff0000', borderWidth: 2, borderColor: '#b22222'
                                     }
                                 }
+                                Hidden={isFB}
                             />
 
 

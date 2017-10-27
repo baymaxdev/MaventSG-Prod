@@ -9,7 +9,7 @@
     "primaryColor": "#0B486B",
     "icon": "./assets/mavent_logo3.png",
     "splash": {
-      "image": "./assets/mavent_logo3.png",
+      "image": "./assets/splash_mavent.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

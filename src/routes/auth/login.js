@@ -37,8 +37,10 @@ class Login extends Component {
 
   componentWillReceiveProps(nextProps) {
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn){
-        
         Actions.main();
+      }
+      if (nextProps.auth.fbRegister) {
+          Actions.signup();
       }
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){
         if(nextProps.auth.status === 401)  {

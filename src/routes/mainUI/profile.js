@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Platform, Text, Image, TouchableOpacity, Dimensions ,ListView, RefreshControl } from 'react-native';
-import { Container, Content, Icon } from 'native-base';
+import { Container, Content, Icon, Form, Item, Input } from 'native-base';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { bindActionCreators } from 'redux';
@@ -9,7 +9,7 @@ import * as actions from '../../actions';
 import SkillRowComponent from '../../components/skillRowComponent';
 import ReviewComponent from '../../components/reviewComponent';
 import LoadingComponent from '../../components/loadingComponent';
-
+import Modal from 'react-native-modal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,6 +39,8 @@ class Profile extends Component {
            }],
            reviewData: [],
            refreshing: false,
+           modalVisible: null,
+           aboutMe: ''
 			//listViewData: Array(20).fill('').map((_,i)=>`item #${i}`)
     };
     //this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -50,6 +52,7 @@ class Profile extends Component {
   componentDidMount() {
     this.props.getProfileInfo(this.props.auth.token);
   }
+  
   componentWillReceiveProps(nextProps) {
     if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
       this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews ? nextProps.profile.user.reviews.slice(0, 4) : []});
@@ -135,8 +138,13 @@ class Profile extends Component {
           </View>
           <View style={{ backgroundColor: 'white', padding: 5 }}>
               <View style={styles.wrapper}>
-                <Text style={{ fontSize: 16, color:"#515151" }}>About</Text>
-                <Text style={{ fontSize: 13, color:"#b5b5b5" }}>I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills....</Text>
+                <View style={{justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row'}}>
+                  <Text style={{ fontSize: 16, color:"#515151" }}>About</Text>
+                  <TouchableOpacity  onPress={() => this.setState({modalVisible: 1})}>
+                    <Text style={{ color:'#FFA838' }} >Edit</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={{ fontSize: 13, color:"#b5b5b5" }}>Write something about yourself...</Text>
               </View>
              {
                     mavenList.map((item, index) => {
@@ -166,6 +174,31 @@ class Profile extends Component {
           </View>
 
         </Content>
+        <Modal isVisible={this.state.modalVisible == 1}>
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>this.setState({modalVisible: null})}>
+                <Icon name='close' style={{fontSize:40}}/>
+            </TouchableOpacity>
+            <Form style={{width:'100%' }}>
+                <Item regular>
+                <Input
+                    value={ this.state.aboutMe }
+                    placeholder="Write something about yourself..."
+                    style={{ height: 150, width:'100%', alignSelf: 'flex-start' }}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    multiline
+                    onChangeText={(text) => this.setState({aboutMe: text})}
+                />
+                </Item>
+            </Form>
+            <TouchableOpacity style={[styles.loginBtn,{backgroundColor:'#0B486B', padding:10, marginBottom:10}]} onPress={(e)=>{
+              this.setState({modalVisible: null});
+            }}>
+              <Text style={styles.btnText}>SAVE</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </Container>
 
     );
@@ -197,8 +230,20 @@ const styles = StyleSheet.create({
     flex: 1, justifyContent: 'center', alignItems: 'center', padding: 5
   },
 
-  wrapper: { padding: 10, borderBottomWidth: 1, borderColor: '#EDF4F7' }
- 
+  wrapper: { padding: 10, borderBottomWidth: 1, borderColor: '#EDF4F7' },
+
+  loginBtn:{
+    padding:5, marginTop:15, flexDirection:'row', width:'78%', alignSelf:'center', alignItems:'center',
+    justifyContent:'center', borderRadius:10,
+    height: 50,
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    shadowOffset: {
+    width: 0,
+    height: 1
+    }
+  },
+  btnText:{color:'#fff', fontWeight:'bold'},
 });
 
 const mapStateToProps = (state) =>({

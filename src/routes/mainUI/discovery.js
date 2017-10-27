@@ -12,7 +12,7 @@ import Search from 'react-native-search-box';
 import  {createFilter} from 'react-search-input';
 import ItemRow from '../../components/discoveryItem'
 import LoadingComponent from '../../components/loadingComponent';
-// import ShimmerPlaceHolder from 'react-native-shimmer-placeholder'
+import Placeholder from 'rn-placeholder';
 
 const SCREEN_H = Dimensions.get('window').height;
 const SCREEN_W = Dimensions.get('window').width;
@@ -109,8 +109,8 @@ class Discovery extends React.Component {
                 if (secs == 2) {
                     clearInterval(timer);
                     this.animate(1, () => {
-                        //this.setState({ requestLoading: true });
-                        this.props.getNearbyList(this.state.region,this.state.region, this.props.auth.token);
+                        this.setState({ requestLoading: true });
+                        this.props.getNearbyList(this.state.region, this.state.region, this.props.auth.token);
                     });
                 }
             }, 1000);
@@ -130,12 +130,31 @@ class Discovery extends React.Component {
             }
         ).start(cb);
     }
+    
     searchUpdated(term) {
          this.setState({ searchTerm: term })
     }
     //Sort module.
     sortByVierified(){
 
+    }
+
+    renderPlaceholder() {
+        var ret = [];
+        for (var i = 0; i < 10; i++) {
+            ret.push(
+                <View key={i} style={{paddingHorizontal:10, height: 70}}>
+                    <Placeholder.ImageContent
+                        onReady={false}
+                        lineNumber={2}
+                        animate="shine"
+                        lastLineWidth="80%"
+                        >
+                    </Placeholder.ImageContent>
+                </View>
+            );
+        }
+        return ret;
     }
 
     render() {
@@ -185,6 +204,9 @@ class Discovery extends React.Component {
                             onSearch={this.onSearch} onChangeText={(term) => { this.searchUpdated(term) }} />
                     </View>
                     <Container>
+                        {
+                            this.state.requestLoading?this.renderPlaceholder():null
+                        }
                         <Content>
                             {
                                 filteredLists.map((item, index) => {
@@ -192,10 +214,6 @@ class Discovery extends React.Component {
                                 })
                             }
                         </Content>
-                        {
-                            this.state.requestLoading &&
-                            <LoadingComponent />
-                        }
                     </Container>
                 </View>
             </View>

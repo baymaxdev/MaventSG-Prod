@@ -5,6 +5,7 @@ var RNUploader = require('NativeModules').RNUploader;
 import {
   FACEBOOK_LOGIN_SUCCESS,
   FACEBOOK_LOGIN_FAIL,
+  FACEBOOK_FETCH_DETAILS,
   REQUEST_LOGIN,
   REQUESTED_LOGIN_SUCCEEDED,
   REQUESTED_LOGIN_FAILED,
@@ -141,7 +142,7 @@ export const requestLogin = (email, password) => {
       dispatch({ type: REQUESTED_LOGIN_FAILED });
     })
   }
-}
+} 
 
 export const forgotPassword = (email) => {
 
@@ -151,10 +152,10 @@ export const forgotPassword = (email) => {
   return dispatch => {
     dispatch({ type: FORGOTPASSWORD_SUBMIT });
     const url = `user/forgotPassword?email=${email}`;
-
+    
     request(url, option)
     .then(res => {
-
+      
       if (res.status === 200) dispatch({ type: FORGOTPASSWORD_SUBMIT_SUCCEEDED, status: res.status});
       else dispatch({ type: FORGOTPASSWORD_SUBMIT_FAILED, status: res.status });
     })
@@ -213,9 +214,10 @@ const loginWithToken = (token) => {
     const url = `user/login/Facebook`;
     request(url, option)
     .then(res => {
-      console.log(res);
       if (res.status === 200) {
         dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token:res.token });
+      } else if (res.status === 404 && res.msg === "Not found. Register your account") {
+        dispatch({ type: FACEBOOK_FETCH_DETAILS, object: res });
       }
       else dispatch({ type: VERIFY_OTP_FAIL, msg: res.msg });
     })
