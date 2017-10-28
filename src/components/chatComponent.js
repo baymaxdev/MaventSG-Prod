@@ -6,28 +6,40 @@ import { Actions } from 'react-native-router-flux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../actions';
 import { GiftedChat } from 'react-native-gifted-chat'; // 0.2.5
+import LoadingComponent from '../components/loadingComponent';
 
 class Chat extends Component {
   state = {
     messages: [],
+    requestLoading: true
   };
 
   componentWillMount() {
-    if (this.props.date != undefined) {
-      this.setState({
-        messages: [
-          {
-            _id: 1,
-            text: 'I would like to make you an offer of $' + this.props.price + ', for your advertised service on ' + this.props.date + '. \nAdditional information: ' + this.props.message,
-            createdAt: new Date(),
-            user: {
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log("Props =      ", this.props);
+    console.log("nextProps =      ", nextProps);
+    if (nextProps.maven != undefined) {
+      var m = nextProps.maven.maven;
+      this.setState({maven: nextProps.maven, user: m.userID, description: m.description, price: m.price, requestLoading: false});
+
+      if (this.props.date != undefined) {
+        this.setState({
+          messages: [
+            {
               _id: 1,
-              name: this.props.profile.user.firstName + ' ' + this.props.profile.user.lastName,
-              avatar: this.props.profile.user.displayPicture,
+              text: 'I would like to make you an offer of $' + this.props.price + ', for your advertised service on ' + this.props.date + '. \nAdditional information: ' + this.props.message,
+              createdAt: new Date(),
+              user: {
+                _id: 1,
+                name: m.userID.firstName + ' ' + m.userID.lastName,
+                avatar: m.userID.displayPicture,
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
+      }
     }
   }
 
@@ -39,16 +51,19 @@ class Chat extends Component {
 
   render() {
     return (
+      this.state.requestLoading ?
+      <LoadingComponent/>
+      :
       <View style={{flex: 1}}>
         <TouchableOpacity onPress={() => {
-          this.props.getMavenDetails(this.props.item.mavenID, this.props.profile.location, this.props.auth.token);
-          Actions.skillPage({ title: `${this.props.item.firstName} ${this.props.item.lastName}`, item: this.props.item, isMe: false })
+          this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
+          Actions.skillPage({ title: this.props.title, isMe: false })
         }}>
           <View style={{flexDirection: 'row', height: 70, alignItems: 'center'}}>
-            <Image source={{uri: this.props.item.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
+            <Image source={{uri: this.state.user.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
             <View style={{flex: 1, justifyContent: 'center'}}>
               <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.props.title}</Text>
-              <Text style={{flex: 1, fontSize: 16}}>{this.props.item.title}</Text>
+              <Text style={{flex: 1, fontSize: 16}}>{this.props.title}</Text>
             </View>
             <Icon name="ios-arrow-forward" style={{ fontSize: 25, color: '#90939B', marginHorizontal: 10}} />
           </View>
@@ -67,8 +82,8 @@ class Chat extends Component {
           onSend={(messages) => this.onSend(messages)}
           user={{
             _id: 1,
-            name: this.props.profile.user.firstName + ' ' + this.props.profile.user.lastName,
-            avatar: this.props.profile.user.displayPicture,
+            name: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName,
+            avatar: this.props.profile.myInfo.displayPicture,
           }}
         />
       </View>
@@ -79,6 +94,7 @@ class Chat extends Component {
 const mapStateToProps = (state) =>({
   auth: state.auth,
   profile: state.profile,
+  maven: state.explore.maven
 });
 
 const mapDispatchToProps = (dispatch) =>({

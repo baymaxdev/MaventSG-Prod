@@ -12,10 +12,10 @@ class ItemRow extends React.Component {
 
   render() {
     let provider = this.props.data;
-    let mavens = this.props.profileData.user.mavens;
+    let mavens = this.props.profile.myInfo.mavens;
     return (
       <TouchableOpacity style = {{ paddingHorizontal:10, backgroundColor:'#fff' }} onPress={() => {
-        this.props.getMavenDetails(provider.mavenID, this.props.profileData.location, this.props.auth.token);
+        this.props.getMavenDetails(provider.mavenID, this.props.profile.location, this.props.auth.token);
         var flag = false;
         for (var i = 0; i < mavens.length; i++) {
           if (mavens[i]._id == provider.mavenID) {
@@ -23,7 +23,7 @@ class ItemRow extends React.Component {
             break;
           }
         }
-        Actions.skillPage({ title: `${provider.firstName} ${provider.lastName}`, item: provider, isMe: flag })
+        Actions.skillPage({ title: `${provider.firstName} ${provider.lastName}`, isMe: flag })
       }}>
         <View key={provider.mavenID} style={{ paddingVertical:5, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }}>
           <View pointerEvents="none" style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
@@ -51,7 +51,8 @@ class ItemRow extends React.Component {
               <Text style={{ color:'#b5b5b5', fontWeight:'400', fontSize:12 }}>/hr</Text>
             </View>
             <TouchableOpacity style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'center'}} onPress={()=>{
-              Actions.chatPage({ title: `${provider.firstName} ${provider.lastName}`, item: provider })
+              this.props.getMavenDetails(provider.mavenID, this.props.profile.location, this.props.auth.token);
+              Actions.chatPage({ title: `${provider.firstName} ${provider.lastName}` })
             }}>
               <Icon name = "ios-chatbubbles-outline" style={{ fontSize: 29, color:'#3F6A86', paddingRight:5 }}/>
               <Icon name = "ios-arrow-forward" style={{ fontSize: 18, color:'#BFD9E7', paddingLeft:5 }}/>
@@ -83,10 +84,12 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) =>({
   auth: state.auth,
+  profile: state.profile
 });
 
 const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
   actions: bindActionCreators(actions, dispatch)
 });
 

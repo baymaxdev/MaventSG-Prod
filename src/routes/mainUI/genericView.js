@@ -49,7 +49,7 @@ class GenericView extends Component {
   }
 
   componentDidMount() {
-    this.props.getProfileInfo(this.props.auth.token);
+    //this.props.getProfileInfo(this.props.auth.token);
     if (serviceKey.includes(this.props.data.id)) {
       name = serviceName;
       key = serviceKey;
@@ -177,7 +177,7 @@ class GenericView extends Component {
             renderItem={({ item, index }) => (
               <TouchableOpacity key = { item.mavenID } style = {{ paddingHorizontal:10, backgroundColor:'#fff' }} onPress={() => {
                 this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
-                var mavens = this.props.profile.user.mavens;
+                var mavens = this.props.profile.myInfo.mavens;
                 var flag = false;
                 for (var i = 0; i < mavens.length; i++) {
                   if (mavens[i]._id == item.mavenID) {
@@ -185,7 +185,7 @@ class GenericView extends Component {
                     break;
                   }
                 }
-                Actions.skillPage({ title: `${item.firstName} ${item.lastName}`, item: item, isMe: flag })
+                Actions.skillPage({ title: `${item.firstName} ${item.lastName}`, isMe: flag })
               }}>
                 <View style={{ paddingVertical:5, flexDirection: 'row' }}>
                   <View style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
@@ -213,7 +213,8 @@ class GenericView extends Component {
                       <Text style={{ color:'#b5b5b5', fontWeight:'400', fontSize:12 }}>/hr</Text>
                     </View>
                     <TouchableOpacity style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'center'}} onPress={() => {
-                      Actions.chatPage({ title: `${item.firstName} ${item.lastName}`, item: item })
+                      this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
+                      Actions.chatPage({ title: `${item.firstName} ${item.lastName}` })
                     }}>
                       <Icon name = "ios-chatbubbles-outline" style={{ fontSize: 29, color:'#3F6A86', paddingRight:5 }}/>
                       <Icon name = "ios-arrow-forward" style={{ fontSize: 18, color:'#BFD9E7', paddingLeft:5 }}/>
@@ -275,7 +276,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
   getCatList: (category, location, token) => dispatch(actions.getCatList(category, location, token)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-  getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
+  //getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

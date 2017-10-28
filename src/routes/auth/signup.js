@@ -42,7 +42,6 @@ class Signup extends Component {
         if (Platform.OS === 'android') {
 
         }
-        console.log("signup", this.props.auth.fbInfo);
         if (this.props.auth.fbRegister) {
             const info = this.props.auth.fbInfo;
             this.setState({
@@ -87,7 +86,6 @@ class Signup extends Component {
     }
 
     register = () => {
-        console.log(this.state.birthDay);
         if (this.state.password.length < 6) {
             alert("Password must contain at least 6 characters");
             return;
@@ -154,7 +152,6 @@ class Signup extends Component {
         } else {
             var isFB = false;
         }
-        console.log("isFB", isFB);
         return (
             <View style={{ flex: 1, justifyContent: 'center', padding: 10 }}>
                 <Container>

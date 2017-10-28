@@ -1,6 +1,6 @@
 import React from 'react';
 import Expo from 'expo';
-import { View, TouchableHighlight, ActivityIndicator, Text, Image, Dimensions, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, TouchableHighlight, ActivityIndicator, Text, Image, Dimensions, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import { MapView, Constants, Location, Permissions } from 'expo';
 
 import { Container, Content, Icon } from 'native-base';
@@ -29,7 +29,6 @@ class Discovery extends React.Component {
         super(props);
         this.state = {
             requestLoading: true,
-            statusBarHeight: 1,
             mapLoaded: false,
             errorMessage: null,
             location: null,
@@ -41,14 +40,35 @@ class Discovery extends React.Component {
                 longitudeDelta: 0.0034
             },
             radius: 100,
-            animatedMargin: new Animated.Value(0)
+            animatedMargin: new Animated.Value(0),
+            animated: new Animated.Value(0.01),
+            opacityA: new Animated.Value(1)
         };
         this.searchUpdated = this.searchUpdated.bind(this);
     }
 
     componentWillMount() {
-        this.props.getProfileInfo(this.props.auth.token);
         this.getLocationAsync();
+    }
+
+    componentDidMount() {
+      const { animated, opacityA } = this.state;
+      Animated.loop(
+        Animated.parallel([
+          Animated.timing(animated, {
+            toValue: 1,
+            duration: 2500,
+            // useNativeDriver: Platform.OS === 'android',
+            delay: 100
+          }),
+          Animated.timing(opacityA, {
+            toValue: 0,
+            duration: 2500,
+            // useNativeDriver: Platform.OS === 'android',
+            delay: 100
+          })
+        ])
+      ).start()
     }
 
     componentWillReceiveProps(nextProps) {
@@ -68,7 +88,7 @@ class Discovery extends React.Component {
                 myLocation = userLocation;
                 this.setState({ region: userLocation });
                 this.props.setLocation(userLocation);
-                this.props.getNearbyList(userLocation,userLocation, this.props.auth.token);
+                this.props.getNearbyList(userLocation, userLocation, this.props.auth.token);
             }).catch((e) => {
                 // this one is firing the error instantly
                 alert(e + ' Please make sure your location (GPS) is turned on.');
@@ -130,7 +150,7 @@ class Discovery extends React.Component {
             }
         ).start(cb);
     }
-    
+
     searchUpdated(term) {
          this.setState({ searchTerm: term })
     }
@@ -143,7 +163,7 @@ class Discovery extends React.Component {
         var ret = [];
         for (var i = 0; i < 10; i++) {
             ret.push(
-                <View key={i} style={{paddingHorizontal:10, height: 70}}>
+                <View key={i} style={{paddingHorizontal:20, height: 70}}>
                     <Placeholder.ImageContent
                         onReady={false}
                         lineNumber={2}
@@ -158,13 +178,14 @@ class Discovery extends React.Component {
     }
 
     render() {
+        const { animated, opacityA } = this.state;
         const { nearbyList } = this.props;
         const filteredLists = nearbyList.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
         const movingMargin = this.state.animatedMargin.interpolate({
             inputRange: [0, 0.5, 1],
             outputRange: [-16, -50, -16]
         })
-        
+
         return (
             <View style={{ flex: 1 }}>
                 <MapView
@@ -178,20 +199,40 @@ class Discovery extends React.Component {
                     onRegionChange={this.onRegionChange}
                     onRegionChangeComplete = {this.onRegionChangeComplete}
                 >
-                    <View pointerEvents="none" style={{ height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center'}}>
-                        <View pointerEvents="none" style={[styles.mapCenterMarkerView, {width: this.state.radius, height: this.state.radius, borderRadius: this.state.radius/2}]}>
-                        </View>
-                    </View>
-                    <View pointerEvents="none" style={{position:'absolute', left:0, top:0, height: 0.3 * SCREEN_H, width:SCREEN_W, alignItems: 'center', justifyContent:'center'}}>
-                        <Animated.Image style={{ width: 32, height: 32, marginTop: movingMargin}} source={require('../../../assets/icons/pin.png')}/>
-                    </View>
-
-                    <TouchableOpacity style={{alignItems: 'center', justifyContent: 'center', position:'absolute', right:10, bottom:10, width:55, height:55}} onPress={() => {
-                        this._map.animateToRegion(myLocation, 500);
-                    }}>
-                        <View style={{width: 55, height: 55}}></View>
-                    </TouchableOpacity>
+                <TouchableOpacity style={{alignItems: 'center', justifyContent: 'center', position:'absolute', right:10, bottom:10, width:55, height:55 }} onPress={() => {
+                            this._map.animateToRegion(myLocation, 500);
+                        }}>
+                            <View style={{width: 55, height: 55}}></View>
+                        </TouchableOpacity>
                 </MapView>
+
+                {Platform.OS === 'android'?
+                    <View style={{ height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center', position:'absolute'}}>
+                    <TouchableOpacity style={{alignItems: 'center', justifyContent: 'center', position:'absolute', right:10, bottom:10, width:55, height:55, elevation: 5 }} onPress={() => {
+                            this._map.animateToRegion(myLocation, 500);
+                        }}>
+                            <Image style={{width: 55, height: 55}} source={require('../../../assets/icons/mylocationbutton.png')}/>
+                        </TouchableOpacity>
+                    </View>
+                    :
+                    null
+                }
+                <View pointerEvents="none" style={{ height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center', position:'absolute'}}>
+                    <Animated.View pointerEvents="none" style={{
+                      backgroundColor: 'rgba(0,122,255,0.4)',
+                       borderWidth:1,
+                        borderColor:'rgba(0,112,255,0.7)',
+                         width: this.state.radius,
+                          height: this.state.radius,
+                           borderRadius: this.state.radius/2,
+                            opacity: opacityA,
+                             transform: [{ scale: animated }]
+                            }}>
+                  </Animated.View>
+                </View>
+                <View pointerEvents="none" style={{position:'absolute', height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center'}}>
+                    <Animated.Image style={{ width: 32, height: 32, marginTop: movingMargin}} source={require('../../../assets/icons/pin.png')}/>
+                </View>
 
                 <View style={styles.listContainer}>
                     <View style={{ backgroundColor: '#f8f8f8', padding: 3 }}>
@@ -251,8 +292,8 @@ const mapStateToProps = (state) => ({
 });
 const mapDispatchToProps = (dispatch) => ({
     setLocation: (location) => dispatch(actions.setLocation(location)),
-    getNearbyList: (location,myLocation, token) => dispatch(actions.getNearbyList(location,myLocation, token)),
-    getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
+    getNearbyList: (location, myLocation, token) => dispatch(actions.getNearbyList(location, myLocation, token)),
+    getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
     actions: bindActionCreators(actions, dispatch)
 });
 

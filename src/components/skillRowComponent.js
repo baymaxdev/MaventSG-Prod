@@ -16,7 +16,7 @@ const SkillRowComponent = (props) => {
             {
               props.data.data.map((item, index) => {
                 if (item.category != 'entry') {
-                  return <RateComponent key = {index} data = { item } />
+                  return <RateComponent key = {index} data = { item } onSuccessModal = { props.onSuccessModal } isMe = { props.isMe }/>
                 }
                 else {
                   return (

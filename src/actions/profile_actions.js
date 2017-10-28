@@ -2,6 +2,7 @@ import { AsyncStorage } from 'react-native';
 import { Facebook } from 'expo';
 import request from '../routes/services/getData';
 import {
+  GET_MY_PROFILE_INFO,
   GET_PROFILE_INFO,
   PROFILE_ERROR,
   SET_LOCATION,
@@ -16,7 +17,7 @@ import {
   DELETE_MAVEN_ERROR
 } from './types';
 
-export const getProfileInfo = (token) => {
+export const getMyProfileInfo = (token) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -25,6 +26,28 @@ export const getProfileInfo = (token) => {
   };
   return dispatch => {
     const url = `user/getProfileDetails`;
+    request(url, option)
+    .then(res => {   
+      if (res.status === 200) {
+        dispatch({ type: GET_MY_PROFILE_INFO, myInfo: res.result });
+      }
+      else dispatch({ type: PROFILE_ERROR, error: 'error' });
+    })
+    .catch(err => {
+      dispatch({ type: PROFILE_ERROR, error: err });  
+    })  
+  }
+}
+
+export const getProfileInfo = (token, userId) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `user/getProfileDetails?userID=` + userId;
     request(url, option)
     .then(res => {   
       if (res.status === 200) {

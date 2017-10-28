@@ -175,7 +175,6 @@ export const resetPasswordfunc = (email, password,otp) => {
     const url = `user/resetPassword?email=${email}&newPassword=${password}&otp=${otp}`;
     request(url, option)
     .then(res => {
-      console.log(res);
       if (res.status === 200) dispatch({ type: RESET_PASSWORD_SUCCEEDED, status: res.status, token: res.token });
       else dispatch({ type: RESET_PASSWORD_FAILED, status: res.status });
     })

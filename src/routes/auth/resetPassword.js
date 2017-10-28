@@ -37,6 +37,7 @@ class resetPassword extends Component {
 
     componentWillReceiveProps(nextProps) {
       if(nextProps.auth.resetPasswordSuccess){
+        this.props.getMyProfileInfo(nextProps.auth.token);
         Actions.main();
       }
       else
@@ -116,6 +117,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     resetPasswordfunc: (email,password,otp) => dispatch(actions.resetPasswordfunc(email,password,otp)),
+    getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     actions: bindActionCreators(actions, dispatch)
 });
 export default connect(

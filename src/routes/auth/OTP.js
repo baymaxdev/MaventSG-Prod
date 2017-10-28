@@ -23,6 +23,7 @@ class Otp extends React.Component {
 
    componentWillReceiveProps(nextProps) {
       if(this.props.auth.verifyLoading !== nextProps.auth.verifyLoading && !nextProps.auth.verifyLoading && nextProps.auth.verifyOtp){
+        this.props.getMyProfileInfo(nextProps.auth.token);
         Actions.main();
       }
       if(this.props.auth.verifyLoading !== nextProps.auth.verifyLoading && !nextProps.auth.verifyLoading && !nextProps.auth.verifyOtp){
@@ -151,6 +152,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
     generateOTP: (phoneNumber) => dispatch(actions.generateOTP(phoneNumber)),
     verifyOtp: (phoneNumber, otp) =>dispatch(actions.verifyOtp(phoneNumber, otp)),
+    getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     actions: bindActionCreators(actions, dispatch)
 });
 export default connect(

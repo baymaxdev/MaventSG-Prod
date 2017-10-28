@@ -27,6 +27,7 @@ export const VERIFY_OTP_SUCCESS = 'verify_otp_success';
 export const VERIFY_OTP_FAIL = 'verify_otp_fail';
 
 //PROFILE PAGE
+export const GET_MY_PROFILE_INFO = 'get_my_profile_info';
 export const GET_PROFILE_INFO = 'get_profile_info';
 export const PROFILE_ERROR = 'get_profile_info';
 export const SET_LOCATION = 'set_location';

@@ -37,6 +37,7 @@ class Login extends Component {
 
   componentWillReceiveProps(nextProps) {
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn){
+        this.props.getMyProfileInfo(nextProps.auth.token);
         Actions.main();
       }
       if (nextProps.auth.fbRegister) {
@@ -225,6 +226,7 @@ const mapDispatchToProps = (dispatch) =>({
     requestLogin: (email, password) => dispatch(actions.requestLogin(email, password)),
     facebookLogin: () => dispatch(actions.facebookLogin()),
     setLocation: (location) => dispatch(actions.setLocation(location)),
+    getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     actions: bindActionCreators(actions, dispatch)
 });
 export default connect(

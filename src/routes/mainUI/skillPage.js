@@ -42,12 +42,12 @@ class SkillPage extends Component {
         picUrl: [require('../../../assets/images/CarouselView/Image1.jpg'), require('../../../assets/images/CarouselView/Image2.jpg'), require('../../../assets/images/CarouselView/Image3.jpg')],
         user: {},
         distance: 0,
-        title: '',
         description: '',
         price: 0,
         rating: 0,
         modalVisible: false,
         requestLoading: true,
+        idVerified: false,
     };
   }
 
@@ -60,6 +60,7 @@ class SkillPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log("nextProps =      ", nextProps);
     if (nextProps.maven != undefined) {
       var m = nextProps.maven.maven;
       var da = m.dayAvailable.split(',').map(function(item) {
@@ -77,8 +78,8 @@ class SkillPage extends Component {
       for (i = 0; i < ta.length; i++) {
         avt[ta[i]].value = true;
       }
-      this.setState({user: m.userID, distance: nextProps.maven.distance, title: m.title, description: m.description, price: m.price, 
-        rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false});
+      this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, 
+        rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, idVerified: m.userID.idVerified});
     }
   }
 
@@ -99,6 +100,7 @@ class SkillPage extends Component {
     if (this.state.picUrl[0] == undefined && this.state.picUrl[1] == undefined && this.state.picUrl[2] == undefined) {
       picFlag = false;
     }
+    
     return (
       this.state.requestLoading?
       <LoadingComponent/>
@@ -107,7 +109,7 @@ class SkillPage extends Component {
         <ScrollView>
           <View style={{ padding: 20 }} >
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
-              <Image source={{uri: this.state.user.displayPicture}} style={ this.props.item.idVerified?styles.isVerifyStyle:styles.noneVerifyStyle }/>
+              <Image source={this.state.user.displayPicture ? {uri: this.state.user.displayPicture} : require('../../../assets/images/avatar.png')} style={ this.state.idVerified?styles.isVerifyStyle:styles.noneVerifyStyle }/>
               <Text style={{ fontSize: 20, color: '#145775', fontWeight: '500', paddingVertical:5 }}>{this.state.user.firstName} {this.state.user.lastName}</Text>
               <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
                 <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
@@ -236,12 +238,13 @@ class SkillPage extends Component {
         </ScrollView>
         <View style={{ flexDirection:'row'}} >
           <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#004869'}] } onPress={() => {
-            Actions.genericBooking({ title: this.state.user.firstName + ' ' + this.state.user.lastName, item: this.props.item });
+            Actions.genericBooking({ title: this.props.title, item: this.state.maven });
             }}>
             <Text style={styles.btnText}>SKILL REQUEST</Text>
           </TouchableOpacity>
           <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-            Actions.chatPage({title: this.props.title, item: this.props.item});
+            this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
+            Actions.chatPage({title: this.props.title});
           }} >
             <Text style={styles.btnText}>CHAT</Text>
           </TouchableOpacity>
@@ -309,7 +312,8 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
+  getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
+  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

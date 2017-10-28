@@ -24,7 +24,7 @@ class Profile extends Component {
                "title": "Register a skill today!",
                "category": "entry",
                "active": false,
-               "rating": 0,
+               "rating": 5,
                "status": 0,
                "mainCategory": 0
            }],
@@ -33,14 +33,15 @@ class Profile extends Component {
                "title": "Register a service today!",
                "category": "entry",
                "active": false,
-               "rating": 0,
+               "rating": 5,
                "status": 0,
                "mainCategory": 1
            }],
            reviewData: [],
            refreshing: false,
            modalVisible: null,
-           aboutMe: ''
+           aboutMe: '',
+           isMe: this.props.userId?false:true
 			//listViewData: Array(20).fill('').map((_,i)=>`item #${i}`)
     };
     //this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -50,22 +51,59 @@ class Profile extends Component {
   }
 
   componentDidMount() {
-    this.props.getProfileInfo(this.props.auth.token);
+    if (!this.state.isMe) {
+      this.props.getProfileInfo(this.props.auth.token, this.props.userId);
+    } else {
+      this.props.getMyProfileInfo(this.props.auth.token);
+    }
   }
-  
+
   componentWillReceiveProps(nextProps) {
-    if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
-      this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews ? nextProps.profile.user.reviews.slice(0, 4) : []});
+    if (this.state.isMe) {
+      if(this.props.profile.myInfo !== nextProps.profile.myInfo && nextProps.profile.loading){
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.reviews ? nextProps.profile.myInfo.reviews.slice(0, 4) : []});
+        if(this.modalFlag) {
+          this.setState({modalVisible: 2});
+          setTimeout(() => {
+            this.setState({modalVisible: null});
+            this.modalFlag = false;
+          }, 750);
+        }
+      }
+    } else {
+      if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews ? nextProps.profile.user.reviews.slice(0, 4) : []});
+        if(this.modalFlag) {
+          this.setState({modalVisible: 2});
+          setTimeout(() => {
+            this.setState({modalVisible: null});
+            this.modalFlag = false;
+          }, 1000);
+        }
+      }
     }
   }
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getProfileInfo(this.props.auth.token);
+    if (!this.state.isMe) {
+      this.props.getProfileInfo(this.props.auth.token, this.props.userId);
+    } else {
+      this.props.getMyProfileInfo(this.props.auth.token);
+    }
+  }
+
+  onSuccessModal() {
+    this.modalFlag = true;
+    if (!this.state.isMe) {
+      this.props.getProfileInfo(this.props.auth.token, this.props.userId);
+    } else {
+      this.props.getMyProfileInfo(this.props.auth.token);
+    }
   }
 
   render() {
-    const {profile: {user}} = this.props;
+    const user = this.state.isMe?this.props.profile.myInfo:this.props.profile.user;
     let mavenList = [];
     if(user && user.mavens && user.mavens.length >  0){
       let serviceList = user.mavens.filter((e) => e.mainCategory === 0);
@@ -83,13 +121,13 @@ class Profile extends Component {
       else{
         mavenList.push({ mainCategory: 1, data: this.state.entryServiceMaven});
       }
-  
+
     }
     else{
       mavenList.push({ mainCategory: 0, data: this.state.entrySkillMaven});
       mavenList.push({ mainCategory: 1, data: this.state.entryServiceMaven});
     }
-    
+
     return (
       this.state.requestLoading ?
       <LoadingComponent/>
@@ -102,7 +140,7 @@ class Profile extends Component {
             onRefresh={this._onRefresh.bind(this)}
           />
         }>
-         
+
           <View style={{ paddingHorizontal: 10 }} >
             <Image source={require('../../../assets/images/CarouselView/Image1.jpg')} style={{ position:'absolute',flex:1, width: width}}>
               <View style={{ backgroundColor:'rgba(11, 72, 107, 0.9)', width:'100%', height:'100%'}}/>
@@ -113,7 +151,7 @@ class Profile extends Component {
             <View style={{ flexDirection:'row', alignItems: 'center', justifyContent:'center', paddingTop: 2 }}>
               <Text style={{ fontSize: 20, color: 'white', fontWeight: '500' }}>{user.firstName + ' ' + user.lastName}</Text>
               {
-                user.idVerified && 
+                user.idVerified &&
                   <Icon name="md-checkmark-circle" style={{ fontSize:15, color:'#FFA838', marginLeft:5, marginTop:4}} />
               }
             </View>
@@ -148,8 +186,8 @@ class Profile extends Component {
               </View>
              {
                     mavenList.map((item, index) => {
-                      return <SkillRowComponent key={index} data={item} />
-                    }) 
+                      return <SkillRowComponent key={index} data={item} onSuccessModal={this.onSuccessModal.bind(this)} isMe={this.state.isMe}/>
+                    })
               }
               <View>
                 <View style={{ paddingBottom: 10 }}>
@@ -161,7 +199,7 @@ class Profile extends Component {
                     <TouchableOpacity onPress={() => this.setState({ reviewData: user.reviews })}>
                       <Text style={{ color:'#FFA838' }} >View all</Text>
                     </TouchableOpacity>
-                  </View>  
+                  </View>
                   <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     {
                       this.state.reviewData.map((item, index)=>{
@@ -197,6 +235,18 @@ class Profile extends Component {
             }}>
               <Text style={styles.btnText}>SAVE</Text>
             </TouchableOpacity>
+          </View>
+        </Modal>
+        <Modal
+          isVisible={this.state.modalVisible == 2}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
           </View>
         </Modal>
       </Container>
@@ -244,6 +294,15 @@ const styles = StyleSheet.create({
     }
   },
   btnText:{color:'#fff', fontWeight:'bold'},
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
 });
 
 const mapStateToProps = (state) =>({
@@ -251,10 +310,9 @@ const mapStateToProps = (state) =>({
     profile: state.profile
 });
 const mapDispatchToProps = (dispatch) =>({
-    getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
+    getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
+    getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     actions: bindActionCreators(actions, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);
-
-

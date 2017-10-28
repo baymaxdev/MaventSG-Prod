@@ -89,7 +89,7 @@ class RouterComponent extends React.Component {
           </Scene>
 
           <Scene key='home' {...this.props} >
-            <Scene key="main" {...this.props} gestureEnabled={false} tabs activeBackgroundColor='#fff' tabBarStyle={{ backgroundColor: '#fff', paddingVertical: 3 }}
+            <Scene key="main" {...this.props} panHandlers={null} gestureEnabled={false} swipeEnabled={false} tabs activeBackgroundColor='#fff' tabBarStyle={{ backgroundColor: '#fff', paddingVertical: 3 }}
               title="M A V E N T" renderLeftButton={null} navigationBarStyle={{ backgroundColor: "#0B486B" }} indicatorStyle={{ backgroundColor: '#084E70' }} activeTintColor="#084E70" inactiveTintColor="#bbbbbb"
               animationEnabled showIcon={true} showLabel={true} default="categoryView" lazy={true} hideNavBar={Platform.OS === "android" ? false : true} >
 

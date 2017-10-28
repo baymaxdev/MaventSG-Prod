@@ -14,6 +14,9 @@ import {
 } from 'react-native';
 
 import { Actions } from 'react-native-router-flux';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actions from '../../actions';
 import DatePicker from 'react-native-datepicker';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -108,7 +111,8 @@ class GenericBookingPage extends Component {
                     <Text style={{fontSize:20}}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.btn,{ backgroundColor:'#0B486B'}]} onPress={(e)=>{
-                  Actions.chatPage({title: this.props.title, item: this.props.item, date: this.state.date, message: this.state.message, price: this.state.price});
+                  //this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
+                  Actions.chatPage({title: this.props.title, date: this.state.date, message: this.state.message, price: this.state.price});
                   }}>
                     <Text style={{fontSize:20, color:'#fff'}}>Send Booking</Text>
                 </TouchableOpacity>
@@ -157,4 +161,15 @@ const styles = StyleSheet.create({
  }
 });
 
-export default GenericBookingPage;
+const mapStateToProps = (state) =>({
+  auth: state.auth,
+  profile: state.profile,
+});
+
+const mapDispatchToProps = (dispatch) =>({
+  getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
+  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  actions: bindActionCreators(actions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GenericBookingPage);

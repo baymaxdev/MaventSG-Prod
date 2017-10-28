@@ -1,5 +1,6 @@
 // import { REHYDRATE } from 'redux-persist/constants';
 import {
+  GET_MY_PROFILE_INFO,
   GET_PROFILE_INFO,
   PROFILE_ERROR,
   SET_LOCATION,
@@ -15,6 +16,7 @@ import {
 } from '../actions/types';
 
 const INITIAL_STATE = {
+  myInfo: {},
   user: {},
   error: null,
   loading: false,
@@ -24,6 +26,8 @@ const INITIAL_STATE = {
 
 export default function (state = INITIAL_STATE, action) {
   switch (action.type) {
+    case GET_MY_PROFILE_INFO:
+      return { ...state, myInfo: action.myInfo, loading: true };
     case GET_PROFILE_INFO:
       return { ...state, user: action.user, loading: true };
     case PROFILE_ERROR:      
