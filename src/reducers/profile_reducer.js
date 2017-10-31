@@ -12,7 +12,15 @@ import {
   DEACTIVATE_MAVEN,
   DEACTIVATE_MAVEN_ERROR,
   DELETE_MAVEN,
-  DELETE_MAVEN_ERROR
+  DELETE_MAVEN_ERROR,
+  REQUEST_ADD_MAVEN_IMAGE,
+  ADD_MAVEN_IMAGE,
+  ADD_MAVEN_IMAGE_ERROR,
+  CHECK_ID,
+  CHECK_ID_ERROR,
+  REQUEST_EDIT_MAVEN_DETAILS,
+  EDIT_MAVEN_DETAILS,
+  EDIT_MAVEN_DETAILS_ERROR,
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -21,7 +29,9 @@ const INITIAL_STATE = {
   error: null,
   loading: false,
   mavenLoading: true,
-  mavenRegSuccess: false
+  addMavenImageLoading: true,
+  mavenRegSuccess: false,
+  addMavenImageSuccess: false,
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -52,6 +62,22 @@ export default function (state = INITIAL_STATE, action) {
       return { ...state};
     case DELETE_MAVEN_ERROR:
       return { ...state, error: action.error};
+    case REQUEST_ADD_MAVEN_IMAGE:
+      return { ...state, addMavenImageLoading: true };
+    case ADD_MAVEN_IMAGE:
+      return { ...state, addMavenImageLoading: false, msg: action.msg, addMavenImageSuccess: true };
+    case ADD_MAVEN_IMAGE_ERROR:
+      return { ...state, addMavenImageLoading: false, msg: action.msg, addMavenImageSuccess: false };
+    case CHECK_ID:
+      return { ...state, postalCode: action.data.postalCode, idVerified: action.data.idVerified};
+    case CHECK_ID_ERROR :
+      return { ...state, error: action.error};
+    case REQUEST_EDIT_MAVEN_DETAILS:
+      return { ...state, mavenLoading: true };
+    case EDIT_MAVEN_DETAILS:
+      return { ...state, mavenLoading: false, msg: action.msg, mavenRegSuccess: true };
+    case EDIT_MAVEN_DETAILS_ERROR:
+      return { ...state, mavenLoading: false, msg: action.msg, mavenRegSuccess: false };
 
     default:
       return state;

@@ -40,6 +40,14 @@ export const DEACTIVATE_MAVEN = 'deactivate_maven';
 export const DEACTIVATE_MAVEN_ERROR = 'deactivate_maven_error';
 export const DELETE_MAVEN = 'delete_maven';
 export const DELETE_MAVEN_ERROR = 'delete_maven_error';
+export const REQUEST_ADD_MAVEN_IMAGE = 'request_add_maven_image';
+export const ADD_MAVEN_IMAGE = 'add_maven_image';
+export const ADD_MAVEN_IMAGE_ERROR = 'add_maven_image_error';
+export const CHECK_ID = 'check_id';
+export const CHECK_ID_ERROR = 'check_id_error';
+export const REQUEST_EDIT_MAVEN_DETAILS = 'request_edit_maven_details';
+export const EDIT_MAVEN_DETAILS = 'edit_maven_details';
+export const EDIT_MAVEN_DETAILS_ERROR = 'edit_maven_details_error';
 
 //EXPLORE
 export const GET_NEARBY_LIST = 'get_nearby_list';

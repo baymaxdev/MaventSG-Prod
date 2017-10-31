@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   Keyboard,
   Dimensions,
-  Modal
+  Modal,
+  RefreshControl,
 } from 'react-native';
 import { Icon } from 'native-base';
 import { Actions } from 'react-native-router-flux';
@@ -21,8 +22,10 @@ import { bindActionCreators } from 'redux';
 import * as actions from '../../actions';
 import StarRating from 'react-native-star-rating';
 import DatePicker from 'react-native-datepicker';
+import { ImagePicker } from 'expo';
 import Gallery from 'react-native-image-gallery';
 import LoadingComponent from '../../components/loadingComponent';
+import ActionSheet from 'react-native-actionsheet'
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -39,7 +42,7 @@ class SkillPage extends Component {
                       { label: 'Night', value: false }],
         reviewData:[{ name:'Kamai Matthews', rating:3.5, description:'I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills....' },
                     { name:'Priscilla Moore', rating:4.5, description:'I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills....' }],
-        picUrl: [require('../../../assets/images/CarouselView/Image1.jpg'), require('../../../assets/images/CarouselView/Image2.jpg'), require('../../../assets/images/CarouselView/Image3.jpg')],
+        picUrl: [],
         user: {},
         distance: 0,
         description: '',
@@ -48,38 +51,53 @@ class SkillPage extends Component {
         modalVisible: false,
         requestLoading: true,
         idVerified: false,
+        refreshing: false,
     };
   }
 
   componentDidMount() {
     if (this.props.isMe) {
-      Actions.refresh({rightButtonImage: require('../../../assets/icons/edit.png'), onRight: () => {Actions.genericBooking()}});
+      Actions.refresh({rightButtonImage: require('../../../assets/icons/edit.png'), onRight: () => {
+        this.editMavenActionSheet.show();
+      }});
     } else {
       Actions.refresh({rightButtonImage: require('../../../assets/icons/morecopy.png'), onRight: () => {Actions.genericBooking()}});
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("nextProps =      ", nextProps);
+    if(this.props.profile.addMavenImageLoading !== nextProps.profile.addMavenImageLoading && !nextProps.profile.addMavenImageLoading && nextProps.profile.addMavenImageSuccess){
+      this.setState({requestLoading: false});
+    }
+    else if(this.props.profile.addMavenImageLoading !== nextProps.profile.addMavenImageLoading && !nextProps.profile.addMavenImageLoading && !nextProps.profile.addMavenImageSuccess){
+      this.setState({requestLoading: false});
+      alert(nextProps.profile.msg);
+    }
     if (nextProps.maven != undefined) {
       var m = nextProps.maven.maven;
       var da = m.dayAvailable.split(',').map(function(item) {
         return parseInt(item, 10);
       });
       var av = this.state.availability;
-      for (var i = 0; i < da.length; i++) {
-        av[da[i]].value = true;
+      for (var i = 0; i < av.length; i++) {
+        if (da.includes(i))
+          av[i].value = true;
+        else
+          av[i].value = false;
       }
 
       var ta = m.timeAvailable.split(',').map(function(item) {
         return parseInt(item, 10);
       });
       var avt = this.state.availableTime;
-      for (i = 0; i < ta.length; i++) {
-        avt[ta[i]].value = true;
+      for (i = 0; i < avt.length; i++) {
+        if (ta.includes(i))
+          avt[i].value = true;
+        else
+          avt[i].value = false;
       }
       this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, 
-        rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, idVerified: m.userID.idVerified});
+        rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, refreshing: false, idVerified: m.userID.idVerified});
     }
   }
 
@@ -95,6 +113,50 @@ class SkillPage extends Component {
     // this.setState({ availableTime:temp});
   }
 
+  _openCameraRoll = async () => {
+    let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
+    if (!image.cancelled) {
+      let pictures = this.state.picUrl;
+      pictures[this.state.picNumber] = image.uri;
+      this.setState({picUrl: pictures, requestLoading: true});
+      this.props.addMavenImage(this.state.maven.maven._id, image.uri, this.props.auth.token);
+    }
+  }
+
+  takePhoto = async () => {
+    let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[4,3]});
+    if (!image.cancelled) {
+      let pictures = this.state.picUrl;
+      pictures[this.state.picNumber] = image.uri;
+      this.setState({picUrl: pictures, requestLoading: true});
+      this.props.addMavenImage(this.state.maven.maven._id, image.uri, this.props.auth.token);
+    }
+  }
+
+  handlePress = (i) => {
+    if (i === 1)
+      this._openCameraRoll();
+    else if (i === 2)
+      this.takePhoto();
+  }
+
+  handleEditMavenPress = (i) => {
+    if (i === 1) {
+      this.props.checkId(this.props.auth.token);
+      Actions.skillList({ isEdit: true , maven: this.state.maven.maven });
+    }
+    else if (i === 2)
+      this.props.deleteMaven(this.state.maven.maven._id, this.props.auth.token, () => {
+        this.props.getMyProfileInfo(this.props.auth.token);
+        Actions.pop();
+      });
+  }
+
+  _onRefresh() {
+    this.setState({refreshing: true});
+    this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
+  }
+
   render() {
     var picFlag = true;
     if (this.state.picUrl[0] == undefined && this.state.picUrl[1] == undefined && this.state.picUrl[2] == undefined) {
@@ -106,7 +168,14 @@ class SkillPage extends Component {
       <LoadingComponent/>
       :
       <View style={ styles.container}>
-        <ScrollView>
+        <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this._onRefresh.bind(this)}
+          />
+        }
+        >
           <View style={{ padding: 20 }} >
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
               <Image source={this.state.user.displayPicture ? {uri: this.state.user.displayPicture} : require('../../../assets/images/avatar.png')} style={ this.state.idVerified?styles.isVerifyStyle:styles.noneVerifyStyle }/>
@@ -118,40 +187,61 @@ class SkillPage extends Component {
             </View>
             {
               picFlag?
-              <View style={{ marginTop: 3,  flexDirection:'row' }}>
-                <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                    this.setState({ modalVisible: true});
-                    initialPage = 0;
-                  }} >
-                  {
-                    this.state.picUrl[0]?
-                    <Image source={{ uri: this.state.picUrl[0] }} style={{ width:'100%', height:'100%' }}/>
-                    :
-                    <View></View>
-                  }
-                </TouchableOpacity>
-                <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                    this.setState({ modalVisible: true});
-                    initialPage = 1;
-                  }} >
-                  {
-                    this.state.picUrl[1]?
-                    <Image source={{ uri: this.state.picUrl[1] }} style={{ width:'100%', height:'100%' }}/>
-                    :
-                    <View></View>
-                  }
-                </TouchableOpacity>
-                <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                    this.setState({ modalVisible: true});
-                    initialPage = 2;
-                  }} >
-                  {
-                    this.state.picUrl[2]?
-                    <Image source={{ uri: this.state.picUrl[2] }} style={{ width:'100%', height:'100%' }}/>
-                    :
-                    <View></View>
-                  }
-                </TouchableOpacity>
+              <View style={{ marginTop: 3,  flexDirection:'row' , justifyContent: 'center'}}>
+                {
+                  this.state.picUrl[0]?
+                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ modalVisible: true});
+                      initialPage = 0;
+                    }} >
+                      <Image source={{ uri: this.state.picUrl[0] }} style={{ width:'100%', height:'100%' }}/>
+                  </TouchableOpacity>
+                  :this.props.isMe?
+                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber: 0 });
+                      this.ActionSheet.show();
+                    }} >
+                      <Icon name="md-add-circle" style={{ fontSize: 25 }} />
+                  </TouchableOpacity>
+                  :
+                  null
+                }
+                {
+                  this.state.picUrl[1]?
+                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ modalVisible: true});
+                      initialPage = 1;
+                    }} >
+                      <Image source={{ uri: this.state.picUrl[1] }} style={{ width:'100%', height:'100%' }}/>
+                  </TouchableOpacity>
+                  :this.props.isMe?
+                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber: 1 });
+                      this.ActionSheet.show();
+                    }} >
+                      <Icon name="md-add-circle" style={{ fontSize: 25 }} />
+                  </TouchableOpacity>
+                  :
+                  null
+                }
+                {
+                  this.state.picUrl[2]?
+                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ modalVisible: true});
+                      initialPage = 2;
+                    }} >
+                      <Image source={{ uri: this.state.picUrl[2] }} style={{ width:'100%', height:'100%' }}/>
+                  </TouchableOpacity>
+                  :this.props.isMe?
+                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                      this.setState({ picNumber: 2 });
+                      this.ActionSheet.show();
+                    }} >
+                      <Icon name="md-add-circle" style={{ fontSize: 25 }} />
+                  </TouchableOpacity>
+                  :
+                  null
+                }
               </View>
               :
               <View></View>
@@ -231,30 +321,69 @@ class SkillPage extends Component {
                 </View>
               })
             }
-            <TouchableOpacity style={{ justifyContent:'center', alignItems:'center', paddingVertical:15 }}>
-              <Text style={{ fontSize: 17, color:"#FFA838" }} >Other services by this Maven</Text>
-            </TouchableOpacity>
+            {
+              !this.props.isMe?
+              <TouchableOpacity style={{ justifyContent:'center', alignItems:'center', paddingVertical:15 }}>
+                <Text style={{ fontSize: 17, color:"#FFA838" }} >Other services by this Maven</Text>
+              </TouchableOpacity>
+              :null
+            }
           </View>
         </ScrollView>
-        <View style={{ flexDirection:'row'}} >
-          <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#004869'}] } onPress={() => {
-            Actions.genericBooking({ title: this.props.title, item: this.state.maven });
-            }}>
-            <Text style={styles.btnText}>SKILL REQUEST</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-            this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
-            Actions.chatPage({title: this.props.title});
-          }} >
-            <Text style={styles.btnText}>CHAT</Text>
-          </TouchableOpacity>
-        </View>
+        {
+          this.props.isMe?
+          <View style={{ flexDirection:'row'}} >
+            <View style={{justifyContent:'center', alignItems:'center', padding:15, backgroundColor:'#004869'}}>
+              <Text style={styles.btnText}>21</Text>
+            </View>
+            <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
+              
+            }} >
+              <Text style={styles.btnText}>View Chats</Text>
+            </TouchableOpacity>
+          </View>
+          :
+          <View style={{ flexDirection:'row'}} >
+            <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#004869'}] } onPress={() => {
+              Actions.genericBooking({ title: this.props.title, item: this.state.maven });
+              }}>
+              <Text style={styles.btnText}>SKILL REQUEST</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
+              this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
+              Actions.chatPage({title: this.props.title});
+            }} >
+              <Text style={styles.btnText}>CHAT</Text>
+            </TouchableOpacity>
+          </View>
+        }
+        <ActionSheet
+            ref={o => this.ActionSheet = o}
+            title={null}
+            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            cancelButtonIndex={0}
+            onPress={this.handlePress}
+        />
+        <ActionSheet
+            ref={o => this.editMavenActionSheet = o}
+            title={'What would you like to do?'}
+            options={['Cancel', 'Edit maven details', 'Delete listing']}
+            cancelButtonIndex={0}
+            destructiveButtonIndex={2}
+            onPress={this.handleEditMavenPress}
+        />
         {this.renderModal()}
       </View>
     );
   }
 
   renderModal() {
+    var images = [];
+    for (var i = 0; i < 3; i ++ ) {
+      if (this.state.picUrl[i]) {
+        images.push({source: {uri: this.state.picUrl[i]}});
+      }
+    }
     return (
       <View>
         <Modal
@@ -268,11 +397,7 @@ class SkillPage extends Component {
         <Gallery
           initialPage={initialPage}
           style={{backgroundColor: 'white', flex: 1}}
-          images={[
-            { source: { uri: this.state.picUrl[0] }},
-            { source: { uri: this.state.picUrl[1] }},
-            { source: { uri: this.state.picUrl[2] }}
-          ]}
+          images={images}
         />
         <TouchableWithoutFeedback  onPress={()=>{this.setState({modalVisible: false})}}>
           <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black'}}></View>
@@ -300,7 +425,7 @@ const styles = StyleSheet.create({
   noneVerifyStyle:{
       height: 150, width: 150, borderRadius: 50, borderWidth:3, borderColor:'#fff'
   },
-  photoView: { flex:1, borderWidth:1, borderRadius:3, borderColor: '#ccc', height:80, 
+  photoView: { borderWidth:1, borderRadius:3, borderColor: '#ccc', height:80, width: (SCREEN_WIDTH - 40) / 3,
   backgroundColor:'#fff', justifyContent:"center", alignItems:'center' }
   
 });
@@ -312,8 +437,11 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
+  getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  addMavenImage: (mavenId, imageUrl, token) => dispatch(actions.addMavenImage(mavenId, imageUrl, token)),
+  deleteMaven: (mavenId, token, next) => dispatch(actions.deleteMaven(mavenId, token, next)),
+  checkId: (token) => dispatch(actions.checkId(token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

@@ -18,8 +18,6 @@ class Chat extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("Props =      ", this.props);
-    console.log("nextProps =      ", nextProps);
     if (nextProps.maven != undefined) {
       var m = nextProps.maven.maven;
       this.setState({maven: nextProps.maven, user: m.userID, description: m.description, price: m.price, requestLoading: false});

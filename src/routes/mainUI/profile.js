@@ -24,7 +24,7 @@ class Profile extends Component {
                "title": "Register a skill today!",
                "category": "entry",
                "active": false,
-               "rating": 5,
+               "rating": 0,
                "status": 0,
                "mainCategory": 0
            }],
@@ -33,7 +33,7 @@ class Profile extends Component {
                "title": "Register a service today!",
                "category": "entry",
                "active": false,
-               "rating": 5,
+               "rating": 0,
                "status": 0,
                "mainCategory": 1
            }],
@@ -61,18 +61,18 @@ class Profile extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.isMe) {
       if(this.props.profile.myInfo !== nextProps.profile.myInfo && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.reviews ? nextProps.profile.myInfo.reviews.slice(0, 4) : []});
+        this.setState({requestLoading: false, refreshing: false, /* reviewData: nextProps.profile.myInfo.reviews */});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
             this.setState({modalVisible: null});
             this.modalFlag = false;
-          }, 750);
+          }, 1000);
         }
       }
     } else {
       if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews ? nextProps.profile.user.reviews.slice(0, 4) : []});
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -202,7 +202,7 @@ class Profile extends Component {
                   </View>
                   <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     {
-                      this.state.reviewData.map((item, index)=>{
+                      this.state.reviewData.slice(0, 4).map((item, index)=>{
                         return <ReviewComponent key={index} data={item}/>
                       })
                     }
@@ -297,8 +297,8 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     padding: 40,
-    justifyContent: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 4,
     borderColor: 'rgba(0, 0, 0, 0.1)',

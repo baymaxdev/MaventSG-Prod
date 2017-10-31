@@ -80,29 +80,90 @@ class SkillList extends Component {
         }
       }
       this.state = {
-            categoryShowModal:false,
-              category: this.props.category?this.props.category:'',
-              mainCategory: mainCategory,
-              subData: subData,
-              subcategory: '',
-              categoryId: '',
-              textInputValue: '',
-              Mon: false,
-              Tue: false,
-              Wed: false,
-              Thu: false,
-              Fri: false,
-              Sat: false,
-              Sun: false,
-              morning: false,
-              afternoon: false,
-              evening: false,
-              night: false,
-              modalData:data,
-              pictures: [],
-              idPictures: [],
-              requestLoading: false
+        categoryShowModal:false,
+        category: this.props.category?this.props.category:'',
+        mainCategory: mainCategory,
+        subData: subData,
+        subcategory: '',
+        categoryId: '',
+        textInputValue: '',
+        Mon: false,
+        Tue: false,
+        Wed: false,
+        Thu: false,
+        Fri: false,
+        Sat: false,
+        Sun: false,
+        morning: false,
+        afternoon: false,
+        evening: false,
+        night: false,
+        modalData:data,
+        pictures: [],
+        idPictures: [],
+        requestLoading: false,
+        price: '',
       };
+  }
+
+  componentWillMount() {
+    if (this.props.isEdit) {
+      Actions.refresh({title: 'Edit Maven Details'});
+      var m = this.props.maven;
+      var da = m.dayAvailable.split(',').map(function(item) {
+        return parseInt(item, 10);
+      });
+      for (var i = 0; i < da.length; i++) {
+        switch (da[i]) {
+          case 0:
+            this.setState({Mon: true})
+            break;
+          case 1:
+            this.setState({Tue: true})
+            break;
+          case 2:
+            this.setState({Wed: true})
+            break;
+          case 3:
+            this.setState({Thu: true})
+            break;
+          case 4:
+            this.setState({Fri: true})
+            break;
+          case 5:
+            this.setState({Sat: true})
+            break;
+          case 6:
+            this.setState({Sun: true})
+            break;
+          default:
+            break;
+        }
+      }
+  
+      var ta = m.timeAvailable.split(',').map(function(item) {
+        return parseInt(item, 10);
+      });
+      for (i = 0; i < ta.length; i++) {
+        switch (ta[i]) {
+          case 0:
+            this.setState({morning: true})
+            break;
+          case 1:
+            this.setState({afternoon: true})
+            break;
+          case 2:
+            this.setState({evening: true})
+            break;
+          case 3:
+            this.setState({night: true})
+            break;
+          default:
+            break;
+        }
+      }
+      this.setState({ description: m.description, price: (m.price).toString() });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -113,6 +174,9 @@ class SkillList extends Component {
     else if(this.props.profile.mavenLoading !== nextProps.profile.mavenLoading && !nextProps.profile.mavenLoading && !nextProps.profile.mavenRegSuccess){
       this.setState({requestLoading: false});
       alert(nextProps.profile.msg);
+    }
+    if (this.props.isEdit && !this.state.postalCode) {
+      this.setState({postalCode: nextProps.profile.postalCode});
     }
   }
 
@@ -183,28 +247,29 @@ class SkillList extends Component {
 
   _openCameraRoll = async () => {
     let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
-    let tempPictures = this.state.pictures;
-    let tempIdPictures = this.state.idPictures;
     if(!image.cancelled) {
-      if(this.state.picNumber === 0) this.setState({picUrl0:{uri:image.uri}});
-      if(this.state.picNumber === 1) this.setState({picUrl1:{uri:image.uri}});
-      if(this.state.picNumber === 2) this.setState({picUrl2:{uri:image.uri}});
-      if(this.state.picNumber === 3) this.setState({idPicUrl0:{uri:image.uri}});
-      if(this.state.picNumber === 4) this.setState({idPicUrl1:{uri:image.uri}});
-      if(this.state.picNumber < 3) tempPictures.push(image.uri);
-      if(this.state.picNumber > 2) tempIdPictures.push(image.uri);
-      this.setState({pictures: tempPictures, idPictures: tempIdPictures});
+      if (this.state.picNumber < 3) {
+        let tempPictures = this.state.pictures;
+        tempPictures[this.state.picNumber] = image.uri;
+        this.setState({pictures: tempPictures});
+      } else {
+        let tempPictures = this.state.idPictures;
+        tempPictures[this.state.picNumber - 3] = image.uri;
+        this.setState({idPictures: tempPictures});
+      }
     }
   }
 
   takePhoto = async () => {
       let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[4,3]});
-      if(!image.cancelled) {
-        if(this.state.picNumber === 0) this.setState({picUrl0:{uri:image.uri}});
-        if(this.state.picNumber === 1) this.setState({picUrl1:{uri:image.uri}});
-        if(this.state.picNumber === 2) this.setState({picUrl2:{uri:image.uri}});
-        if(this.state.picNumber === 3) this.setState({idPicUrl0:{uri:image.uri}});
-        if(this.state.picNumber === 4) this.setState({idPicUrl1:{uri:image.uri}});
+      if (this.state.picNumber < 3) {
+        let tempPictures = this.state.pictures;
+        tempPictures[this.state.picNumber] = image.uri;
+        this.setState({pictures: tempPictures});
+      } else {
+        let tempPictures = this.state.idPictures;
+        tempPictures[this.state.picNumber - 3] = image.uri;
+        this.setState({idPictures: tempPictures});
       }
   }
 
@@ -226,7 +291,7 @@ class SkillList extends Component {
       return;
     }
     if(!this.state.price || this.state.price.length < 0) {
-      alert('Please input title.');
+      alert('Please input price.');
       return;
     }
     let dayList = [];
@@ -266,6 +331,51 @@ class SkillList extends Component {
     }
     this.setState({requestLoading: true});
     this.props.registerMaven(data, this.props.auth.token);
+
+  }
+
+  onEdit = () => {
+    if(!this.state.description || this.state.description.length < 0) {
+      alert('Please input description.');
+      return;
+    }
+    if(!this.state.price || this.state.price.length < 0) {
+      alert('Please input price.');
+      return;
+    }
+    let dayList = [];
+    if(this.state.Mon) dayList.push(0);
+    if(this.state.Tue) dayList.push(1);
+    if(this.state.Wed) dayList.push(2);
+    if(this.state.Thu) dayList.push(3);
+    if(this.state.Fri) dayList.push(4);
+    if(this.state.Sat) dayList.push(5);
+    if(this.state.Sun) dayList.push(6);
+
+    if(dayList.length < 1) {
+      alert('Please select available day.');
+      return;
+    }
+    let timeList = [];
+    if(this.state.morning) timeList.push(0);
+    if(this.state.afternoon) timeList.push(1);
+    if(this.state.evening) timeList.push(2);
+    if(this.state.night) timeList.push(3);
+
+    if(timeList.length < 1) {
+      alert('Please select available time.');
+      return;
+    }
+    let data = {
+      mavenId: this.props.maven._id,
+      title: this.props.maven.title,
+      description: this.state.description,
+      dayAvailable: dayList.join(','),
+      timeAvailable: timeList.join(','),
+      price: this.state.price
+    }
+    this.setState({requestLoading: true});
+    this.props.editMavenDetails(data, this.props.auth.token);
 
   }
 
@@ -321,7 +431,9 @@ class SkillList extends Component {
           <ScrollView style={styles.container}>
             <View style={styles.viewContainer}>
               <View style={styles.CardContainer}>
-
+              {
+                this.props.isEdit?null
+                :
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 10 }}>
                   <Text style={{ marginBottom:5 ,fontSize: 16, fontWeight: '600' }}>Service Category</Text>
                   <TouchableHighlight onPress={(e)=>{this.setState({modalData:data, categoryShowModal:true, isCategory:true})}}>
@@ -347,6 +459,9 @@ class SkillList extends Component {
                       <ListModal data={this.state.modalData} show={this.state.categoryShowModal} handler={this.modalHandler}/>
                   }
                 </View>
+              }
+              {
+                this.props.isEdit?null:
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Title</Text>
@@ -373,7 +488,7 @@ class SkillList extends Component {
                     />
                   </View>
                 </View>
-
+              }
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Description</Text>
@@ -391,6 +506,7 @@ class SkillList extends Component {
                       multiline={true}
                       numberOfLines={4}
                       ref={(input) => this.desc = input}
+                      value={this.state.description}
                       onChangeText = {description => this.setState({description})}
                       maxLength={140}
                       autoCorrect={false}
@@ -412,65 +528,62 @@ class SkillList extends Component {
                       placeholderTextColor="rgba(0,0,0,0.3)"
                       placeholder="Price"
                       keyboardType="numeric"
-                      autoCorrect
-                      autoCapitalize="sentences"
-                      // multiline
                       returnKeyType='next'
-                      onSubmitEditing={() => this.desc.focus()}
-                      ref={(input) => this.price = input}
+                      value={this.state.price}
                       onChangeText = {price => this.setState({price})}
                       maxLength={80}
-                      autoCorrect={false}
                       style={{ height: 40, width: 0.80 * SCREEN_WIDTH, alignItems: 'center', padding: 8, justifyContent: 'center', fontSize: 16, }}
                       underlineColorAndroid="transparent"
                     />
                   </View>
                 </View>
-
-                <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <View style={{flexDirection: 'row'}}>
-                    <Text style={{ fontSize: 16, fontWeight: '600' }}>Photos</Text>
-                    <TouchableOpacity onPress={() => this.onQuestionMark('photos')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
-                    </TouchableOpacity>
+                {
+                  this.props.isEdit?null:
+                  <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={{ fontSize: 16, fontWeight: '600' }}>Photos</Text>
+                      <TouchableOpacity onPress={() => this.onQuestionMark('photos')}>
+                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ marginTop: 3,  flexDirection:'row' }}>
+                      <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                        this.setState({ picNumber:0 });
+                        this.ActionSheet.show();
+                        }}>
+                        {
+                          this.state.pictures[0]?
+                          <Image source={{ uri: this.state.pictures[0] }} style={{ width:'100%', height:'100%' }}/>
+                          :
+                          <Icon name="md-add-circle"/>
+                        }
+                      </TouchableOpacity>
+                      <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                        this.setState({ picNumber:1 });
+                        this.ActionSheet.show();
+                        }}>
+                        {
+                          this.state.pictures[1]?
+                          <Image source={{ uri: this.state.pictures[1] }} style={{ width:'100%', height:'100%' }}/>
+                          :
+                          <Icon name="md-add-circle"/>
+                        }
+                      </TouchableOpacity>
+                      <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                        this.setState({ picNumber:2 });
+                        this.ActionSheet.show();
+                        }}>
+                        {
+                          this.state.pictures[2]?
+                          <Image source={{ uri: this.state.pictures[2] }} style={{ width:'100%', height:'100%' }}/>
+                          :
+                          <Icon name="md-add-circle"/>
+                        }
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <View style={{ marginTop: 3,  flexDirection:'row' }}>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ picNumber:0 });
-                      this.ActionSheet.show();
-                      }}>
-                      {
-                        this.state.picUrl0?
-                        <Image source={ this.state.picUrl0 } style={{ width:'100%', height:'100%' }}/>
-                        :
-                        <Icon name="md-add-circle"/>
-                      }
-                    </TouchableOpacity>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ picNumber:1 });
-                      this.ActionSheet.show();
-                      }}>
-                      {
-                        this.state.picUrl1?
-                        <Image source={ this.state.picUrl1 } style={{ width:'100%', height:'100%' }}/>
-                        :
-                        <Icon name="md-add-circle"/>
-                      }
-                    </TouchableOpacity>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ picNumber:2 });
-                      this.ActionSheet.show();
-                      }}>
-                      {
-                        this.state.picUrl2?
-                        <Image source={ this.state.picUrl2 } style={{ width:'100%', height:'100%' }}/>
-                        :
-                        <Icon name="md-add-circle"/>
-                      }
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
+                }
+                
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Address: Postal Code</Text>
@@ -485,7 +598,8 @@ class SkillList extends Component {
                       returnKeyType='go'
                       keyboardType="numeric"
                       maxLength={6}
-                      // ref={(input) => this.postal = input}
+                      editable={this.props.isEdit?false:true}
+                      value={this.state.postalCode}
                       onChangeText = {postalCode => this.setState({postalCode})}
                       underlineColorAndroid='transparent'
                       style={{ height: 40, width: 0.8 * SCREEN_WIDTH, padding: 8, fontSize: 16 }}
@@ -575,49 +689,57 @@ class SkillList extends Component {
                     </View>
                   </View>
                 </View>
-                <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
-                  <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-                        <View style={{flex:1, borderBottomWidth:1, borderColor:'#a9a9a9'}} />
-                        <Text style={{padding:10, color:'#808080'}}>OPTIONAL</Text>
-                        <View style={{flex:1, borderBottomWidth:1, borderColor:'#a9a9a9'}} />
+                {
+                  this.props.isEdit?null:
+                  <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
+                    <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+                          <View style={{flex:1, borderBottomWidth:1, borderColor:'#a9a9a9'}} />
+                          <Text style={{padding:10, color:'#808080'}}>OPTIONAL</Text>
+                          <View style={{flex:1, borderBottomWidth:1, borderColor:'#a9a9a9'}} />
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={{ fontSize: 16, fontWeight: '600' }}>ID Verification</Text>
+                      <TouchableOpacity onPress={() => this.onQuestionMark('verification')}>
+                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ marginTop: 3,  flexDirection:'row' }}>
+                      <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                        this.setState({ picNumber:3 });
+                        this.ActionSheet.show();
+                        }}>
+                        {
+                          this.state.idPictures[0]?
+                          <Image source={ this.state.idPictures[0] } style={{ width:'100%', height:'100%' }}/>
+                          :
+                          <Icon name="md-add-circle"/>
+                        }
+                      </TouchableOpacity>
+                      <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                        this.setState({ picNumber:4 });
+                        this.ActionSheet.show();
+                        }}>
+                        {
+                          this.state.idPictures[1]?
+                          <Image source={ this.state.idPictures[1] } style={{ width:'100%', height:'100%' }}/>
+                          :
+                          <Icon name="md-add-circle"/>
+                        }
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <View style={{flexDirection: 'row'}}>
-                    <Text style={{ fontSize: 16, fontWeight: '600' }}>ID Verification</Text>
-                    <TouchableOpacity onPress={() => this.onQuestionMark('verification')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={{ marginTop: 3,  flexDirection:'row' }}>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ picNumber:3 });
-                      this.ActionSheet.show();
-                      }}>
-                      {
-                        this.state.idPicUrl0?
-                        <Image source={ this.state.idPicUrl0 } style={{ width:'100%', height:'100%' }}/>
-                        :
-                        <Icon name="md-add-circle"/>
-                      }
-                    </TouchableOpacity>
-                    <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ picNumber:4 });
-                      this.ActionSheet.show();
-                      }}>
-                      {
-                        this.state.idPicUrl1?
-                        <Image source={ this.state.idPicUrl1 } style={{ width:'100%', height:'100%' }}/>
-                        :
-                        <Icon name="md-add-circle"/>
-                      }
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                }
 
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15, paddingBottom: 12, flexDirection: 'row', justifyContent: 'space-around' }}>
                   <TouchableOpacity onPress={(e)=>{ Actions.pop() }} style={[styles.btn,{ backgroundColor:'#ccc'}]}>
                       <Text style={{fontSize:20}}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={(e)=> {this.onAdd()}} style={[styles.btn,{ backgroundColor:'#0B486B'}]}>
+                  <TouchableOpacity onPress={(e)=> {
+                    if (this.props.isEdit)
+                      this.onEdit()
+                    else
+                      this.onAdd()
+                    }} style={[styles.btn,{ backgroundColor:'#0B486B'}]}>
                       <Text style={{fontSize:20, color:'#fff'}}>List it!</Text>
                   </TouchableOpacity>
                 </View>
@@ -631,6 +753,10 @@ class SkillList extends Component {
             cancelButtonIndex={0}
             onPress={this.handlePress}
           />
+          {
+            this.state.requestLoading && 
+            <LoadingComponent/>
+          }
         </View>
     );
   }
@@ -678,6 +804,7 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   registerMaven: (mavenData, token) => dispatch(actions.registerMaven(mavenData, token)),
+  editMavenDetails: (mavenData, token) => dispatch(actions.editMavenDetails(mavenData, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 export default connect(mapStateToProps, mapDispatchToProps)(SkillList);

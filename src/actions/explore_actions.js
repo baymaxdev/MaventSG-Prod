@@ -68,7 +68,6 @@ export const getMavenDetails = (mavenId, location, token) => {
     request(url, option)
     .then(res => {   
       if (res.status === 200) {
-        console.log("API=       ", res.result);
         dispatch({ type: GET_MAVEN_DETAILS, maven: res.result });   
       }
       else dispatch({ type: GET_MAVEN_DETAILS_FAILED, error: res.msg });

@@ -56,7 +56,7 @@ class Signup extends Component {
 
     componentWillReceiveProps(nextProps) {
         if (this.props.auth.signupLoading !== nextProps.auth.signupLoading && !nextProps.auth.signupLoading && nextProps.auth.signedUp) {
-            Actions.OTP({ phoneState: "1" });
+            Actions.replace('OTP', { phoneState: "1" });
         }
         if (this.props.auth.signupLoading !== nextProps.auth.signupLoading && !nextProps.auth.signupLoading && !nextProps.auth.signedUp) {
             alert(nextProps.auth.signupMsg);

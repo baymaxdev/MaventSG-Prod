@@ -46,7 +46,6 @@ class Login extends Component {
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){
         if(nextProps.auth.status === 401)  {
             Actions.OTP({phoneState: "2"});
-
         }
         else{
             alert('Invalid User');

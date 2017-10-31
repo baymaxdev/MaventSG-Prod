@@ -148,15 +148,11 @@ export default function (state = INITIAL_STATE, action) {
     case GENERATE_OTP_SUCCESS:      
         return {                
             ...state,
-            signedUp: true,
-            signupLoading: false,
             signupMsg: action.msg,
         }
     case GENERATE_OTP_FAIL:      
         return {                
             ...state,
-            signupLoading: false,
-            signedUp: false,
             signupMsg: action.msg
         } 
     case REQUEST_VERIFY_OTP:      
