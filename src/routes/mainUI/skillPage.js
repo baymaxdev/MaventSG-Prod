@@ -25,7 +25,7 @@ import DatePicker from 'react-native-datepicker';
 import { ImagePicker } from 'expo';
 import Gallery from 'react-native-image-gallery';
 import LoadingComponent from '../../components/loadingComponent';
-import ActionSheet from 'react-native-actionsheet'
+import ActionSheet from 'react-native-actionsheet';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -61,15 +61,18 @@ class SkillPage extends Component {
         this.editMavenActionSheet.show();
       }});
     } else {
-      Actions.refresh({rightButtonImage: require('../../../assets/icons/morecopy.png'), onRight: () => {Actions.genericBooking()}});
+      Actions.refresh({rightButtonImage: require('../../../assets/icons/morecopy.png'), onRight: () => {
+        this.genericMavenActionSheet.show();
+      }});
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if(this.props.profile.addMavenImageLoading !== nextProps.profile.addMavenImageLoading && !nextProps.profile.addMavenImageLoading && nextProps.profile.addMavenImageSuccess){
+    console.log("nextprops", nextProps);
+    if(this.props.profile.mavenImageLoading !== nextProps.profile.mavenImageLoading && !nextProps.profile.mavenImageLoading && nextProps.profile.mavenImageSuccess){
       this.setState({requestLoading: false});
     }
-    else if(this.props.profile.addMavenImageLoading !== nextProps.profile.addMavenImageLoading && !nextProps.profile.addMavenImageLoading && !nextProps.profile.addMavenImageSuccess){
+    else if(this.props.profile.mavenImageLoading !== nextProps.profile.mavenImageLoading && !nextProps.profile.mavenImageLoading && !nextProps.profile.mavenImageSuccess){
       this.setState({requestLoading: false});
       alert(nextProps.profile.msg);
     }
@@ -102,16 +105,32 @@ class SkillPage extends Component {
   }
 
   onClickAvailability = (index) => {
-    // let temp = this.state.availability;
-    // temp[index].value = !temp[index].value;
-    // this.setState({ availability:temp});
+
   }
 
   onClickAvailableTime = (index) => {
-    // let temp = this.state.availableTime;
-    // temp[index].value = !temp[index].value;
-    // this.setState({ availableTime:temp});
+
   }
+
+  // _openCameraRoll = () => {
+  //   ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]})
+  //   .then((image) => {
+  //     if (!image.cancelled) {
+  //       ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80)
+  //       .then((res) => {
+  //         console.log("res", res);
+  //         let pictures = this.state.picUrl;
+  //         pictures[this.state.picNumber] = res.uri;
+  //         this.setState({picUrl: pictures, requestLoading: true});
+  //         this.props.addMavenImage(this.state.maven.maven._id, res.uri, this.props.auth.token);
+  //       }).catch((err) => {
+  //         console.log("err", err);
+  //       });
+  //     }
+  //   }).catch((err) => {
+
+  //   });
+  // }
 
   _openCameraRoll = async () => {
     let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
@@ -152,17 +171,33 @@ class SkillPage extends Component {
       });
   }
 
+  handleDeleteImagePress = (i) => {
+    if (i === 1) {
+      this.props.deleteMavenImage(this.state.maven.maven._id, this.state.deleteImageIndex, this.props.auth.token, () => {
+        this._onRefresh();
+      });
+    }
+  }
+
+  handleGenericMavenPress = (i) => {
+    if (i == 1) {
+
+    } else if (i == 2) {
+
+    }
+  }
+
   _onRefresh() {
     this.setState({refreshing: true});
     this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
   }
 
+  _onDeleteImage(index) {
+    this.setState({deleteImageIndex: index});
+    this.deleteImageActionSheet.show();
+  }
+
   render() {
-    var picFlag = true;
-    if (this.state.picUrl[0] == undefined && this.state.picUrl[1] == undefined && this.state.picUrl[2] == undefined) {
-      picFlag = false;
-    }
-    
     return (
       this.state.requestLoading?
       <LoadingComponent/>
@@ -186,65 +221,89 @@ class SkillPage extends Component {
               </View>
             </View>
             {
-              picFlag?
               <View style={{ marginTop: 3,  flexDirection:'row' , justifyContent: 'center'}}>
                 {
                   this.state.picUrl[0]?
-                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ modalVisible: true});
-                      initialPage = 0;
-                    }} >
-                      <Image source={{ uri: this.state.picUrl[0] }} style={{ width:'100%', height:'100%' }}/>
-                  </TouchableOpacity>
+                  <View style={ styles.photoView }>
+                    <TouchableOpacity style={ styles.photoView } onPress={(e) => {
+                        this.setState({ modalVisible: true});
+                        initialPage = 0;
+                      }} >
+                        <Image source={{ uri: this.state.picUrl[0] }} style={{ width:'100%', height:'100%' }}/>
+                    </TouchableOpacity>
+                    {
+                      this.props.isMe?
+                      <TouchableOpacity style={{ right: 0, top: 0, position: 'absolute', padding: 3, }} onPress={() => {this._onDeleteImage(0)}}>
+                        <Image source={require('../../../assets/icons/close.png')} style={{width: 25, height: 25}} />
+                      </TouchableOpacity>
+                      :null
+                    }
+                  </View>
                   :this.props.isMe?
                   <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
                       this.setState({ picNumber: 0 });
                       this.ActionSheet.show();
                     }} >
-                      <Icon name="md-add-circle" style={{ fontSize: 25 }} />
+                      <Icon name="md-add-circle" style={{ fontSize: 30 }} />
                   </TouchableOpacity>
                   :
                   null
                 }
                 {
                   this.state.picUrl[1]?
-                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ modalVisible: true});
-                      initialPage = 1;
-                    }} >
-                      <Image source={{ uri: this.state.picUrl[1] }} style={{ width:'100%', height:'100%' }}/>
-                  </TouchableOpacity>
-                  :this.props.isMe?
+                  <View style={ styles.photoView }>
+                    <TouchableOpacity style={ styles.photoView } onPress={(e) => {
+                        this.setState({ modalVisible: true});
+                        initialPage = 1;
+                      }} >
+                        <Image source={{ uri: this.state.picUrl[1] }} style={{ width:'100%', height:'100%' }}/>
+                    </TouchableOpacity>
+                    {
+                      this.props.isMe?
+                      <TouchableOpacity style={{ right: 0, top: 0, position: 'absolute', padding: 3, }} onPress={() => {this._onDeleteImage(1)}}>
+                        <Image source={require('../../../assets/icons/close.png')} style={{width: 25, height: 25}} />
+                      </TouchableOpacity>
+                      :null
+                    }
+                  </View>
+                  :this.props.isMe && this.state.picUrl[0]?
                   <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
                       this.setState({ picNumber: 1 });
                       this.ActionSheet.show();
                     }} >
-                      <Icon name="md-add-circle" style={{ fontSize: 25 }} />
+                      <Icon name="md-add-circle" style={{ fontSize: 30 }} />
                   </TouchableOpacity>
                   :
                   null
                 }
                 {
                   this.state.picUrl[2]?
-                  <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
-                      this.setState({ modalVisible: true});
-                      initialPage = 2;
-                    }} >
-                      <Image source={{ uri: this.state.picUrl[2] }} style={{ width:'100%', height:'100%' }}/>
-                  </TouchableOpacity>
-                  :this.props.isMe?
+                  <View style={ styles.photoView }>
+                    <TouchableOpacity style={ styles.photoView } onPress={(e) => {
+                        this.setState({ modalVisible: true});
+                        initialPage = 2;
+                      }} >
+                        <Image source={{ uri: this.state.picUrl[2] }} style={{ width:'100%', height:'100%' }}/>
+                    </TouchableOpacity>
+                    {
+                      this.props.isMe?
+                      <TouchableOpacity style={{ right: 0, top: 0, position: 'absolute', padding: 3, }} onPress={() => {this._onDeleteImage(2)}}>
+                        <Image source={require('../../../assets/icons/close.png')} style={{width: 25, height: 25}} />
+                      </TouchableOpacity>
+                      :null
+                    }
+                  </View>
+                  :this.props.isMe && this.state.picUrl[0] && this.state.picUrl[1]?
                   <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
                       this.setState({ picNumber: 2 });
                       this.ActionSheet.show();
                     }} >
-                      <Icon name="md-add-circle" style={{ fontSize: 25 }} />
+                      <Icon name="md-add-circle" style={{ fontSize: 30 }} />
                   </TouchableOpacity>
                   :
                   null
                 }
               </View>
-              :
-              <View></View>
             }
             <View style={ [styles.viewContainer,{ paddingTop:0 }] } >
               <Text style={ styles.subjectText }>{this.state.title}</Text>
@@ -323,7 +382,9 @@ class SkillPage extends Component {
             }
             {
               !this.props.isMe?
-              <TouchableOpacity style={{ justifyContent:'center', alignItems:'center', paddingVertical:15 }}>
+              <TouchableOpacity style={{ justifyContent:'center', alignItems:'center', paddingVertical:15 }} onPress={() => {
+                Actions.otherProfile({title: this.props.title, userId: this.state.user._id});
+              }}>
                 <Text style={{ fontSize: 17, color:"#FFA838" }} >Other services by this Maven</Text>
               </TouchableOpacity>
               :null
@@ -371,6 +432,21 @@ class SkillPage extends Component {
             cancelButtonIndex={0}
             destructiveButtonIndex={2}
             onPress={this.handleEditMavenPress}
+        />
+        <ActionSheet
+            ref={o => this.deleteImageActionSheet = o}
+            title={null}
+            options={['Cancel', 'Delete Image']}
+            cancelButtonIndex={0}
+            destructiveButtonIndex={1}
+            onPress={this.handleDeleteImagePress}
+        />
+        <ActionSheet
+            ref={o => this.genericMavenActionSheet = o}
+            title={'What would you like to do?'}
+            options={['Cancel', 'Save', 'Report']}
+            cancelButtonIndex={0}
+            onPress={this.handleGenericMavenPress}
         />
         {this.renderModal()}
       </View>
@@ -440,6 +516,7 @@ const mapDispatchToProps = (dispatch) =>({
   getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   addMavenImage: (mavenId, imageUrl, token) => dispatch(actions.addMavenImage(mavenId, imageUrl, token)),
+  deleteMavenImage: (mavenId, index, token, next) => dispatch(actions.deleteMavenImage(mavenId, index, token, next)),
   deleteMaven: (mavenId, token, next) => dispatch(actions.deleteMaven(mavenId, token, next)),
   checkId: (token) => dispatch(actions.checkId(token)),
   actions: bindActionCreators(actions, dispatch)

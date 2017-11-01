@@ -18,6 +18,9 @@ import {
   REQUEST_ADD_MAVEN_IMAGE,
   ADD_MAVEN_IMAGE,
   ADD_MAVEN_IMAGE_ERROR,
+  REQUEST_DELETE_MAVEN_IMAGE,
+  DELETE_MAVEN_IMAGE,
+  DELETE_MAVEN_IMAGE_ERROR,
   CHECK_ID,
   CHECK_ID_ERROR,
   REQUEST_EDIT_MAVEN_DETAILS,
@@ -243,6 +246,7 @@ export const addMavenImage = ( mavenId, imageUrl, token ) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
+        console.log(res);
         dispatch({ type: ADD_MAVEN_IMAGE, msg: res.msg });
       }
       else {
@@ -251,6 +255,30 @@ export const addMavenImage = ( mavenId, imageUrl, token ) => {
     })
     .catch(err => {
       dispatch({ type: ADD_MAVEN_IMAGE_ERROR, msg: err });
+    })  
+  }
+}
+
+export const deleteMavenImage = (mavenId, index, token, next) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    dispatch({ type: REQUEST_DELETE_MAVEN_IMAGE });
+    const url = `maven/deleteMavenImage?mavenID=${mavenId}&index=${index}`;
+    request(url, option)
+    .then(res => {   
+      if (res.status === 200) {
+        dispatch({ type: DELETE_MAVEN_IMAGE, msg: res.msg });
+        next();
+      }
+      else dispatch({ type: DELETE_MAVEN_IMAGE_ERROR, msg: res.msg });
+    })
+    .catch(err => {
+      dispatch({ type: DELETE_MAVEN_IMAGE_ERROR, msg: err });
     })  
   }
 }

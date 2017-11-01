@@ -25,7 +25,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../../actions';
 import LoadingComponent from '../../components/loadingComponent';
-import ActionSheet from 'react-native-actionsheet'
+import ActionSheet from 'react-native-actionsheet';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -116,25 +116,25 @@ class SkillList extends Component {
       for (var i = 0; i < da.length; i++) {
         switch (da[i]) {
           case 0:
-            this.setState({Mon: true})
+            this.setState({Sun: true})
             break;
           case 1:
-            this.setState({Tue: true})
+            this.setState({Mon: true})
             break;
           case 2:
-            this.setState({Wed: true})
+            this.setState({Tue: true})
             break;
           case 3:
-            this.setState({Thu: true})
+            this.setState({Wed: true})
             break;
           case 4:
-            this.setState({Fri: true})
+            this.setState({Thu: true})
             break;
           case 5:
-            this.setState({Sat: true})
+            this.setState({Fri: true})
             break;
           case 6:
-            this.setState({Sun: true})
+            this.setState({Sat: true})
             break;
           default:
             break;
@@ -295,13 +295,13 @@ class SkillList extends Component {
       return;
     }
     let dayList = [];
-    if(this.state.Mon) dayList.push(0);
-    if(this.state.Tue) dayList.push(1);
-    if(this.state.Wed) dayList.push(2);
-    if(this.state.Thu) dayList.push(3);
-    if(this.state.Fri) dayList.push(4);
-    if(this.state.Sat) dayList.push(5);
-    if(this.state.Sun) dayList.push(6);
+    if(this.state.Sun) dayList.push(0);
+    if(this.state.Mon) dayList.push(1);
+    if(this.state.Tue) dayList.push(2);
+    if(this.state.Wed) dayList.push(3);
+    if(this.state.Thu) dayList.push(4);
+    if(this.state.Fri) dayList.push(5);
+    if(this.state.Sat) dayList.push(6);
 
     if(dayList.length < 1) {
       alert('Please select available day.');
@@ -344,13 +344,13 @@ class SkillList extends Component {
       return;
     }
     let dayList = [];
-    if(this.state.Mon) dayList.push(0);
-    if(this.state.Tue) dayList.push(1);
-    if(this.state.Wed) dayList.push(2);
-    if(this.state.Thu) dayList.push(3);
-    if(this.state.Fri) dayList.push(4);
-    if(this.state.Sat) dayList.push(5);
-    if(this.state.Sun) dayList.push(6);
+    if(this.state.Sun) dayList.push(0);
+    if(this.state.Mon) dayList.push(1);
+    if(this.state.Tue) dayList.push(2);
+    if(this.state.Wed) dayList.push(3);
+    if(this.state.Thu) dayList.push(4);
+    if(this.state.Fri) dayList.push(5);
+    if(this.state.Sat) dayList.push(6);
 
     if(dayList.length < 1) {
       alert('Please select available day.');
@@ -615,6 +615,11 @@ class SkillList extends Component {
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8, flexDirection: 'row', justifyContent: 'space-around' }}>
+                    <TouchableHighlight underlayColor='#158BCF' style={this.state.Sun ? styles.buttonPressed : styles.button} onPress={this.onPressSun}>
+                      <View style={{ borderWidth: 1, borderColor: '#ccc', height: 40, width: 40, borderRadius: 3, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontSize: 28, fontWeight: 'bold' }}>S</Text>
+                      </View>
+                    </TouchableHighlight>
                     <TouchableHighlight underlayColor='#158BCF' style={this.state.Mon ? styles.buttonPressed : styles.button} onPress={this.onPressMon}>
                       <View style={{ borderWidth: 1, borderColor: '#ccc', height: 40, width: 40, borderRadius: 3, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontSize: 28, fontWeight: 'bold' }}>M</Text>
@@ -641,11 +646,6 @@ class SkillList extends Component {
                       </View>
                     </TouchableHighlight>
                     <TouchableHighlight underlayColor='#158BCF' style={this.state.Sat ? styles.buttonPressed : styles.button} onPress={this.onPressSat}>
-                      <View style={{ borderWidth: 1, borderColor: '#ccc', height: 40, width: 40, borderRadius: 3, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 28, fontWeight: 'bold' }}>S</Text>
-                      </View>
-                    </TouchableHighlight>
-                    <TouchableHighlight underlayColor='#158BCF' style={this.state.Sun ? styles.buttonPressed : styles.button} onPress={this.onPressSun}>
                       <View style={{ borderWidth: 1, borderColor: '#ccc', height: 40, width: 40, borderRadius: 3, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontSize: 28, fontWeight: 'bold' }}>S</Text>
                       </View>
@@ -740,7 +740,7 @@ class SkillList extends Component {
                     else
                       this.onAdd()
                     }} style={[styles.btn,{ backgroundColor:'#0B486B'}]}>
-                      <Text style={{fontSize:20, color:'#fff'}}>List it!</Text>
+                      <Text style={{fontSize:20, color:'#fff'}}>{this.props.isEdit?'Update':'List it!'}</Text>
                   </TouchableOpacity>
                 </View>
               </View>

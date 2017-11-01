@@ -16,6 +16,9 @@ import {
   REQUEST_ADD_MAVEN_IMAGE,
   ADD_MAVEN_IMAGE,
   ADD_MAVEN_IMAGE_ERROR,
+  REQUEST_DELETE_MAVEN_IMAGE,
+  DELETE_MAVEN_IMAGE,
+  DELETE_MAVEN_IMAGE_ERROR,
   CHECK_ID,
   CHECK_ID_ERROR,
   REQUEST_EDIT_MAVEN_DETAILS,
@@ -29,9 +32,9 @@ const INITIAL_STATE = {
   error: null,
   loading: false,
   mavenLoading: true,
-  addMavenImageLoading: true,
+  mavenImageLoading: true,
   mavenRegSuccess: false,
-  addMavenImageSuccess: false,
+  mavenImageSuccess: false,
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -63,11 +66,17 @@ export default function (state = INITIAL_STATE, action) {
     case DELETE_MAVEN_ERROR:
       return { ...state, error: action.error};
     case REQUEST_ADD_MAVEN_IMAGE:
-      return { ...state, addMavenImageLoading: true };
+      return { ...state, mavenImageLoading: true };
     case ADD_MAVEN_IMAGE:
-      return { ...state, addMavenImageLoading: false, msg: action.msg, addMavenImageSuccess: true };
+      return { ...state, mavenImageLoading: false, msg: action.msg, mavenImageSuccess: true };
     case ADD_MAVEN_IMAGE_ERROR:
-      return { ...state, addMavenImageLoading: false, msg: action.msg, addMavenImageSuccess: false };
+      return { ...state, mavenImageLoading: false, msg: action.msg, mavenImageSuccess: false };
+    case REQUEST_DELETE_MAVEN_IMAGE:
+      return { ...state, mavenImageLoading: true };
+    case DELETE_MAVEN_IMAGE:
+      return { ...state, mavenImageLoading: false, msg: action.msg, mavenImageSuccess: true };
+    case DELETE_MAVEN_IMAGE_ERROR:
+      return { ...state, mavenImageLoading: false, msg: action.msg, mavenImageSuccess: false };
     case CHECK_ID:
       return { ...state, postalCode: action.data.postalCode, idVerified: action.data.idVerified};
     case CHECK_ID_ERROR :
