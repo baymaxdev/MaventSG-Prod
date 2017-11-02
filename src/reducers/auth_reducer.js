@@ -7,15 +7,15 @@ import {
   PASSWORD_LOGIN_CHANGED,
   REQUEST_LOGIN,
   REQUESTED_LOGIN_SUCCEEDED,
-  REQUESTED_LOGIN_FAILED,
+  REQUESTED_LOGIN_ERROR,
 
   FORGOTPASSWORD_SUBMIT,
   FORGOTPASSWORD_SUBMIT_SUCCEEDED,
-  FORGOTPASSWORD_SUBMIT_FAILED,
+  FORGOTPASSWORD_SUBMIT_ERROR,
 
   RESET_PASSWORD,
   RESET_PASSWORD_SUCCEEDED,
-  RESET_PASSWORD_FAILED,
+  RESET_PASSWORD_ERROR,
 
   REQUEST_USER_REG,
   REG_USER_SUCCESS,
@@ -55,7 +55,8 @@ export default function (state = INITIAL_STATE, action) {
         return {                
             ...state,
             fbInfo: action.object,
-            fbRegister: true,
+            status: action.object.status,
+            loginLoading: false,
         }
     case REQUEST_LOGIN:      
       return {                
@@ -73,7 +74,7 @@ export default function (state = INITIAL_STATE, action) {
             token:action.token
         } 
 
-    case REQUESTED_LOGIN_FAILED:      
+    case REQUESTED_LOGIN_ERROR:      
         return {                
             ...state,
             loginLoading: false,
@@ -97,7 +98,7 @@ export default function (state = INITIAL_STATE, action) {
            
         }
     
-    case FORGOTPASSWORD_SUBMIT_FAILED:
+    case FORGOTPASSWORD_SUBMIT_ERROR:
         return {
             ...state,
             EmailVerify:false,
@@ -116,7 +117,7 @@ export default function (state = INITIAL_STATE, action) {
              token: action.token,
              resetPasswordSuccess : true
         }
-    case RESET_PASSWORD_FAILED:
+    case RESET_PASSWORD_ERROR:
         return {
             ...state,
              status: action.status,
@@ -173,8 +174,9 @@ export default function (state = INITIAL_STATE, action) {
             ...state,
             verifyOtp: false,
             verifyLoading: false,
-            verifyMsg: action.msg
-
+            verifyMsg: action.msg,
+            loginLoading: false,
+            status: action.status
         }       
 
     default:

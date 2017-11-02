@@ -19,6 +19,7 @@ const RateComponent = (props) => {
         ref={component => this._row1 = component}
         rightOpenValue={-100}
         disableRightSwipe={true}
+        disableLeftSwipe={!props.isMe}
       >
         <View style={styles.standaloneRowBack}>
           <TouchableOpacity style={{width: 100}} onPress={() => {
@@ -66,6 +67,8 @@ const RateComponent = (props) => {
       <SwipeRow
         ref={component => this._row2 = component}
         rightOpenValue={-150}
+        disableRightSwipe={true}
+        disableLeftSwipe={!props.isMe}
       >
         <View style={styles.standaloneRowBack}>
           <TouchableOpacity style={{width: 100}} onPress={() => {

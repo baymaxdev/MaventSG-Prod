@@ -24,7 +24,7 @@ class Profile extends Component {
                "title": "Register a skill today!",
                "category": "entry",
                "active": false,
-               "rating": 0,
+               "rating": 5,
                "status": 0,
                "mainCategory": 0
            }],
@@ -33,7 +33,7 @@ class Profile extends Component {
                "title": "Register a service today!",
                "category": "entry",
                "active": false,
-               "rating": 0,
+               "rating": 5,
                "status": 0,
                "mainCategory": 1
            }],
@@ -168,19 +168,27 @@ class Profile extends Component {
                 <Text style={styles.socialTextValue}>223</Text>
                 <Text style={styles.socialTextTitle}>Jobs Offer</Text>
               </View>
-              <View style={{flex:1, justifyContent: 'center', padding: 5, alignItems: 'center' }}>
-                <Text style={styles.socialTextValue}>88</Text>
-                <Text style={styles.socialTextTitle}>Saved</Text>
-              </View>
+              {
+                this.state.isMe?
+                <View style={{flex:1, justifyContent: 'center', padding: 5, alignItems: 'center' }}>
+                  <Text style={styles.socialTextValue}>88</Text>
+                  <Text style={styles.socialTextTitle}>Saved</Text>
+                </View>
+                :null
+              }
             </View>
           </View>
           <View style={{ backgroundColor: 'white', padding: 5 }}>
               <View style={styles.wrapper}>
                 <View style={{justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row'}}>
                   <Text style={{ fontSize: 16, color:"#515151" }}>About</Text>
-                  <TouchableOpacity  onPress={() => this.setState({modalVisible: 1})}>
-                    <Text style={{ color:'#FFA838' }} >Edit</Text>
-                  </TouchableOpacity>
+                  {
+                    this.state.isMe?
+                    <TouchableOpacity  onPress={() => this.setState({modalVisible: 1})}>
+                      <Text style={{ color:'#FFA838' }} >Edit</Text>
+                    </TouchableOpacity>
+                    :null
+                  }
                 </View>
                 <Text style={{ fontSize: 13, color:"#b5b5b5" }}>Write something about yourself...</Text>
               </View>

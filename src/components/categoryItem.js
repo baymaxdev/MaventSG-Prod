@@ -127,7 +127,7 @@ class RenderItem extends React.Component {
             break;
         }
         if(id === 'service' || id === 'learn' ){
-          if (id == 'service')
+          if (id === 'service')
             this.props.getTopicCount(1, this.props.auth.token);
           else 
             this.props.getTopicCount(0, this.props.auth.token);

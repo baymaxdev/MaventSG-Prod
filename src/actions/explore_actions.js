@@ -1,15 +1,13 @@
-import { AsyncStorage } from 'react-native';
-import { Facebook } from 'expo';
 import request from '../routes/services/getData';
 import {
   GET_NEARBY_LIST,
-  GET_NEARBY_LIST_FAILED,
+  GET_NEARBY_LIST_ERROR,
   GET_CAT_LIST,
-  GET_CAT_LIST_FAILED,
+  GET_CAT_LIST_ERROR,
   GET_MAVEN_DETAILS,
-  GET_MAVEN_DETAILS_FAILED,
+  GET_MAVEN_DETAILS_ERROR,
   GET_TOPIC_COUNT,
-  GET_TOPIC_COUNT_FAILED
+  GET_TOPIC_COUNT_ERROR
 } from './types';
 
 export const getNearbyList = (location, myLocation,token) => {
@@ -26,10 +24,10 @@ export const getNearbyList = (location, myLocation,token) => {
       if (res.status === 200) {
         dispatch({ type: GET_NEARBY_LIST, list: res.result });   
       }
-      else dispatch({ type: GET_NEARBY_LIST_FAILED, error: res.msg });
+      else dispatch({ type: GET_NEARBY_LIST_ERROR, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: GET_NEARBY_LIST_FAILED, error: err });  
+      dispatch({ type: GET_NEARBY_LIST_ERROR, error: err });  
     })  
   }
 }
@@ -48,10 +46,10 @@ export const getCatList = (category, location, token) => {
       if (res.status === 200) {
         dispatch({ type: GET_CAT_LIST, list: res.result });   
       }
-      else dispatch({ type: GET_CAT_LIST_FAILED, error: res.msg });
+      else dispatch({ type: GET_CAT_LIST_ERROR, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: GET_CAT_LIST_FAILED, error: err });  
+      dispatch({ type: GET_CAT_LIST_ERROR, error: err });  
     })  
   }
 }
@@ -70,10 +68,10 @@ export const getMavenDetails = (mavenId, location, token) => {
       if (res.status === 200) {
         dispatch({ type: GET_MAVEN_DETAILS, maven: res.result });   
       }
-      else dispatch({ type: GET_MAVEN_DETAILS_FAILED, error: res.msg });
+      else dispatch({ type: GET_MAVEN_DETAILS_ERROR, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: GET_MAVEN_DETAILS_FAILED, error: err });  
+      dispatch({ type: GET_MAVEN_DETAILS_ERROR, error: err });  
     })  
   }
 }
@@ -92,10 +90,10 @@ export const getTopicCount = (mainCategory, token) => {
       if (res.status === 200) {
         dispatch({ type: GET_TOPIC_COUNT, topicCount: res.result });   
       }
-      else dispatch({ type: GET_TOPIC_COUNT_FAILED, error: res.msg });
+      else dispatch({ type: GET_TOPIC_COUNT_ERROR, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: GET_TOPIC_COUNT_FAILED, error: err });  
+      dispatch({ type: GET_TOPIC_COUNT_ERROR, error: err });  
     })  
   }
 }

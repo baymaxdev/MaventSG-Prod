@@ -40,17 +40,15 @@ class Login extends Component {
         this.props.getMyProfileInfo(nextProps.auth.token);
         Actions.main();
       }
-      if (nextProps.auth.fbRegister) {
-          Actions.signup();
-      }
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){
-        if(nextProps.auth.status === 401)  {
+        if (nextProps.auth.status === 404) {
+            Actions.signup();
+        } else if(nextProps.auth.status === 401) {
             Actions.OTP({phoneState: "2"});
         }
         else{
             alert('Invalid User');
         }
-        
       }
   }
 

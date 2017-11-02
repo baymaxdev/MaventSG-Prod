@@ -8,15 +8,15 @@ import {
   FACEBOOK_FETCH_DETAILS,
   REQUEST_LOGIN,
   REQUESTED_LOGIN_SUCCEEDED,
-  REQUESTED_LOGIN_FAILED,
+  REQUESTED_LOGIN_ERROR,
 
   FORGOTPASSWORD_SUBMIT,
   FORGOTPASSWORD_SUBMIT_SUCCEEDED,
-  FORGOTPASSWORD_SUBMIT_FAILED,
+  FORGOTPASSWORD_SUBMIT_ERROR,
 
   RESET_PASSWORD,
   RESET_PASSWORD_SUCCEEDED,
-  RESET_PASSWORD_FAILED,
+  RESET_PASSWORD_ERROR,
 
   REQUEST_USER_REG,
   REG_USER_SUCCESS,
@@ -136,13 +136,13 @@ export const requestLogin = (email, password) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token:res.token });
-      else dispatch({ type: REQUESTED_LOGIN_FAILED, status: res.status });
+      else dispatch({ type: REQUESTED_LOGIN_ERROR, status: res.status });
     })
     .catch(err => {
-      dispatch({ type: REQUESTED_LOGIN_FAILED });
+      dispatch({ type: REQUESTED_LOGIN_ERROR });
     })
   }
-} 
+}
 
 export const forgotPassword = (email) => {
 
@@ -152,15 +152,15 @@ export const forgotPassword = (email) => {
   return dispatch => {
     dispatch({ type: FORGOTPASSWORD_SUBMIT });
     const url = `user/forgotPassword?email=${email}`;
-    
+
     request(url, option)
     .then(res => {
-      
+
       if (res.status === 200) dispatch({ type: FORGOTPASSWORD_SUBMIT_SUCCEEDED, status: res.status});
-      else dispatch({ type: FORGOTPASSWORD_SUBMIT_FAILED, status: res.status });
+      else dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR, status: res.status });
     })
     .catch(err => {
-      dispatch({ type: FORGOTPASSWORD_SUBMIT_FAILED });
+      dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR });
     })
   }
 }
@@ -176,10 +176,10 @@ export const resetPasswordfunc = (email, password,otp) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) dispatch({ type: RESET_PASSWORD_SUCCEEDED, status: res.status, token: res.token });
-      else dispatch({ type: RESET_PASSWORD_FAILED, status: res.status });
+      else dispatch({ type: RESET_PASSWORD_ERROR, status: res.status });
     })
     .catch(err => {
-      dispatch({ type: RESET_PASSWORD_FAILED });
+      dispatch({ type: RESET_PASSWORD_ERROR });
     })
   }
 }
@@ -215,10 +215,10 @@ const loginWithToken = (token) => {
     .then(res => {
       if (res.status === 200) {
         dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token:res.token });
-      } else if (res.status === 404 && res.msg === "Not found. Register your account") {
+      } else if (res.status === 404) {
         dispatch({ type: FACEBOOK_FETCH_DETAILS, object: res });
       }
-      else dispatch({ type: VERIFY_OTP_FAIL, msg: res.msg });
+      else dispatch({ type: VERIFY_OTP_FAIL, msg: res.msg, status: res.status });
     })
     .catch(err => {
       dispatch({ type: VERIFY_OTP_FAIL, msg: 'error' });

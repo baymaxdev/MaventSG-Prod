@@ -9,9 +9,13 @@ const SkillRowComponent = (props) => {
   return <View style={styles.wrapper}>
             <View style={{ paddingBottom: 3, flexDirection:'row', alignItems:'center', justifyContent:'space-between' }}>
               <Text style={{ fontSize: 16, color:'#515151' }}>{ props.data.mainCategory === 0 ? "My Skill" : "My Service" }</Text>
-              <TouchableOpacity  onPress={() => Actions.skillList({category: props.data.mainCategory === 0 ? 'Teach a Skill' : 'Provide a Service' })}>
-                <Text style={{ color:'#FFA838' }} >Add</Text>
-              </TouchableOpacity>
+              {
+                props.isMe?
+                <TouchableOpacity  onPress={() => Actions.skillList({category: props.data.mainCategory === 0 ? 'Teach a Skill' : 'Provide a Service' })}>
+                  <Text style={{ color:'#FFA838' }} >Add</Text>
+                </TouchableOpacity>
+                :null
+              }
             </View>
             {
               props.data.data.map((item, index) => {
@@ -20,9 +24,11 @@ const SkillRowComponent = (props) => {
                 }
                 else {
                   return (
+                    props.isMe?
                     <View key={index} style={{borderStyle: 'dotted', borderWidth: 1, borderRadius: 10, backgroundColor: 'rgba(133, 163, 181, 0.2)', marginHorizontal: -10, paddingHorizontal: 10}}>
                       <EntryComponent key={index} data={item} />
                     </View>
+                    :null
                   )
                 }
               })

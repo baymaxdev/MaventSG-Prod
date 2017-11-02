@@ -5,7 +5,7 @@ import {
   PROFILE_ERROR,
   SET_LOCATION,
   REGISTER_MAVEN,
-  REGISTER_MAVEN_FAILED,
+  REGISTER_MAVEN_ERROR,
   REQUEST_REGISTER_MAVEN,
   ACTIVATE_MAVEN,
   ACTIVATE_MAVEN_ERROR,
@@ -51,7 +51,7 @@ export default function (state = INITIAL_STATE, action) {
       return { ...state, mavenLoading: true };
     case REGISTER_MAVEN:
       return { ...state, mavenLoading: false, msg: action.msg, mavenRegSuccess: true };
-    case REGISTER_MAVEN_FAILED:
+    case REGISTER_MAVEN_ERROR:
       return { ...state, mavenLoading: false, msg: action.msg, mavenRegSuccess: false };
     case ACTIVATE_MAVEN:
       return { ...state};

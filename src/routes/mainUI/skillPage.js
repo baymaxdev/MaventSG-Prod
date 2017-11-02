@@ -68,7 +68,6 @@ class SkillPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("nextprops", nextProps);
     if(this.props.profile.mavenImageLoading !== nextProps.profile.mavenImageLoading && !nextProps.profile.mavenImageLoading && nextProps.profile.mavenImageSuccess){
       this.setState({requestLoading: false});
     }
@@ -118,13 +117,11 @@ class SkillPage extends Component {
   //     if (!image.cancelled) {
   //       ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80)
   //       .then((res) => {
-  //         console.log("res", res);
   //         let pictures = this.state.picUrl;
   //         pictures[this.state.picNumber] = res.uri;
   //         this.setState({picUrl: pictures, requestLoading: true});
   //         this.props.addMavenImage(this.state.maven.maven._id, res.uri, this.props.auth.token);
   //       }).catch((err) => {
-  //         console.log("err", err);
   //       });
   //     }
   //   }).catch((err) => {
@@ -406,7 +403,7 @@ class SkillPage extends Component {
           :
           <View style={{ flexDirection:'row'}} >
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#004869'}] } onPress={() => {
-              Actions.genericBooking({ title: this.props.title, item: this.state.maven });
+              Actions.genericBooking({ title: this.props.title, maven: this.state.maven.maven });
               }}>
               <Text style={styles.btnText}>SKILL REQUEST</Text>
             </TouchableOpacity>

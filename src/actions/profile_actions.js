@@ -1,5 +1,4 @@
 import { AsyncStorage } from 'react-native';
-import { Facebook } from 'expo';
 import request from '../routes/services/getData';
 import {
   GET_MY_PROFILE_INFO,
@@ -7,7 +6,7 @@ import {
   PROFILE_ERROR,
   SET_LOCATION,
   REGISTER_MAVEN,
-  REGISTER_MAVEN_FAILED,
+  REGISTER_MAVEN_ERROR,
   REQUEST_REGISTER_MAVEN,
   ACTIVATE_MAVEN,
   ACTIVATE_MAVEN_ERROR,
@@ -136,11 +135,11 @@ export const registerMaven = (mavenData, token) => {
         dispatch(getMyProfileInfo(token));
       }
       else {
-        dispatch({ type: REGISTER_MAVEN_FAILED, msg: res.msg });
+        dispatch({ type: REGISTER_MAVEN_ERROR, msg: res.msg });
       }
     })
     .catch(err => {
-      dispatch({ type: REGISTER_MAVEN_FAILED, msg: err });  
+      dispatch({ type: REGISTER_MAVEN_ERROR, msg: err });  
     })  
   }
 }
@@ -246,7 +245,6 @@ export const addMavenImage = ( mavenId, imageUrl, token ) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        console.log(res);
         dispatch({ type: ADD_MAVEN_IMAGE, msg: res.msg });
       }
       else {
@@ -328,7 +326,6 @@ export const editMavenDetails = ( mavenData, token ) => {
     const url = `maven/editMavenDetails`;
     request(url, option)
     .then(res => {
-      console.log(res);
       if (res.status === 200) {
         dispatch({ type: EDIT_MAVEN_DETAILS, msg: res.msg });
       }

@@ -6,7 +6,8 @@ import {
   Platform,
   Dimensions,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import {Container, Content, Icon} from 'native-base';
 import { Actions } from 'react-native-router-flux';
@@ -21,13 +22,14 @@ const SCREEN_WIDTH = Dimensions
   .width;
 const {width, height} = Dimensions.get('window');
 const HORIZONTAL_PADDING = 8;
-var topicCounts = [];
 
 class SubCategory extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchTerm: ''
+      searchTerm: '',
+      topicCounts: [],
+      refreshing: false,
     }
   }
 
@@ -35,7 +37,7 @@ class SubCategory extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    topicCounts = nextProps.explore.topicCount;
+    this.setState({ refreshing: false, topicCounts: nextProps.explore.topicCount });
   }
 
   navigate = (data) => {
@@ -57,9 +59,10 @@ class SubCategory extends Component {
 
   renderItem(data) {
     var topic = '';
-    for (var i = 0; i < topicCounts.length; i++) {
-      if (topicCounts[i].category == data.id) {
-        topic = topicCounts[i].topicCount;
+    let tc = this.state.topicCounts;
+    for (var i = 0; i < tc.length; i++) {
+      if (tc[i].category == data.id) {
+        topic = tc[i].topicCount;
       }
     }
     return (
@@ -88,6 +91,14 @@ class SubCategory extends Component {
     );
   }
 
+  _onRefresh() {
+    this.setState({refreshing: true});
+    if (this.state.topicCounts.length === 10)
+      this.props.getTopicCount(1, this.props.auth.token);
+    else
+      this.props.getTopicCount(0, this.props.auth.token);
+  }
+
   render() {
     const filteredLists = this.props.data.filter(createFilter(this.state.searchTerm, ['name']))
     return (
@@ -101,7 +112,12 @@ class SubCategory extends Component {
         <Container>
           <Content style={{
             width: width
-          }}>
+          }} refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh.bind(this)}
+            />
+          }>
             <Image source={require('../../../assets/images/Announcement_banner.jpg')} style={{ width: width, height: height / 3.65 }}/>
             <View style={{
               flex: 1
@@ -159,6 +175,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
   setLocation: (location) => dispatch(actions.setLocation(location)),
   getCatList: (category, location, token) => dispatch(actions.getCatList(category, location, token)),
+  getTopicCount: (mainCategory, token) => dispatch(actions.getTopicCount(mainCategory, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

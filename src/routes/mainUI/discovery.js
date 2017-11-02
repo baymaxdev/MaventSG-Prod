@@ -42,7 +42,9 @@ class Discovery extends React.Component {
             radius: 100,
             animatedMargin: new Animated.Value(0),
             animated: new Animated.Value(0.01),
-            opacityA: new Animated.Value(1)
+            opacityA: new Animated.Value(1),
+            animated2: new Animated.Value(0.01),
+            opacityA2: new Animated.Value(1)
         };
         this.searchUpdated = this.searchUpdated.bind(this);
     }
@@ -52,23 +54,42 @@ class Discovery extends React.Component {
     }
 
     componentDidMount() {
-      const { animated, opacityA } = this.state;
-      Animated.loop(
-        Animated.parallel([
-          Animated.timing(animated, {
-            toValue: 1,
-            duration: 2500,
-            // useNativeDriver: Platform.OS === 'android',
-            delay: 100
-          }),
-          Animated.timing(opacityA, {
-            toValue: 0,
-            duration: 2500,
-            // useNativeDriver: Platform.OS === 'android',
-            delay: 100
-          })
-        ])
-      ).start()
+      const { animated, opacityA, animated2, opacityA2 } = this.state;
+
+      Animated.stagger(1000,[
+        Animated.loop(
+          Animated.parallel([
+            Animated.timing(animated, {
+              toValue: 1.5,
+              duration: 2500,
+              // useNativeDriver: Platform.OS === 'android',
+              // delay: 100
+            }),
+            Animated.timing(opacityA, {
+              toValue: 0,
+              duration: 2500,
+              // useNativeDriver: Platform.OS === 'android',
+              delay: 300
+            })
+          ])
+        ),
+        Animated.loop(
+          Animated.parallel([
+            Animated.timing(animated2, {
+              toValue: 1.5,
+              duration: 2800,
+              // useNativeDriver: Platform.OS === 'android',
+              // delay: 100
+            }),
+            Animated.timing(opacityA2, {
+              toValue: 0,
+              duration: 2500,
+              // useNativeDriver: Platform.OS === 'android',
+              // delay: 100
+            })
+          ])
+        )
+      ]).start()
     }
 
     componentWillReceiveProps(nextProps) {
@@ -178,7 +199,7 @@ class Discovery extends React.Component {
     }
 
     render() {
-        const { animated, opacityA } = this.state;
+        const { animated, opacityA, animated2, opacityA2 } = this.state;
         const { nearbyList } = this.props;
         const filteredLists = nearbyList.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
         const movingMargin = this.state.animatedMargin.interpolate({
@@ -228,6 +249,16 @@ class Discovery extends React.Component {
                             opacity: opacityA,
                              transform: [{ scale: animated }]
                             }}>
+                            <Animated.View pointerEvents="none" style={{
+                              backgroundColor: 'rgba(51,149,255,0.4)',
+                               borderWidth:1,
+                                 width: this.state.radius,
+                                  height: this.state.radius,
+                                   borderRadius: this.state.radius/2,
+                                    opacity: opacityA2,
+                                     transform: [{ scale: animated2 }]
+                                    }}>
+                          </Animated.View>
                   </Animated.View>
                 </View>
                 <View pointerEvents="none" style={{position:'absolute', height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center'}}>

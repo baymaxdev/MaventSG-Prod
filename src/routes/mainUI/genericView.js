@@ -9,7 +9,8 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  RefreshControl,
 } from 'react-native';
 import {Icon, Container, Content, Card} from 'native-base';
 import { connect } from 'react-redux';
@@ -22,11 +23,13 @@ import Search from 'react-native-search-box';
 import ModalDropdown from 'react-native-modal-dropdown';
 import LoadingComponent from '../../components/loadingComponent';
 import categoryData from '../services/category.json';
+import Placeholder from 'rn-placeholder';
+import FilterComponent from '../../components/filterComponent';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const KEYS_TO_FILTERS = ['category', 'title', 'firstName','lastName'];
-const serviceKey = ['cooking_service', 'information_service', 'improvment', 'cleaning', 'beauty', 'photography', 'art_service', 'care', 'pet', 'others_service'];
+const serviceKey = ['cooking_service', 'information_service', 'improvement', 'cleaning', 'beauty', 'photography', 'art_service', 'care', 'pet', 'others_service'];
 const serviceName = ['Cooking & Banking', 'Information Technology', 'Home Improvement', 'Cleaning', 'Beauty', 'Photography', 'Art & Design', 'Home Care', 'Pet related', 'Others'];
 const skillKey = ['school', 'art_skill', 'information_skill', 'sports', 'music', 'cooking_skill', 'others_skill'];
 const skillName = ['School Subjects', 'Art & Design', 'Information Technology', 'Sports & Fitness', 'Music', 'Cooking & Baking', 'Others'];
@@ -44,12 +47,16 @@ class GenericView extends Component {
       data: [],
       refreshing: false,
       searchTerm: '',
-      categoryName: ''
+      categoryName: '',
+      categoryId: '',
+      modalVisible: false,
+      min: '',
+      max: '',
+      sortBy: 0,
     };
   }
 
   componentDidMount() {
-    //this.props.getProfileInfo(this.props.auth.token);
     if (serviceKey.includes(this.props.data.id)) {
       name = serviceName;
       key = serviceKey;
@@ -57,10 +64,11 @@ class GenericView extends Component {
       name = skillName;
       key = skillKey;
     }
+    this.setState({categoryId: this.props.data.id});
   }
 
   componentWillReceiveProps(nextProps) {
-      this.setState({requestLoading: false, data: nextProps.catList});
+    this.setState({requestLoading: false, refreshing: false, data: nextProps.catList});
   }
 
   handleRefresh = () => {
@@ -92,7 +100,11 @@ class GenericView extends Component {
               tintColorSearch="#a4a4a4"
               tintColorDelete="#e5e5e5"
               titleCancelColor="#a4a4a4"
-              onSearch={this.onSearch} onChangeText={this.onChangeText} />
+              onSearch={this.onSearch}
+              onChangeText={this.onChangeText}
+              onCancel={this.onCancel}
+              onDelete={this.onDelete}
+              />
           </View>
  };
 
@@ -125,7 +137,16 @@ class GenericView extends Component {
     this.setState({ searchTerm: text });
   }
 
+  onCancel = (text) => {
+    this.setState({searchTerm: ''});
+  }
+
+  onDelete = (text) => {
+    this.setState({searchTerm: ''});
+  }
+
   onChangeCategory = (index, value) => {
+    this.setState({requestLoading: true, categoryId: key[index]});
     this.props.getCatList(key[index], this.props.profile.location, this.props.auth.token);
     Actions.refresh({title: value});
   }
@@ -134,8 +155,61 @@ class GenericView extends Component {
 
   }
 
+  renderPlaceholder() {
+    var ret = [];
+    for (var i = 0; i < 10; i++) {
+        ret.push(
+            <View key={i} style={{paddingHorizontal:20, height: 70}}>
+                <Placeholder.ImageContent
+                    onReady={false}
+                    lineNumber={2}
+                    animate="shine"
+                    lastLineWidth="80%"
+                    >
+                </Placeholder.ImageContent>
+            </View>
+        );
+    }
+    return ret;
+  }
+
+  _onRefresh() {
+    this.setState({refreshing: true});
+    this.props.getCatList(this.state.categoryId, this.props.profile.location, this.props.auth.token);
+  }
+
   render() {
-    const filteredLists = this.state.data.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
+    var filteredLists = this.state.data.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
+    let _this = this;
+    filteredLists.sort(function(a, b) {
+      if (_this.state.sortBy === 0) 
+        return parseFloat(a.distance) - parseFloat(b.distance);
+      else
+        return parseFloat(a.price) - parseFloat(b.price);
+    });
+
+    var max, min;
+    if (this.state.min === '')
+      min = 0;
+    else
+      min = parseInt(this.state.min);
+
+    if (this.state.max === '')
+      max = -1;
+    else
+      max = parseInt(this.state.max);
+
+    console.log(max, min);
+    filteredLists = filteredLists.filter((a) => {
+      if (a.price >= min) {
+        if (max === -1) {
+          return a;
+        } else if (a.price <= max) {
+          return a;
+        }
+      }
+    });
+
     return (
       <View style={styles.container}>
         <View style={{ height: 0.09 * SCREEN_HEIGHT, justifyContent: 'center' }}>
@@ -145,8 +219,8 @@ class GenericView extends Component {
               <Text style={ styles.titleText }>Categories</Text>
               <View>
                 <ModalDropdown options={name}
-                              textStyle={{color: '#b5b5b5', fontSize: 16}}
-                              dropdownTextStyle={{color: '#b5b5b5', fontSize: 16}}
+                              textStyle={ styles.valueText }
+                              dropdownTextStyle={ styles.valueText }
                               onSelect={this.onChangeCategory}
                               defaultValue={this.props.title}/>
               </View>
@@ -156,90 +230,116 @@ class GenericView extends Component {
               <Text style={ styles.titleText }>Availability</Text>
               <View>
                 <ModalDropdown options={availability}
-                              textStyle={{color: '#b5b5b5', fontSize: 16}}
-                              dropdownTextStyle={{color: '#b5b5b5', fontSize: 16}}
+                              textStyle={ styles.valueText }
+                              dropdownTextStyle={ styles.valueText }
+                              dropdownStyle= {{height: 75}}
                               onSelect={this.onChangeAvailability}
                               defaultValue={'Today'}/>
               </View>
             </View>
-
             <View style={ styles.topView }>
-              <Text style={ styles.titleText }>Filter</Text>
-              <Text style={ styles.valueText }>Nearest</Text>
+              <TouchableOpacity style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} onPress={() => {
+                this.setState({modalVisible: true});
+              }}>
+                <Text style={ styles.titleText }>Filter</Text>
+                <Text style={ styles.valueText }>{this.state.sortBy === 0?'Nearest':'Lowest Price'}</Text>
+              </TouchableOpacity>
             </View>
-
           </View>
         </View>
-        <Container>
-          <Content>
-          <FlatList
-            data={filteredLists}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity key = { item.mavenID } style = {{ paddingHorizontal:10, backgroundColor:'#fff' }} onPress={() => {
-                this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
-                var mavens = this.props.profile.myInfo.mavens;
-                var flag = false;
-                for (var i = 0; i < mavens.length; i++) {
-                  if (mavens[i]._id == item.mavenID) {
-                    flag = true;
-                    break;
+        {
+          this.state.data.length === 0?
+          <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
+            <TouchableOpacity style={{}} onPress={() => {
+                Actions.skillList({ category: name === serviceName?'Provide a Service':'Teach a Skill', subCategory: this.props.title, categoryId: this.state.categoryId });
+            }}>
+              <Text style={{fontSize: 18}}>No Maven here yet. Want to be the first?</Text>
+            </TouchableOpacity>
+          </View>
+          :
+          <Container>
+          {
+              this.state.requestLoading?this.renderPlaceholder():null
+          }
+          <Content
+            refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh.bind(this)}
+            />
+          }>
+            <FlatList
+              data={filteredLists}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity key = { item.mavenID } style = {{ paddingHorizontal:10, backgroundColor:'#fff' }} onPress={() => {
+                  this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
+                  var mavens = this.props.profile.myInfo.mavens;
+                  var flag = false;
+                  for (var i = 0; i < mavens.length; i++) {
+                    if (mavens[i]._id == item.mavenID) {
+                      flag = true;
+                      break;
+                    }
                   }
-                }
-                Actions.skillPage({ title: `${item.firstName} ${item.lastName}`, isMe: flag })
-              }}>
-                <View style={{ paddingVertical:5, flexDirection: 'row' }}>
-                  <View style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
-                    <Image source = {item.displayPicture ? {uri: item.displayPicture} : require('../../../assets/images/avatar.png')} style={ item.idVerified?styles.isVerifyStyle:styles.noneVerifyStyle } />
-                  </View>
-                  <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
-                    <TextInput defaultValue={item.title} editable={false} style={{ fontSize:13, color:'#515151', fontWeight:'400', height:17, marginRight: -50}}></TextInput>
-                    <TextInput defaultValue={categoryData[item.category]} editable={false} style={{ color:'#145775', height:23, marginRight: -50, fontSize:12, fontWeight:'400' }}></TextInput>
-                    <Text style={{ fontSize: 12, color:'#b5b5b5' }}>{`${item.firstName} ${item.lastName}`}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                      <StarRating
-                        disabled
-                        maxStars={5}
-                        rating={item.rating}
-                        starSize={15}
-                        starColor="#FFA838"
-                        starStyle={{paddingHorizontal:2}}
-                      />
-                      <Text style={{ color:'#b5b5b5'}}>({item.rating})</Text>
+                  Actions.skillPage({ title: `${item.firstName} ${item.lastName}`, isMe: flag })
+                }}>
+                  <View style={{ paddingVertical:5, flexDirection: 'row' }}>
+                    <View pointerEvents="none" style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
+                      <Image source = {item.displayPicture ? {uri: item.displayPicture} : require('../../../assets/images/avatar.png')} style={ item.idVerified?styles.isVerifyStyle:styles.noneVerifyStyle } />
+                    </View>
+                    <View pointerEvents="none" style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
+                      <TextInput defaultValue={item.title} editable={false} style={{ fontSize:13, color:'#515151', fontWeight:'400', height:17, marginRight: -50}}></TextInput>
+                      <TextInput defaultValue={categoryData[item.category]} editable={false} style={{ color:'#145775', height:23, marginRight: -50, fontSize:12, fontWeight:'400' }}></TextInput>
+                      <Text style={{ fontSize: 12, color:'#b5b5b5' }}>{`${item.firstName} ${item.lastName}`}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center'}}>
+                        <StarRating
+                          disabled
+                          maxStars={5}
+                          rating={item.rating}
+                          starSize={15}
+                          starColor="#FFA838"
+                          starStyle={{paddingHorizontal:2}}
+                        />
+                        <Text style={{ color:'#b5b5b5'}}>({item.rating})</Text>
+                      </View>
+                    </View>
+                    <View style={{ justifyContent: 'space-around', flex: 1, alignItems: 'flex-end', paddingHorizontal:10 }}>
+                      <View style={{flexDirection:'row', alignItems:'center'}}>
+                        <Text style={{color:'#FFA838', fontWeight:"700", fontSize:15}}>${item.price}</Text>
+                        <Text style={{ color:'#b5b5b5', fontWeight:'400', fontSize:12 }}>/hr</Text>
+                      </View>
+                      <TouchableOpacity style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'center'}} onPress={() => {
+                        this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
+                        Actions.chatPage({ title: `${item.firstName} ${item.lastName}` })
+                      }}>
+                        <Icon name = "ios-chatbubbles-outline" style={{ fontSize: 29, color:'#3F6A86', paddingRight:5 }}/>
+                        <Icon name = "ios-arrow-forward" style={{ fontSize: 18, color:'#BFD9E7', paddingLeft:5 }}/>
+                      </TouchableOpacity>
+                      <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+                        <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
+                        <Text style={{ fontSize: 15, color:'#b5b5b5', }}>{Math.round(item.distance / 100) / 10 + "Km"}</Text>
+                      </View>
                     </View>
                   </View>
-                  <View style={{ justifyContent: 'space-around', flex: 1, alignItems: 'flex-end', paddingHorizontal:10 }}>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                      <Text style={{color:'#FFA838', fontWeight:"700", fontSize:15}}>${item.price}</Text>
-                      <Text style={{ color:'#b5b5b5', fontWeight:'400', fontSize:12 }}>/hr</Text>
-                    </View>
-                    <TouchableOpacity style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'center'}} onPress={() => {
-                      this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
-                      Actions.chatPage({ title: `${item.firstName} ${item.lastName}` })
-                    }}>
-                      <Icon name = "ios-chatbubbles-outline" style={{ fontSize: 29, color:'#3F6A86', paddingRight:5 }}/>
-                      <Icon name = "ios-arrow-forward" style={{ fontSize: 18, color:'#BFD9E7', paddingLeft:5 }}/>
-                    </TouchableOpacity>
-                    <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-                      <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
-                      <Text style={{ fontSize: 15, color:'#b5b5b5', }}>{Math.round(item.distance / 100) / 10 + "Km"}</Text>
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            )}
-            keyExtractor={item => item.mavenID}
-            ItemSeparatorComponent={this.renderSeparator}
-            ListHeaderComponent={this.renderHeader}
-            ListFooterComponent={this.renderFooter}
-            onRefresh={this.handleRefresh}
-            refreshing={this.state.refreshing}
-            onEndReached={this.handleLoadMore}
-            onEndReachedThreshold={0.9}
-
-          />
-        </Content>
-      </Container>
-
+                </TouchableOpacity>
+              )}
+              keyExtractor={item => item.mavenID}
+              ItemSeparatorComponent={this.renderSeparator}
+              ListHeaderComponent={this.renderHeader}
+              ListFooterComponent={this.renderFooter}
+              onEndReached={this.handleLoadMore}
+              onEndReachedThreshold={0.9}
+            />
+          </Content>
+        </Container>
+        }
+        <FilterComponent modalVisible={this.state.modalVisible} sortBy={this.state.sortBy} min={this.state.min} max={this.state.max}
+          onApply={(res) => {
+            this.setState({modalVisible: false, sortBy: res.sortBy, min: res.min, max: res.max});
+          }}
+          onCancel={() => {
+            this.setState({modalVisible: false});
+          }}/>
       </View>
     );
   }
@@ -247,10 +347,10 @@ class GenericView extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor:'#fff'
+    flex: 1, backgroundColor:'#fff', flexDirection: 'column'
   },
-  titleText: { color:'#515151', fontSize:16 },
-  valueText: { color:'#b5b5b5' },
+  titleText: { color:'#515151', fontSize: 16 },
+  valueText: { color:'#b5b5b5', fontSize: 14 },
   topView:{ flex: 1, paddingLeft: 10, justifyContent: 'center', borderRightWidth: 1, borderColor: '#ececec', alignItems:'center' },
   isVerifyStyle:{
     height: 70,

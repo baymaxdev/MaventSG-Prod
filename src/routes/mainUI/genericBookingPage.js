@@ -23,14 +23,28 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 class GenericBookingPage extends Component {
   constructor(props) {
-      super(props);
+    super(props);
 
-      this.state = {
-          date: '',
-          price: '',
-          message: ''
-      };
+    this.state = {
+        date: '',
+        price: '',
+        message: ''
+    };
+  }
+
+  onBooking() {
+    if (this.state.date === '') {
+      alert("Please select service date.");
+      return;
     }
+    if (this.state.price === '') {
+      alert("Please input offer price.");
+      return;
+    }
+    this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
+    Actions.chatPage({title: this.props.title, date: this.state.date, message: this.state.message, price: this.state.price});
+    this.props.createOffer(this.props.maven._id, this.state.price, this.props.auth.token);
+  }
 
   render() {
     return (
@@ -110,10 +124,7 @@ class GenericBookingPage extends Component {
                  <TouchableOpacity onPress={(e)=>{Actions.pop()}} style={[styles.btn,{ backgroundColor:'#ccc'}]}>
                     <Text style={{fontSize:20}}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.btn,{ backgroundColor:'#0B486B'}]} onPress={(e)=>{
-                  //this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
-                  Actions.chatPage({title: this.props.title, date: this.state.date, message: this.state.message, price: this.state.price});
-                  }}>
+                <TouchableOpacity style={[styles.btn,{ backgroundColor:'#0B486B'}]} onPress={(e)=>{this.onBooking()}}>
                     <Text style={{fontSize:20, color:'#fff'}}>Send Booking</Text>
                 </TouchableOpacity>
               </View>
@@ -169,6 +180,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
   getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  createOffer: (mavenId, price, token) => dispatch(actions.createOffer(mavenId, price, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 
