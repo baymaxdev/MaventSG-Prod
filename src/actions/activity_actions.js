@@ -5,7 +5,6 @@ import {
 } from './types';
 
 export const createOffer = (mavenId, price, token) => {
-  console.log(mavenId, price, token);
   let option = { 
     method: 'GET',
     headers: {
@@ -16,11 +15,12 @@ export const createOffer = (mavenId, price, token) => {
     const url = `activity/createOffer?mavenID=${mavenId}&price=${price}`;
     request(url, option)
     .then(res => {
-      console.log(res);
       if (res.status === 200) {
-        dispatch({ type: CREATE_OFFER });   
+        dispatch({ type: CREATE_OFFER, status: res.status });   
       }
-      else dispatch({ type: CREATE_OFFER_ERROR, error: res.msg });
+      else {
+        dispatch({ type: CREATE_OFFER_ERROR, error: res.msg, status: res.status });
+      }
     })
     .catch(err => {
       dispatch({ type: CREATE_OFFER_ERROR, error: err });  

@@ -6,8 +6,6 @@ import {
   GET_CAT_LIST_ERROR,
   GET_MAVEN_DETAILS,
   GET_MAVEN_DETAILS_ERROR,
-  GET_TOPIC_COUNT,
-  GET_TOPIC_COUNT_ERROR
 } from './types';
 
 export const getNearbyList = (location, myLocation,token) => {
@@ -75,27 +73,3 @@ export const getMavenDetails = (mavenId, location, token) => {
     })  
   }
 }
-
-export const getTopicCount = (mainCategory, token) => {
-  let option = { 
-    method: 'GET',
-    headers: {
-      'Authorization': `JWT ${token}`,
-    },
-  };
-  return dispatch => {
-    const url = `topic/getCategoryTopicCount?mainCategory=${mainCategory}`;
-    request(url, option)
-    .then(res => {   
-      if (res.status === 200) {
-        dispatch({ type: GET_TOPIC_COUNT, topicCount: res.result });   
-      }
-      else dispatch({ type: GET_TOPIC_COUNT_ERROR, error: res.msg });
-    })
-    .catch(err => {
-      dispatch({ type: GET_TOPIC_COUNT_ERROR, error: err });  
-    })  
-  }
-}
-
-

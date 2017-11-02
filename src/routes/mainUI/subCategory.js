@@ -37,7 +37,7 @@ class SubCategory extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ refreshing: false, topicCounts: nextProps.explore.topicCount });
+    this.setState({ refreshing: false, topicCounts: nextProps.topic.topicCount });
   }
 
   navigate = (data) => {
@@ -46,7 +46,8 @@ class SubCategory extends Component {
   }
 
   goTopic = (data) => {
-    Actions.topicPage({title: data.name});
+    this.props.getTopics(data.id, this.props.auth.token);
+    Actions.topicPage({ title: data.name });
   }
 
   onSearch = (text) => {
@@ -170,12 +171,13 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) =>({
   auth: state.auth,
   profile: state.profile,
-  explore: state.explore
+  topic: state.topic,
 });
 const mapDispatchToProps = (dispatch) =>({
   setLocation: (location) => dispatch(actions.setLocation(location)),
   getCatList: (category, location, token) => dispatch(actions.getCatList(category, location, token)),
   getTopicCount: (mainCategory, token) => dispatch(actions.getTopicCount(mainCategory, token)),
+  getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

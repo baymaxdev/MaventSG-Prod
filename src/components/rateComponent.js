@@ -63,7 +63,7 @@ const RateComponent = (props) => {
       </SwipeRow>
     }
     {
-      !props.data.active &&
+      !props.data.active && props.isMe &&
       <SwipeRow
         ref={component => this._row2 = component}
         rightOpenValue={-150}

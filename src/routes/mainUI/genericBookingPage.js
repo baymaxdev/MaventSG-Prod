@@ -32,6 +32,16 @@ class GenericBookingPage extends Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.activity.status === 200) {
+      this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
+      Actions.chatPage({title: this.props.title, date: this.state.date, message: this.state.message, price: this.state.price});
+    } else {
+      alert(nextProps.activity.error);
+      Actions.pop();
+    }
+  }
+
   onBooking() {
     if (this.state.date === '') {
       alert("Please select service date.");
@@ -41,8 +51,6 @@ class GenericBookingPage extends Component {
       alert("Please input offer price.");
       return;
     }
-    this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
-    Actions.chatPage({title: this.props.title, date: this.state.date, message: this.state.message, price: this.state.price});
     this.props.createOffer(this.props.maven._id, this.state.price, this.props.auth.token);
   }
 
@@ -175,6 +183,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) =>({
   auth: state.auth,
   profile: state.profile,
+  activity: state.activity
 });
 
 const mapDispatchToProps = (dispatch) =>({

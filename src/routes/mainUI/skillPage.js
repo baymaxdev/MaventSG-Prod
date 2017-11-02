@@ -61,7 +61,7 @@ class SkillPage extends Component {
         this.editMavenActionSheet.show();
       }});
     } else {
-      Actions.refresh({rightButtonImage: require('../../../assets/icons/morecopy.png'), onRight: () => {
+      Actions.refresh({rightButtonImage: require('../../../assets/icons/more1.png'), onRight: () => {
         this.genericMavenActionSheet.show();
       }});
     }
@@ -98,7 +98,7 @@ class SkillPage extends Component {
         else
           avt[i].value = false;
       }
-      this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, 
+      this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price,
         rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, refreshing: false, idVerified: m.userID.idVerified});
     }
   }
@@ -304,7 +304,7 @@ class SkillPage extends Component {
             }
             <View style={ [styles.viewContainer,{ paddingTop:0 }] } >
               <Text style={ styles.subjectText }>{this.state.title}</Text>
-              <Text style={ styles.subjectText }>Skill Description</Text>
+              <Text style={[ styles.subjectText, {fontSize: 19, fontWeight: 'bold'} ]}>Skill Description</Text>
                 <Text style={ styles.contentText }>{this.state.description}</Text>
             </View>
             <View style={ [styles.viewContainer, { flexDirection:'row', justifyContent:'space-between' }] } >
@@ -322,7 +322,7 @@ class SkillPage extends Component {
                     this.state.availability.map((item,index)=>{
                       return <TouchableOpacity key={index} onPress={(e)=> this.onClickAvailability(index) }
                                 style={ { width:30, height:30, borderRadius:15, marginHorizontal:3, backgroundColor:item.value?'#fc912f':'#f1f1f1', justifyContent:'center', alignItems:'center' } }>
-                              <Text style={{ color: item.value?'#fff':'#515151' }} >{item.label}</Text>                        
+                              <Text style={{ color: item.value?'#fff':'#515151' }} >{item.label}</Text>
                         </TouchableOpacity>
                     })
                   }
@@ -333,7 +333,7 @@ class SkillPage extends Component {
                     this.state.availableTime.map((item,index)=>{
                       return <TouchableOpacity key={index} onPress={(e)=> this.onClickAvailableTime(index) }
                                 style={ { flex:1, height:39, borderRadius:17, marginHorizontal:3, backgroundColor:item.value?'#fc912f':'#f1f1f1', justifyContent:'center', alignItems:'center' } }>
-                              <Text style={{ color: item.value?'#fff':'#515151' }} >{item.label}</Text>                        
+                              <Text style={{ color: item.value?'#fff':'#515151' }} >{item.label}</Text>
                         </TouchableOpacity>
                     })
                   }
@@ -395,7 +395,7 @@ class SkillPage extends Component {
               <Text style={styles.btnText}>21</Text>
             </View>
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-              
+
             }} >
               <Text style={styles.btnText}>View Chats</Text>
             </TouchableOpacity>
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   },
   photoView: { borderWidth:1, borderRadius:3, borderColor: '#ccc', height:80, width: (SCREEN_WIDTH - 40) / 3,
   backgroundColor:'#fff', justifyContent:"center", alignItems:'center' }
-  
+
 });
 
 const mapStateToProps = (state) =>({

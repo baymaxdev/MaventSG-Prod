@@ -142,7 +142,7 @@ export const requestLogin = (email, password) => {
       dispatch({ type: REQUESTED_LOGIN_ERROR });
     })
   }
-}
+} 
 
 export const forgotPassword = (email) => {
 
@@ -152,10 +152,10 @@ export const forgotPassword = (email) => {
   return dispatch => {
     dispatch({ type: FORGOTPASSWORD_SUBMIT });
     const url = `user/forgotPassword?email=${email}`;
-
+    
     request(url, option)
     .then(res => {
-
+      
       if (res.status === 200) dispatch({ type: FORGOTPASSWORD_SUBMIT_SUCCEEDED, status: res.status});
       else dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR, status: res.status });
     })

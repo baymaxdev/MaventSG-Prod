@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions, Image,
-     TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated } from 'react-native';
 import {ImagePicker} from 'expo';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actions from '../../actions';
 import {Actions} from 'react-native-router-flux';
 import {Container, Content, Icon, Form} from 'native-base';
 import Search from 'react-native-search-box';
@@ -35,13 +37,15 @@ class TopicPage extends Component {
       likeList:[],
       moreList: [],
       reportList: [],
-      data: data,
+      data: [],
       modalVisible: false,
       modalID: 1,
       postModal: false,
       angle: new Animated.Value(0),
       showPicker:false,
       offSet: new Animated.Value(height),
+      requestLoading: true,
+      refreshing: false,
     }
   }
 
@@ -51,15 +55,20 @@ class TopicPage extends Component {
 
   componentDidMount() {
     Actions.refresh({rightButtonImage: require('../../../assets/icons/more.png'), rightButtonIconStyle: { width: 20, height:20}, onRight: ()=>{this.setModalVisible(true, 1)}})
-    let temp = [];
-    let tempMore = [];
-    let tempReport = [];
-    data.map((item, index)=>{
-      temp.push(false);
-      tempMore.push(false);
-      tempReport.push(false);
-    })
-    this.setState({ likeList: temp, moreList: tempMore, reportList: tempReport });
+    // let temp = [];
+    // let tempMore = [];
+    // let tempReport = [];
+    // data.map((item, index)=>{
+    //   temp.push(false);
+    //   tempMore.push(false);
+    //   tempReport.push(false);
+    // })
+    // this.setState({ likeList: temp, moreList: tempMore, reportList: tempReport });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps.topic.topics);
+    this.setState({ data: nextProps.topic.topics, requestLoading: false });
   }
 
   navigate = (data) => {
@@ -108,16 +117,82 @@ class TopicPage extends Component {
     this.setState((prev) => ({postModal: !prev.postModal}))
   }
 
+  getDateString(date) {
+    let createdDate = new Date(date);
+    let currentDate = new Date();
+    let diffMin = (currentDate - createdDate) / 1000 / 60;
+    console.log(createdDate);
+    console.log(currentDate);
+    var date = '';
+    if (diffMin < 60) {
+      date = Math.floor(diffMin) + ' minute';
+    } else if ((diffMin / 60) < 24) {
+      date = Math.floor(diffMin / 60) + ' hour';
+    } else {
+      let diffYear = currentDate.getUTCFullYear() - createdDate.getUTCFullYear();
+      let diffMon = currentDate.getUTCMonth() - createdDate.getUTCMonth();
+      let diffDay = currentDate.getUTCDate() - createdDate.getUTCDate();
+
+      if (diffMon == 0) {
+        if (diffYear > 0) {
+          if (diffDay < 0) {
+            date = '11 month';
+          } else {
+            date = '1 year';
+          }
+        } else {
+          date = Math.floor(diffMin / 60 / 24) + ' day';
+        }
+      } else if (diffMon == 1) {
+        if (diffYear > 0) {
+          date = diffYear + ' year';
+        } else {
+          if (diffDay < 0) {
+            date = Math.floor(diffMin / 60 / 24) + ' day';
+          } else {
+            date = diffMon + ' month';
+          }
+        }
+      } else if (diffMon > 1) {
+        if (diffYear > 0) {
+          date = diffYear + ' year';
+        } else {
+          if (diffDay < 0) {
+            date = (diffMon - 1) + ' month';
+          } else {
+            date = diffMon + ' month';
+          }
+        }
+      } else {
+        if (diffYear == 1) {
+          if (diffDay < 0) {
+            date = (12 + diffMon - 1) + ' month';
+          } else {
+            date = (12 + diffMon) + ' month';
+          }
+        } else {
+          date = (diffYear - 1) + ' year';
+        }
+      }
+    }
+    if (date[0] == '1' && date[1] == ' ') {
+      date += ' ago';
+    } else {
+      date += 's ago';
+    }
+    return date;
+  }
+
   renderItem(item, index) {
     return (
       <View style = {{ borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginBottom: 13}}>
         <View style = {{flexDirection: "row", justifyContent: 'space-between', padding: 10}}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Image source = {item.pic} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
+            <Image source = {{uri: item.userID.displayPicture}} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
             <View style = {{paddingHorizontal: 10}} >
-              <Text style = {styles.nameText} >{item.name}</Text>
+              <Text style = {styles.nameText} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
               <View style={{ height: 5 }}></View>
-              <Text style ={{ color: '#a4a4a4', fontSize: 14}} >{item.day}</Text>
+              <Text style ={{ color: '#a4a4a4', fontSize: 14}} >{this.getDateString(item.createdDate)}</Text>
             </View>
           </View>
           <TouchableOpacity style={{paddingTop: 5, paddingRight: 5 }} onPress={() => {this.onclickReport(index)}}>
@@ -132,17 +207,17 @@ class TopicPage extends Component {
           }
         <View style = {{ paddingBottom: 5}}>
           {
-            item.topic &&
-            <Text style ={{ color: '#ababab', fontSize: 15, paddingHorizontal: 10}} numberOfLines = {this.state.moreList[index] ? null : 3} >{item.topic}</Text>
+            item.text &&
+            <Text style ={{ color: '#ababab', fontSize: 15, paddingHorizontal: 10}} numberOfLines = {this.state.moreList[index] ? null : 3} >{item.text}</Text>
           }
           {
             item.image &&
               <View>
                 <Text style = {[styles.nameText, {paddingHorizontal: 10}]}>
-                  {item.name}
+                  {item.userID.firstName + ' ' + item.userID.lastName}
                   <Text style = {{ color: '#ababab', fontSize: 15}}> added a new photo.</Text>
                 </Text>
-                <Image source = {item.image} style ={{ marginTop: 10,  width: '100%', height: 200}}/>
+                <Image source = {{uri: item.image}} style ={{ marginTop: 10,  width: '100%', height: 200}}/>
               </View>
           }
         </View>
@@ -154,13 +229,13 @@ class TopicPage extends Component {
             <TouchableOpacity onPress={(e)=>this.onclickLike(index)} >
               <Icon style={{ fontSize:30, marginTop: 3, color: this.state.likeList[index]?'#f69021':'#515151' }} name = {this.state.likeList[index]?'ios-heart':'ios-heart-outline'} />
             </TouchableOpacity>
-            <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.likes}</Text>
+            <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.heart}</Text>
           </View>
           <View style = {{ marginLeft: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} >
             <TouchableOpacity onPress={(e)=>this.navigate(item)} >
               <Icon style={{ fontSize:30, marginTop: 3, color: '#515151' }} name = {'ios-chatbubbles-outline'} />
             </TouchableOpacity>
-            <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.comments}</Text>
+            <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.commentsCount}</Text>
           </View>
         </View>
       </View>
@@ -210,8 +285,6 @@ class TopicPage extends Component {
       if(!image.cancelled) {
         this.setState({picUrl: {uri: image.uri}});
       }
-
-
   }
 
   render() {
@@ -369,4 +442,12 @@ const styles = StyleSheet.create({
   PostBtnText: { color: '#fff', fontSize: 20 }
 });
 
-export default TopicPage;
+const mapStateToProps = (state) =>({
+  topic: state.topic,
+});
+const mapDispatchToProps = (dispatch) =>({
+  getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
+  actions: bindActionCreators(actions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TopicPage);

@@ -42,7 +42,7 @@ class Signup extends Component {
         if (Platform.OS === 'android') {
 
         }
-        if (this.props.auth.fbRegister) {
+        if (this.props.auth.status === 404) {
             const info = this.props.auth.fbInfo;
             this.setState({
                 email: info.email,
@@ -147,7 +147,7 @@ class Signup extends Component {
         }
     }
     render() {
-        if (this.props.auth.fbRegister && this.props.auth.fbRegister == true) {
+        if (this.props.auth.status === 404) {
             var isFB = true;
         } else {
             var isFB = false;

@@ -10,9 +10,9 @@ import {
   export default function (state = INITIAL_STATE, action) {
     switch (action.type) {
       case CREATE_OFFER:
-        return { ...state };
+        return { ...state, status: action.status };
       case CREATE_OFFER_ERROR:
-        return { ...state, error: action.error };
+        return { ...state, error: action.error, status: action.status };
       default:
         return state;
     }

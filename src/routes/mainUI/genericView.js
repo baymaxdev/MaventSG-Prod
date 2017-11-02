@@ -178,11 +178,19 @@ class GenericView extends Component {
     this.props.getCatList(this.state.categoryId, this.props.profile.location, this.props.auth.token);
   }
 
+  renderDropdownRow(rowData, rowID, highlited) {
+    return (
+      <TouchableOpacity style={{height: 30, justifyContent: 'center', paddingHorizontal: 10}}>
+        <Text style={styles.valueText}>{rowData}</Text>
+      </TouchableOpacity>
+    )
+  }
+
   render() {
     var filteredLists = this.state.data.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
     let _this = this;
     filteredLists.sort(function(a, b) {
-      if (_this.state.sortBy === 0) 
+      if (_this.state.sortBy === 0)
         return parseFloat(a.distance) - parseFloat(b.distance);
       else
         return parseFloat(a.price) - parseFloat(b.price);
@@ -199,7 +207,6 @@ class GenericView extends Component {
     else
       max = parseInt(this.state.max);
 
-    console.log(max, min);
     filteredLists = filteredLists.filter((a) => {
       if (a.price >= min) {
         if (max === -1) {
@@ -222,6 +229,12 @@ class GenericView extends Component {
                               textStyle={ styles.valueText }
                               dropdownTextStyle={ styles.valueText }
                               onSelect={this.onChangeCategory}
+                              adjustFrame={(style) => {
+                                style.left = 0;
+                                style.height = 30 * name.length + (name.length - 1) / 2;
+                                return style;
+                              }}
+                              renderRow={this.renderDropdownRow.bind(this)}
                               defaultValue={this.props.title}/>
               </View>
             </View>
@@ -232,7 +245,14 @@ class GenericView extends Component {
                 <ModalDropdown options={availability}
                               textStyle={ styles.valueText }
                               dropdownTextStyle={ styles.valueText }
-                              dropdownStyle= {{height: 75}}
+                              adjustFrame={(style) => {
+                                style.alignSelf = 'center';
+                                style.width = SCREEN_WIDTH / 3;
+                                style.left = SCREEN_WIDTH / 3;
+                                style.height = 30 * 2 + 1;
+                                return style;
+                              }}
+                              renderRow={this.renderDropdownRow.bind(this)}
                               onSelect={this.onChangeAvailability}
                               defaultValue={'Today'}/>
               </View>
@@ -247,16 +267,6 @@ class GenericView extends Component {
             </View>
           </View>
         </View>
-        {
-          this.state.data.length === 0?
-          <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
-            <TouchableOpacity style={{}} onPress={() => {
-                Actions.skillList({ category: name === serviceName?'Provide a Service':'Teach a Skill', subCategory: this.props.title, categoryId: this.state.categoryId });
-            }}>
-              <Text style={{fontSize: 18}}>No Maven here yet. Want to be the first?</Text>
-            </TouchableOpacity>
-          </View>
-          :
           <Container>
           {
               this.state.requestLoading?this.renderPlaceholder():null
@@ -268,6 +278,17 @@ class GenericView extends Component {
               onRefresh={this._onRefresh.bind(this)}
             />
           }>
+          {
+            this.state.data.length === 0?
+            <View style={{height: 0.91 * SCREEN_HEIGHT - 64, justifyContent: 'center', alignItems:'center', paddingBottom: 100}}>
+              <TouchableOpacity style={{justifyContent: 'center', alignItems:'center'}} onPress={() => {
+                  Actions.skillList({ category: name === serviceName?'Provide a Service':'Teach a Skill', subCategory: this.props.title, categoryId: this.state.categoryId });
+              }}>
+              <Image source={require('../../../assets/icons/first.png')} />
+              <View style={{ height: 10 }}></View>
+                <Text style={{fontSize: 18}}>No Maven here yet. Want to be the first?</Text>
+              </TouchableOpacity>
+            </View>:
             <FlatList
               data={filteredLists}
               renderItem={({ item, index }) => (
@@ -330,9 +351,9 @@ class GenericView extends Component {
               onEndReached={this.handleLoadMore}
               onEndReachedThreshold={0.9}
             />
+          }
           </Content>
         </Container>
-        }
         <FilterComponent modalVisible={this.state.modalVisible} sortBy={this.state.sortBy} min={this.state.min} max={this.state.max}
           onApply={(res) => {
             this.setState({modalVisible: false, sortBy: res.sortBy, min: res.min, max: res.max});
