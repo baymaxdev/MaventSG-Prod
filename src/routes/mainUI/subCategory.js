@@ -47,7 +47,7 @@ class SubCategory extends Component {
 
   goTopic = (data) => {
     this.props.getTopics(data.id, this.props.auth.token);
-    Actions.topicPage({ title: data.name });
+    Actions.topicPage({ title: data.name, category: data.id });
   }
 
   onSearch = (text) => {

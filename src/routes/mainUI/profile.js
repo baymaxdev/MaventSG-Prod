@@ -50,7 +50,7 @@ class Profile extends Component {
     // this.fetchdetails();
   }
 
-  componentDidMount() {
+  updateProfileInfo() {
     if (!this.state.isMe) {
       this.props.getProfileInfo(this.props.auth.token, this.props.userId);
     } else {
@@ -58,10 +58,14 @@ class Profile extends Component {
     }
   }
 
+  componentDidMount() {
+    this.updateProfileInfo();
+  }
+
   componentWillReceiveProps(nextProps) {
     if (this.state.isMe) {
       if(this.props.profile.myInfo !== nextProps.profile.myInfo && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, /* reviewData: nextProps.profile.myInfo.reviews */});
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.reviews, aboutMe: nextProps.profile.myInfo.about});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -86,20 +90,12 @@ class Profile extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    if (!this.state.isMe) {
-      this.props.getProfileInfo(this.props.auth.token, this.props.userId);
-    } else {
-      this.props.getMyProfileInfo(this.props.auth.token);
-    }
+    this.updateProfileInfo();
   }
 
   onSuccessModal() {
     this.modalFlag = true;
-    if (!this.state.isMe) {
-      this.props.getProfileInfo(this.props.auth.token, this.props.userId);
-    } else {
-      this.props.getMyProfileInfo(this.props.auth.token);
-    }
+    this.updateProfileInfo();
   }
 
   render() {
@@ -126,6 +122,9 @@ class Profile extends Component {
     else{
       mavenList.push({ mainCategory: 0, data: this.state.entrySkillMaven});
       mavenList.push({ mainCategory: 1, data: this.state.entryServiceMaven});
+    }
+    if (user.about === null || user.about === '') {
+      user.about = 'Write something about yourself...';
     }
 
     return (
@@ -190,7 +189,7 @@ class Profile extends Component {
                     :null
                   }
                 </View>
-                <Text style={{ fontSize: 13, color:"#b5b5b5" }}>Write something about yourself...</Text>
+                <Text style={{ fontSize: 13, color:"#b5b5b5" }}>{user.about}</Text>
               </View>
              {
                     mavenList.map((item, index) => {
@@ -222,7 +221,9 @@ class Profile extends Component {
         </Content>
         <Modal isVisible={this.state.modalVisible == 1}>
           <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
-            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>this.setState({modalVisible: null})}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+              this.setState({modalVisible: null, aboutMe: this.props.profile.myInfo.about});
+              }}>
                 <Icon name='close' style={{fontSize:40}}/>
             </TouchableOpacity>
             <Form style={{width:'100%' }}>
@@ -240,6 +241,10 @@ class Profile extends Component {
             </Form>
             <TouchableOpacity style={[styles.loginBtn,{backgroundColor:'#0B486B', padding:10, marginBottom:10}]} onPress={(e)=>{
               this.setState({modalVisible: null});
+              let _this = this;
+              this.props.editAbout(this.state.aboutMe, this.props.auth.token, () => {
+                _this.updateProfileInfo();
+              });
             }}>
               <Text style={styles.btnText}>SAVE</Text>
             </TouchableOpacity>
@@ -320,6 +325,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
     getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
+    editAbout: (about, token, next) => dispatch(actions.editAbout(about, token, next)),
     actions: bindActionCreators(actions, dispatch)
 });
 

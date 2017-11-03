@@ -116,16 +116,15 @@ class CommentsPage extends Component {
                   </View>
               })
             }
-            
-            <View style = {{flexDirection: 'row', alignItems: 'center', borderWidth: 1, paddingHorizontal:10, borderColor: '#b5b5b5'}}>
-              <TextInput returnKeyType="next" multiline={true} placeholder = "Write a comments..." style = {{ fontSize:15, flex: 1, height:50 }}/>
-              <TouchableOpacity onPress = {(e)=>{}}>
-                <Icon name = "ios-happy-outline" style={{ color: '#b5b5b5' }}/>
-                </TouchableOpacity>
-              </View>
             </ScrollView>
           </Content>
         </Container>
+        <View style = {{flexDirection: 'row', alignItems: 'center', borderWidth: 1, paddingHorizontal:10, borderColor: '#b5b5b5', backgroundColor: '#fff'}}>
+          <TextInput returnKeyType="next" multiline={true} placeholder = "Write a comments..." style = {{ fontSize:15, flex: 1, height:50 }}/>
+          <TouchableOpacity onPress = {(e)=>{}}>
+            <Icon name = "ios-happy-outline" style={{ color: '#b5b5b5' }}/>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     );
   }

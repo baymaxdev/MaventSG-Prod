@@ -25,6 +25,12 @@ import {
   REQUEST_EDIT_MAVEN_DETAILS,
   EDIT_MAVEN_DETAILS,
   EDIT_MAVEN_DETAILS_ERROR,
+  EDIT_ABOUT,
+  EDIT_ABOUT_ERROR,
+  SAVE_MAVEN,
+  SAVE_MAVEN_ERROR,
+  REPORT_MAVEN,
+  REPORT_MAVEN_ERROR,
 } from './types';
 
 export const getMyProfileInfo = (token) => {
@@ -131,15 +137,15 @@ export const registerMaven = (mavenData, token) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: REGISTER_MAVEN, msg: res.msg });   
+        dispatch({ type: REGISTER_MAVEN });   
         dispatch(getMyProfileInfo(token));
       }
       else {
-        dispatch({ type: REGISTER_MAVEN_ERROR, msg: res.msg });
+        dispatch({ type: REGISTER_MAVEN_ERROR, error: res.msg });
       }
     })
     .catch(err => {
-      dispatch({ type: REGISTER_MAVEN_ERROR, msg: err });  
+      dispatch({ type: REGISTER_MAVEN_ERROR, error: err });  
     })  
   }
 }
@@ -245,14 +251,14 @@ export const addMavenImage = ( mavenId, imageUrl, token ) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: ADD_MAVEN_IMAGE, msg: res.msg });
+        dispatch({ type: ADD_MAVEN_IMAGE });
       }
       else {
-        dispatch({ type: ADD_MAVEN_IMAGE_ERROR, msg: res.msg });
+        dispatch({ type: ADD_MAVEN_IMAGE_ERROR, error: res.msg });
       }
     })
     .catch(err => {
-      dispatch({ type: ADD_MAVEN_IMAGE_ERROR, msg: err });
+      dispatch({ type: ADD_MAVEN_IMAGE_ERROR, error: err });
     })  
   }
 }
@@ -270,13 +276,13 @@ export const deleteMavenImage = (mavenId, index, token, next) => {
     request(url, option)
     .then(res => {   
       if (res.status === 200) {
-        dispatch({ type: DELETE_MAVEN_IMAGE, msg: res.msg });
+        dispatch({ type: DELETE_MAVEN_IMAGE });
         next();
       }
-      else dispatch({ type: DELETE_MAVEN_IMAGE_ERROR, msg: res.msg });
+      else dispatch({ type: DELETE_MAVEN_IMAGE_ERROR, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: DELETE_MAVEN_IMAGE_ERROR, msg: err });
+      dispatch({ type: DELETE_MAVEN_IMAGE_ERROR, error: err });
     })  
   }
 }
@@ -313,28 +319,125 @@ export const editMavenDetails = ( mavenData, token ) => {
     timeAvailable: mavenData.timeAvailable
   }
   
+  var formBody = [];
+  for (var property in data) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(data[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+  }
+  formBody = formBody.join("&");
+  
   let option = { 
-    method: 'PUT',
-    body: JSON.stringify(data),
+    method: 'POST',
     headers: {
+      'Accept': 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': `JWT ${token}`,
     },
+    body: formBody,
   };
+
   return dispatch => {
     dispatch({ type: REQUEST_EDIT_MAVEN_DETAILS });
     const url = `maven/editMavenDetails`;
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: EDIT_MAVEN_DETAILS, msg: res.msg });
+        dispatch({ type: EDIT_MAVEN_DETAILS });
       }
       else {
-        dispatch({ type: EDIT_MAVEN_DETAILS_ERROR, msg: res.msg });
+        dispatch({ type: EDIT_MAVEN_DETAILS_ERROR, error: res.msg });
       }
     })
     .catch(err => {
-      dispatch({ type: EDIT_MAVEN_DETAILS_ERROR, msg: err });
+      dispatch({ type: EDIT_MAVEN_DETAILS_ERROR, error: err });
     })
+  }
+}
+
+export const editAbout = (about, token, next) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `user/editAbout?about=${about}`;
+    request(url, option)
+    .then(res => {   
+      if (res.status === 200) {
+        dispatch({ type: EDIT_ABOUT});
+        next();
+      }
+      else dispatch({ type: EDIT_ABOUT_ERROR, error: res.msg });
+    })
+    .catch(err => {
+      dispatch({ type: EDIT_ABOUT_ERROR, error: err });
+    })  
+  }
+}
+
+export const saveMaven = (mavenId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `user/saveMaven?mavenID=${mavenId}`;
+    request(url, option)
+    .then(res => {   
+      if (res.status === 200) {
+        dispatch({ type: SAVE_MAVEN });
+        next();
+      }
+      else dispatch({ type: SAVE_MAVEN_ERROR, error: res.msg });
+    })
+    .catch(err => {
+      dispatch({ type: SAVE_MAVEN_ERROR, error: err });
+    })  
+  }
+}
+
+export const reportMaven = ( mavenId, description, token ) => {
+  let data = {
+    mavenID: mavenId,
+    description: description
+  };
+
+  var formBody = [];
+  for (var property in data) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(data[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+  }
+  formBody = formBody.join("&");
+  
+  let option = { 
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `JWT ${token}`,
+    },
+    body: formBody,
+  };
+
+  return dispatch => {
+    const url = `maven/report`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: REPORT_MAVEN });
+      }
+      else {
+        dispatch({ type: REPORT_MAVEN_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: REPORT_MAVEN_ERROR, error: err });
+    })  
   }
 }

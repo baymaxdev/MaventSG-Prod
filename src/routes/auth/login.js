@@ -44,7 +44,7 @@ class Login extends Component {
         if (nextProps.auth.status === 404) {
             Actions.signup();
         } else if(nextProps.auth.status === 401) {
-            Actions.OTP({phoneState: "2"});
+            Actions.OTP({phoneState: "2", userId: nextProps.auth.userId});
         }
         else{
             alert('Invalid User');

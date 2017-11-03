@@ -97,16 +97,4 @@ export default class FilterComponent extends React.Component {
   }
 };
 const styles = StyleSheet.create({
-   isVerifyStyle:{
-         height: 70, 
-         width: 70, 
-         borderRadius: 25,
-         borderWidth:2,
-         borderColor:'#FFA838'
-   },
-   noneVerifyStyle:{
-         height: 70, 
-         width: 70,
-         borderRadius: 25,
-   }
 });

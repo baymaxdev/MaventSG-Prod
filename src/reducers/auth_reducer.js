@@ -24,7 +24,9 @@ import {
   GENERATE_OTP_FAIL,
   REQUEST_VERIFY_OTP,
   VERIFY_OTP_SUCCESS,
-  VERIFY_OTP_FAIL
+  VERIFY_OTP_FAIL,
+  CHANGE_PHONE_NUMBER,
+  CHANGE_PHONE_NUMBER_ERROR,
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -79,7 +81,9 @@ export default function (state = INITIAL_STATE, action) {
             ...state,
             loginLoading: false,
             loggedIn: false,
-            status: action.status
+            status: action.status,
+            userId: action.userId,
+            error: action.error
         } 
     
   /*  case FORGOTPASSWORD_SUBMIT:
@@ -135,7 +139,6 @@ export default function (state = INITIAL_STATE, action) {
             ...state,
             signupLoading: false,
             signedUp: true,
-            signupMsg: action.msg,
             phoneNumber: action.phoneNumber
         } 
 
@@ -144,17 +147,16 @@ export default function (state = INITIAL_STATE, action) {
             ...state,
             signupLoading: false,
             signedUp: false,
-            signupMsg: action.msg
+            error: action.error
         }
     case GENERATE_OTP_SUCCESS:      
         return {                
             ...state,
-            signupMsg: action.msg,
         }
     case GENERATE_OTP_FAIL:      
         return {                
             ...state,
-            signupMsg: action.msg
+            error: action.error
         } 
     case REQUEST_VERIFY_OTP:      
       return {                
@@ -166,7 +168,6 @@ export default function (state = INITIAL_STATE, action) {
             ...state,
             verifyOtp: true,
             verifyLoading: false,
-            verifyMsg: action.msg,
             token:action.token
         }
     case VERIFY_OTP_FAIL:      
@@ -174,11 +175,21 @@ export default function (state = INITIAL_STATE, action) {
             ...state,
             verifyOtp: false,
             verifyLoading: false,
-            verifyMsg: action.msg,
+            error: action.error,
             loginLoading: false,
-            status: action.status
-        }       
-
+            status: action.status,
+            userId: action.userId
+        }
+    case CHANGE_PHONE_NUMBER:
+        return {
+            ...state,
+            phoneNumber: action.phoneNumber
+        }
+    case CHANGE_PHONE_NUMBER_ERROR:
+        return {
+            ...state,
+            error: action.error
+        }
     default:
       return state;
   }

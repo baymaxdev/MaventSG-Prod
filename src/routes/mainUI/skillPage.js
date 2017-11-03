@@ -12,10 +12,9 @@ import {
   TouchableOpacity,
   Keyboard,
   Dimensions,
-  Modal,
   RefreshControl,
 } from 'react-native';
-import { Icon } from 'native-base';
+import { Icon, Form, Item, Input } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -23,9 +22,10 @@ import * as actions from '../../actions';
 import StarRating from 'react-native-star-rating';
 import DatePicker from 'react-native-datepicker';
 import { ImagePicker } from 'expo';
-import Gallery from 'react-native-image-gallery';
 import LoadingComponent from '../../components/loadingComponent';
 import ActionSheet from 'react-native-actionsheet';
+import Modal from 'react-native-modal';
+import GalleryComponent from '../../components/galleryComponent';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -49,9 +49,11 @@ class SkillPage extends Component {
         price: 0,
         rating: 0,
         modalVisible: false,
+        reportModalVisible: false,
         requestLoading: true,
         idVerified: false,
         refreshing: false,
+        reportText: '',
     };
   }
 
@@ -61,7 +63,7 @@ class SkillPage extends Component {
         this.editMavenActionSheet.show();
       }});
     } else {
-      Actions.refresh({rightButtonImage: require('../../../assets/icons/more1.png'), onRight: () => {
+      Actions.refresh({rightButtonImage: require('../../../assets/icons/copy1.png'), onRight: () => {
         this.genericMavenActionSheet.show();
       }});
     }
@@ -73,7 +75,7 @@ class SkillPage extends Component {
     }
     else if(this.props.profile.mavenImageLoading !== nextProps.profile.mavenImageLoading && !nextProps.profile.mavenImageLoading && !nextProps.profile.mavenImageSuccess){
       this.setState({requestLoading: false});
-      alert(nextProps.profile.msg);
+      alert(nextProps.profile.error);
     }
     if (nextProps.maven != undefined) {
       var m = nextProps.maven.maven;
@@ -178,9 +180,9 @@ class SkillPage extends Component {
 
   handleGenericMavenPress = (i) => {
     if (i == 1) {
-
+      this.props.saveMaven(this.state.maven.maven._id, this.props.auth.token);
     } else if (i == 2) {
-
+      this.setState({reportModalVisible: true});
     }
   }
 
@@ -380,7 +382,11 @@ class SkillPage extends Component {
             {
               !this.props.isMe?
               <TouchableOpacity style={{ justifyContent:'center', alignItems:'center', paddingVertical:15 }} onPress={() => {
-                Actions.otherProfile({title: this.props.title, userId: this.state.user._id});
+                if (this.props.from === 'profile') {
+                  Actions.pop();
+                } else {
+                  Actions.otherProfile({title: this.props.title, userId: this.state.user._id});
+                }
               }}>
                 <Text style={{ fontSize: 17, color:"#FFA838" }} >Other services by this Maven</Text>
               </TouchableOpacity>
@@ -445,37 +451,39 @@ class SkillPage extends Component {
             cancelButtonIndex={0}
             onPress={this.handleGenericMavenPress}
         />
-        {this.renderModal()}
-      </View>
-    );
-  }
-
-  renderModal() {
-    var images = [];
-    for (var i = 0; i < 3; i ++ ) {
-      if (this.state.picUrl[i]) {
-        images.push({source: {uri: this.state.picUrl[i]}});
-      }
-    }
-    return (
-      <View>
-        <Modal
-        animationType={"none"}
-        transparent={true}
-        visible={this.state.modalVisible}
-        onRequestClose={() => {alert("Modal has been closed.")}}>
-        <TouchableWithoutFeedback  onPress={()=>{this.setState({modalVisible: false})}}>
-          <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black'}}></View>
-        </TouchableWithoutFeedback>
-        <Gallery
-          initialPage={initialPage}
-          style={{backgroundColor: 'white', flex: 1}}
-          images={images}
-        />
-        <TouchableWithoutFeedback  onPress={()=>{this.setState({modalVisible: false})}}>
-          <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black'}}></View>
-        </TouchableWithoutFeedback>
+        <Modal isVisible={this.state.reportModalVisible}>
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+              this.setState({reportModalVisible: false, reportText: ''});
+              }}>
+                <Icon name='close' style={{fontSize:40}}/>
+            </TouchableOpacity>
+            <Form style={{width:'100%' }}>
+                <Item regular>
+                <Input
+                    value={ this.state.reportText }
+                    placeholder="Write description here."
+                    style={{ height: 150, width:'100%', alignSelf: 'flex-start' }}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    multiline
+                    onChangeText={(text) => this.setState({reportText: text})}
+                />
+                </Item>
+            </Form>
+            <TouchableOpacity style={[styles.loginBtn,{backgroundColor:'#0B486B', padding:10, marginBottom:10}]} onPress={(e)=>{
+              this.setState({reportModalVisible: false});
+              let _this = this;
+              this.props.reportMaven(this.state.maven.maven._id, this.state.reportText, this.props.auth.token);
+            }}>
+              <Text style={styles.btnText}>REPORT</Text>
+            </TouchableOpacity>
+          </View>
         </Modal>
+        <GalleryComponent picUrl={this.state.picUrl} modalVisible={this.state.modalVisible} initialPage={initialPage}
+          onClose={() => {
+            this.setState({modalVisible: false})
+          }}/>
       </View>
     );
   }
@@ -499,8 +507,18 @@ const styles = StyleSheet.create({
       height: 150, width: 150, borderRadius: 50, borderWidth:3, borderColor:'#fff'
   },
   photoView: { borderWidth:1, borderRadius:3, borderColor: '#ccc', height:80, width: (SCREEN_WIDTH - 40) / 3,
-  backgroundColor:'#fff', justifyContent:"center", alignItems:'center' }
-
+  backgroundColor:'#fff', justifyContent:"center", alignItems:'center' },
+  loginBtn:{
+    padding:5, marginTop:15, flexDirection:'row', width:'78%', alignSelf:'center', alignItems:'center',
+    justifyContent:'center', borderRadius:10,
+    height: 50,
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    shadowOffset: {
+    width: 0,
+    height: 1
+    }
+  },
 });
 
 const mapStateToProps = (state) =>({
@@ -515,6 +533,8 @@ const mapDispatchToProps = (dispatch) =>({
   addMavenImage: (mavenId, imageUrl, token) => dispatch(actions.addMavenImage(mavenId, imageUrl, token)),
   deleteMavenImage: (mavenId, index, token, next) => dispatch(actions.deleteMavenImage(mavenId, index, token, next)),
   deleteMaven: (mavenId, token, next) => dispatch(actions.deleteMaven(mavenId, token, next)),
+  saveMaven: (mavenId, token) => dispatch(actions.saveMaven(mavenId, token)),
+  reportMaven: (mavenId, description, token) => dispatch(actions.reportMaven(mavenId, description, token)),
   checkId: (token) => dispatch(actions.checkId(token)),
   actions: bindActionCreators(actions, dispatch)
 });

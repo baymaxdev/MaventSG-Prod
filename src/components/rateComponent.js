@@ -36,8 +36,8 @@ const RateComponent = (props) => {
         </View>
         <View style={styles.standaloneRowFront}>
           <TouchableOpacity style={styles.standaloneRowFront} onPress={() => {
-            props.getMavenDetails(props.data._id, props.profile.location, props.auth.token);
-            Actions.skillPage({ title: `${user.firstName} ${user.lastName}`, isMe: props.isMe, })
+              props.getMavenDetails(props.data._id, props.profile.location, props.auth.token);
+              Actions.skillPage({ title: `${user.firstName} ${user.lastName}`, isMe: props.isMe, from: 'profile'})
           }}>
           <View style={styles.container}>
             <View style={{ flexDirection: 'row',flex:1, justifyContent:'flex-start', alignItems: 'center' }}>
@@ -45,7 +45,12 @@ const RateComponent = (props) => {
                 <Text style={{ color: '#2399E6' }} >{props.data.rating}</Text>
               </View>
               <Text style={{ fontSize: 15, paddingLeft: 10, color: '#515151' }}>{props.data.title}</Text>
-              <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#55AE58', alignSelf: 'flex-start'}}></View>
+              {
+                props.isMe?
+                <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#55AE58', alignSelf: 'flex-start'}}></View>
+                :
+                null
+              }
             </View>
             <View style={{flexDirection: 'row',flex:1, justifyContent:'flex-end'}}>
             <StarRating

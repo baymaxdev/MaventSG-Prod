@@ -17,7 +17,7 @@ class Otp extends React.Component {
          value3:'',
          value4:'',
          value5:'',
-         phoneNumber: ''
+         phoneNumber: this.props.auth.phoneNumber
      };
    }
 
@@ -72,6 +72,7 @@ class Otp extends React.Component {
            return;
        }
        let phoneNumber = this.props.phoneState === "1" ? this.props.auth.phoneNumber : this.state.phoneNumber;
+       this.props.changePhoneNumber(this.props.userId, this.state.phoneNumber);
        this.props.generateOTP(phoneNumber);
    }
 
@@ -153,6 +154,7 @@ const mapDispatchToProps = (dispatch) =>({
     generateOTP: (phoneNumber) => dispatch(actions.generateOTP(phoneNumber)),
     verifyOtp: (phoneNumber, otp) =>dispatch(actions.verifyOtp(phoneNumber, otp)),
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
+    changePhoneNumber: (userId, phoneNumber) => dispatch(actions.changePhoneNumber(userId, phoneNumber)),
     actions: bindActionCreators(actions, dispatch)
 });
 export default connect(
@@ -166,7 +168,7 @@ const styles = StyleSheet.create({
     textInput:{ height:40, paddingHorizontal:5 , textAlign:'center', width: '100%'},
     phoneInput:{backgroundColor:'#fff', paddingHorizontal:10, height: 30,
                 flex: 1,
-                borderColor: '#a9a9a9', borderWidth: 0.5, borderRadius:5},
+                borderColor: '#a9a9a9', borderWidth: 0.5, borderRadius:5, fontSize: 14},
     btn:{backgroundColor:'#0B486B', padding:10, width:'100%', marginTop:30, borderRadius:5,
             shadowOpacity: 0.8,
             shadowRadius: 2,

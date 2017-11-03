@@ -190,7 +190,7 @@ class GenericView extends Component {
     var filteredLists = this.state.data.filter(createFilter(this.state.searchTerm, KEYS_TO_FILTERS))
     let _this = this;
     filteredLists.sort(function(a, b) {
-      if (_this.state.sortBy === 0)
+      if (_this.state.sortBy === 0) 
         return parseFloat(a.distance) - parseFloat(b.distance);
       else
         return parseFloat(a.price) - parseFloat(b.price);
@@ -280,12 +280,10 @@ class GenericView extends Component {
           }>
           {
             this.state.data.length === 0?
-            <View style={{height: 0.91 * SCREEN_HEIGHT - 64, justifyContent: 'center', alignItems:'center', paddingBottom: 100}}>
-              <TouchableOpacity style={{justifyContent: 'center', alignItems:'center'}} onPress={() => {
+            <View style={{height: 0.91 * SCREEN_HEIGHT - 64, justifyContent: 'center', alignItems:'center'}}>
+              <TouchableOpacity style={{}} onPress={() => {
                   Actions.skillList({ category: name === serviceName?'Provide a Service':'Teach a Skill', subCategory: this.props.title, categoryId: this.state.categoryId });
               }}>
-              <Image source={require('../../../assets/icons/first.png')} />
-              <View style={{ height: 10 }}></View>
                 <Text style={{fontSize: 18}}>No Maven here yet. Want to be the first?</Text>
               </TouchableOpacity>
             </View>:

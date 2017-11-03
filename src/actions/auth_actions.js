@@ -25,7 +25,9 @@ import {
   GENERATE_OTP_FAIL,
   REQUEST_VERIFY_OTP,
   VERIFY_OTP_SUCCESS,
-  VERIFY_OTP_FAIL
+  VERIFY_OTP_FAIL,
+  CHANGE_PHONE_NUMBER,
+  CHANGE_PHONE_NUMBER_ERROR,
 } from './types';
 
 export const requestSignup = (userData, token) => {
@@ -66,12 +68,12 @@ export const requestSignup = (userData, token) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: REG_USER_SUCCESS, msg: res.msg, phoneNumber });
+        dispatch({ type: REG_USER_SUCCESS, phoneNumber });
       }
-      else dispatch({ type: REG_USER_FAIL, msg: res.msg });
+      else dispatch({ type: REG_USER_FAIL, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: REG_USER_FAIL, msg: 'error' });
+      dispatch({ type: REG_USER_FAIL, error: err });
     })
   }
 }
@@ -86,12 +88,12 @@ export const generateOTP = (phoneNumber) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: GENERATE_OTP_SUCCESS, msg: res.msg });
+        dispatch({ type: GENERATE_OTP_SUCCESS });
       }
-      else dispatch({ type: GENERATE_OTP_FAIL, msg: res.msg });
+      else dispatch({ type: GENERATE_OTP_FAIL, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: GENERATE_OTP_FAIL, msg: 'error' });
+      dispatch({ type: GENERATE_OTP_FAIL, error: err });
     })
   }
 
@@ -108,12 +110,12 @@ export const verifyOtp = (phoneNumber, otp) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: VERIFY_OTP_SUCCESS, msg: res.msg, token: res.token });
+        dispatch({ type: VERIFY_OTP_SUCCESS, token: res.token });
       }
-      else dispatch({ type: VERIFY_OTP_FAIL, msg: res.msg });
+      else dispatch({ type: VERIFY_OTP_FAIL, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: VERIFY_OTP_FAIL, msg: 'error' });
+      dispatch({ type: VERIFY_OTP_FAIL, error: err });
     })
   }
 
@@ -135,11 +137,11 @@ export const requestLogin = (email, password) => {
     const url = `user/login`;
     request(url, option)
     .then(res => {
-      if (res.status === 200) dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token:res.token });
-      else dispatch({ type: REQUESTED_LOGIN_ERROR, status: res.status });
+      if (res.status === 200) dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token: res.token });
+      else dispatch({ type: REQUESTED_LOGIN_ERROR, status: res.status, userId: res.userID, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: REQUESTED_LOGIN_ERROR });
+      dispatch({ type: REQUESTED_LOGIN_ERROR, error: err });
     })
   }
 } 
@@ -218,12 +220,35 @@ const loginWithToken = (token) => {
       } else if (res.status === 404) {
         dispatch({ type: FACEBOOK_FETCH_DETAILS, object: res });
       }
-      else dispatch({ type: VERIFY_OTP_FAIL, msg: res.msg, status: res.status });
+      else dispatch({ type: REQUESTED_LOGIN_ERROR, error: res.msg, status: res.status, userId: res.userID });
     })
     .catch(err => {
-      dispatch({ type: VERIFY_OTP_FAIL, msg: 'error' });
+      dispatch({ type: REQUESTED_LOGIN_ERROR, error: err });
     })
   }
   // dispatch({ type: FACEBOOK_LOGIN_SUCCESS, token: token });
 
+}
+
+export const changePhoneNumber = (userId, phoneNumber) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+    },
+  };
+  return dispatch => {
+    const url = `user/changePhoneNumber?userID=${userId}&phoneNumber=${phoneNumber}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: CHANGE_PHONE_NUMBER, phoneNumber: phoneNumber });   
+      }
+      else {
+        dispatch({ type: CHANGE_PHONE_NUMBER_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: CHANGE_PHONE_NUMBER_ERROR, error: err });  
+    })  
+  }
 }

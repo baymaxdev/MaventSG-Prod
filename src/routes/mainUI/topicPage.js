@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl } from 'react-native';
 import {ImagePicker} from 'expo';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -8,6 +8,8 @@ import {Actions} from 'react-native-router-flux';
 import {Container, Content, Icon, Form} from 'native-base';
 import Search from 'react-native-search-box';
 import PickerModal from '../../components/picker';
+import Placeholder from 'rn-placeholder';
+import ReadMore from '@expo/react-native-read-more-text';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const {width, height} = Dimensions.get('window');
@@ -35,7 +37,6 @@ class TopicPage extends Component {
     super(props);
     this.state = {
       likeList:[],
-      moreList: [],
       reportList: [],
       data: [],
       modalVisible: false,
@@ -46,6 +47,7 @@ class TopicPage extends Component {
       offSet: new Animated.Value(height),
       requestLoading: true,
       refreshing: false,
+      sortBy: 0,
     }
   }
 
@@ -55,30 +57,19 @@ class TopicPage extends Component {
 
   componentDidMount() {
     Actions.refresh({rightButtonImage: require('../../../assets/icons/more.png'), rightButtonIconStyle: { width: 20, height:20}, onRight: ()=>{this.setModalVisible(true, 1)}})
-    // let temp = [];
-    // let tempMore = [];
     // let tempReport = [];
     // data.map((item, index)=>{
-    //   temp.push(false);
-    //   tempMore.push(false);
     //   tempReport.push(false);
     // })
-    // this.setState({ likeList: temp, moreList: tempMore, reportList: tempReport });
+    // this.setState({ reportList: tempReport });
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.topic.topics);
-    this.setState({ data: nextProps.topic.topics, requestLoading: false });
+    this.setState({ data: nextProps.topic.topics, requestLoading: false, refreshing: false });
   }
 
-  navigate = (data) => {
+  navigateToComments = (data) => {
     Actions.commentsPage({data:data});
-  }
-
-  onclickMore = (index) =>{
-    let list = this.state.moreList;
-    list[index] = !list[index];
-    this.setState({moreList: list});
   }
 
   onclickReport = (index) =>{
@@ -88,11 +79,11 @@ class TopicPage extends Component {
   }
 
   onclickLike = (index) =>{
-    let temp = this.state.likeList;
-    temp[index] = !temp[index];
-    let tempData = this.state.data;
-    tempData[index].likes = temp[index] ? tempData[index].likes + 1 : tempData[index].likes - 1
-    this.setState({likeList: temp, data: tempData});
+    this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token);
+    let temp = this.state.data;
+    temp[index].liked = !temp[index].liked;
+    temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
+    this.setState({data: temp});
   }
 
   onClickAdd = () => {
@@ -121,8 +112,6 @@ class TopicPage extends Component {
     let createdDate = new Date(date);
     let currentDate = new Date();
     let diffMin = (currentDate - createdDate) / 1000 / 60;
-    console.log(createdDate);
-    console.log(currentDate);
     var date = '';
     if (diffMin < 60) {
       date = Math.floor(diffMin) + ' minute';
@@ -183,12 +172,32 @@ class TopicPage extends Component {
     return date;
   }
 
+  _renderTruncatedFooter = (handlePress) => {
+    return (
+      <Text style={{color: '#f69021', fontSize: 16, marginTop: 5}} onPress={handlePress}>
+        Show More
+      </Text>
+    );
+  }
+
+  _renderRevealedFooter = (handlePress) => {
+    return (
+      <Text style={{color: '#f69021', fontSize: 16, marginTop: 5}} onPress={handlePress}>
+        Less
+      </Text>
+    );
+  }
+
+  _handleTextReady = () => {
+  }
+
   renderItem(item, index) {
+    console.log(item);
     return (
       <View style = {{ borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginBottom: 13}}>
         <View style = {{flexDirection: "row", justifyContent: 'space-between', padding: 10}}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Image source = {{uri: item.userID.displayPicture}} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
+            <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
             <View style = {{paddingHorizontal: 10}} >
               <Text style = {styles.nameText} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
               <View style={{ height: 5 }}></View>
@@ -205,10 +214,16 @@ class TopicPage extends Component {
               <Text style={{fontSize: 15, paddingLeft: 5, color: 'white'}}>Report Post</Text>
             </TouchableOpacity>
           }
-        <View style = {{ paddingBottom: 5}}>
+        <View style = {{ paddingBottom: 5, paddingHorizontal: 10}}>
           {
             item.text &&
-            <Text style ={{ color: '#ababab', fontSize: 15, paddingHorizontal: 10}} numberOfLines = {this.state.moreList[index] ? null : 3} >{item.text}</Text>
+            <ReadMore
+              numberOfLines={2}
+              renderTruncatedFooter={this._renderTruncatedFooter}
+              renderRevealedFooter={this._renderRevealedFooter}
+              onReady={this._handleTextReady}>
+              <Text style ={{ color: '#ababab', fontSize: 15, paddingHorizontal: 10}}>{item.text}</Text>
+            </ReadMore>
           }
           {
             item.image &&
@@ -221,18 +236,15 @@ class TopicPage extends Component {
               </View>
           }
         </View>
-        <TouchableOpacity style={{paddingHorizontal: 10, paddingBottom: 5}} onPress={(e)=>this.onclickMore(index)}>
-          <Text style = {{ color: '#f69021', fontSize: 16}} >{ this.state.moreList[index] ? "Less" : "See More"}</Text>
-        </TouchableOpacity>
         <View style = {{ flexDirection: 'row', alignItems:'center', paddingHorizontal: 10, paddingBottom: 5}}>
           <View style = {{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} >
             <TouchableOpacity onPress={(e)=>this.onclickLike(index)} >
-              <Icon style={{ fontSize:30, marginTop: 3, color: this.state.likeList[index]?'#f69021':'#515151' }} name = {this.state.likeList[index]?'ios-heart':'ios-heart-outline'} />
+              <Icon style={{ fontSize:30, marginTop: 3, color: item.liked?'#f69021':'#515151' }} name = {item.liked?'ios-heart':'ios-heart-outline'} />
             </TouchableOpacity>
             <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.heart}</Text>
           </View>
           <View style = {{ marginLeft: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} >
-            <TouchableOpacity onPress={(e)=>this.navigate(item)} >
+            <TouchableOpacity onPress={(e)=>this.navigateToComments(item)} >
               <Icon style={{ fontSize:30, marginTop: 3, color: '#515151' }} name = {'ios-chatbubbles-outline'} />
             </TouchableOpacity>
             <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.commentsCount}</Text>
@@ -287,21 +299,71 @@ class TopicPage extends Component {
       }
   }
 
+  renderPlaceholder() {
+    var ret = [];
+    for (var i = 0; i < 5; i++) {
+        ret.push(
+            <View key={i} style={{padding:20, height: 150}}>
+                <Placeholder.ImageContent
+                    onReady={false}
+                    lineNumber={2}
+                    animate="shine"
+                    lastLineWidth="40%"
+                    >
+                </Placeholder.ImageContent>
+                <View style={{height: 20}}/>
+                <Placeholder.Paragraph
+                    onReady={false}
+                    lineNumber={3}
+                    animate="shine"
+                    lastLineWidth="70%"
+                    >
+                </Placeholder.Paragraph>
+            </View>
+        );
+    }
+    return ret;
+  }
+
+  _onRefresh() {
+    this.setState({refreshing: true});
+    this.props.getTopics(this.props.category, this.props.auth.token);
+  }
+
+  onSortByRecent() {
+    this.setState({sortBy: 0});
+    this.setModalVisible(false)
+  }
+
+  onSortByMostHearts() {
+    this.setState({sortBy: 1});
+    this.setModalVisible(false)
+  }
+
   render() {
     const spin = this.state.angle.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '-135deg']
     })
+    var sortedData = this.state.data;
+    let _this = this;
+    sortedData.sort(function(a, b) {
+      if (_this.state.sortBy === 0) 
+        return Date(b.createdDate) - Date(a.createdDate);
+      else
+        return b.heart - a.heart;
+    });
+
     return (
       <Container>
         <Modal transparent={true} visible={this.state.modalVisible} onRequestClose={() => null} >
           { this.state.modalID === 1 &&
           <TouchableOpacity style={styles.navModal} onPressOut={() => {this.setModalVisible(false)}}>
             <View style={styles.innerNavModal}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => {this.onSortByRecent()}}>
                 <Text style={{color: '#fff'}}>Recent</Text>
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => {this.onSortByMostHearts()}}>
                 <Text style={{color: '#fff', marginTop: 5}}>Most Hearts</Text>
               </TouchableOpacity>
             </View>
@@ -359,9 +421,17 @@ class TopicPage extends Component {
           }
 
         </Modal>
-        <Content padder style = {{backgroundColor: '#fff'}}>
+        {
+            this.state.requestLoading?this.renderPlaceholder():null
+        }
+        <Content padder style = {{backgroundColor: '#fff'}}
+        refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh.bind(this)}
+        />}>
        {
-         this.state.data.map((item, index)=>{
+         sortedData.map((item, index)=>{
            return <View key={index}>
              {this.renderItem(item, index)}
             </View>
@@ -443,10 +513,12 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) =>({
+  auth: state.auth,
   topic: state.topic,
 });
 const mapDispatchToProps = (dispatch) =>({
   getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
+  setLike: (id, type, token) => dispatch(actions.setLike(id, type, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 
