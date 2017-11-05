@@ -27,6 +27,7 @@ import * as actions from '../../actions';
 import LoadingComponent from '../../components/loadingComponent';
 import ActionSheet from 'react-native-actionsheet';
 import Modal from 'react-native-modal';
+import InfoData from '../services/information.json';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -143,7 +144,7 @@ class SkillList extends Component {
             break;
         }
       }
-  
+
       var ta = m.timeAvailable.split(',').map(function(item) {
         return parseInt(item, 10);
       });
@@ -386,28 +387,28 @@ class SkillList extends Component {
   onQuestionMark = (which) => {
     switch (which) {
       case 'title':
-        which = 'This is title';
+        which = InfoData[which];
         break;
       case 'description':
-        which = 'This is description';
+        which = InfoData[which];
         break;
       case 'price':
-        which = 'This is price';
+        which = InfoData[which];
         break;
       case 'photos':
-        which = 'This is photos';
+        which = InfoData[which];
         break;
       case 'postal code':
-        which = 'This is postal code';
+        which = InfoData[which];
         break;
       case 'day availability':
-        which = 'This is day availability';
+        which = InfoData[which];
         break;
       case 'time availability':
-        which = 'This is time availability';
+        which = InfoData[which];
         break;
       case 'verification':
-        which = 'This is verification';
+        which = InfoData[which];
         break;
       default:
         break;
@@ -463,7 +464,7 @@ class SkillList extends Component {
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Title</Text>
                     <TouchableOpacity onPress={() => this.onQuestionMark('title')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
@@ -490,7 +491,7 @@ class SkillList extends Component {
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Service Description</Text>
                     <TouchableOpacity onPress={() => this.onQuestionMark('description')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8 }}>
@@ -517,13 +518,13 @@ class SkillList extends Component {
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Price</Text>
                     <TouchableOpacity onPress={() => this.onQuestionMark('price')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
                     <TextInput
                       placeholderTextColor="rgba(0,0,0,0.3)"
-                      placeholder="Price"
+                      placeholder="Price per hour"
                       keyboardType="numeric"
                       returnKeyType='next'
                       value={this.state.price}
@@ -540,7 +541,7 @@ class SkillList extends Component {
                     <View style={{flexDirection: 'row'}}>
                       <Text style={{ fontSize: 16, fontWeight: '600' }}>Photos</Text>
                       <TouchableOpacity onPress={() => this.onQuestionMark('photos')}>
-                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                       </TouchableOpacity>
                     </View>
                     <View style={{ marginTop: 3,  flexDirection:'row' }}>
@@ -580,12 +581,12 @@ class SkillList extends Component {
                     </View>
                   </View>
                 }
-                
+
                 <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Address: Postal Code</Text>
                     <TouchableOpacity onPress={() => this.onQuestionMark('postal code')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8 }}>
@@ -608,7 +609,7 @@ class SkillList extends Component {
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Day Availability</Text>
                     <TouchableOpacity onPress={() => this.onQuestionMark('day availability')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 8, flexDirection: 'row', justifyContent: 'space-around' }}>
@@ -654,7 +655,7 @@ class SkillList extends Component {
                   <View style={{flexDirection: 'row'}}>
                     <Text style={{ fontSize: 16, fontWeight: '600' }}>Time Availability</Text>
                     <TouchableOpacity onPress={() => this.onQuestionMark('time availability')}>
-                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                      <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                     </TouchableOpacity>
                   </View>
                   <View style={{ marginTop: 3, width: 0.85 * SCREEN_WIDTH, backgroundColor: 'white', borderRadius: 3, padding: 8, justifyContent: 'space-around' }}>
@@ -697,7 +698,7 @@ class SkillList extends Component {
                     <View style={{flexDirection: 'row'}}>
                       <Text style={{ fontSize: 16, fontWeight: '600' }}>ID Verification</Text>
                       <TouchableOpacity onPress={() => this.onQuestionMark('verification')}>
-                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 10, width: 20, height: 20}}/>
+                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                       </TouchableOpacity>
                     </View>
                     <View style={{ marginTop: 3,  flexDirection:'row' }}>
@@ -746,24 +747,31 @@ class SkillList extends Component {
           <ActionSheet
             ref={o => this.ActionSheet = o}
             title={null}
-            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            options={['Cancel', 'Choose from Library', 'Take a picture']}
             cancelButtonIndex={0}
             onPress={this.handlePress}
           />
           {
-            this.state.requestLoading && 
+            this.state.requestLoading &&
             <LoadingComponent/>
           }
           <Modal
             isVisible={this.state.modalVisible}
-            animationInTiming={500}
-            animationOutTiming={500}
+            animationInTiming={350}
+            animationOutTiming={350}
             >
             <View style={styles.modalContent}>
-              <Text style={{fontSize: 24, fontWeight: 'bold', alignSelf: 'flex-start', marginBottom: 20}}>Information</Text>
-              <View style={{}}>
-                <Text style={{fontSize: 20}}>{this.state.information}</Text>
+              <View style={{ flexDirection: 'row', marginBottom: 5}}>
+                <View style={{ justifyContent: 'center', alignItems: 'center'}}>
+                  <Text style={{fontSize: 20, fontWeight: 'bold'}}>Self-Help Guide</Text>
+                </View>
+                <Icon name='md-star'style={{fontSize: 40, color: '#FFDF00', marginLeft: 10}} />
               </View>
+              <View style={{ width: '100%', borderBottomWidth: 1, borderColor: 'rgba(0, 0, 0, 0.3)', marginBottom: 15}}></View>
+              <View style={{}}>
+                <Text style={{fontSize: 20, textAlign: 'center', }}>{this.state.information}</Text>
+              </View>
+              <View style={{ width: '100%', borderBottomWidth: 1, borderColor: 'rgba(0, 0, 0, 0.3)', marginTop: 15, marginBottom: 5}}></View>
               <TouchableOpacity style={ styles.loginBtn } onPress={(e)=>{
                 this.setState({modalVisible: false});
               }}>
@@ -809,14 +817,15 @@ const styles = StyleSheet.create({
         }
   },
   photoView: { flex:1, borderWidth:1, borderRadius:3, borderColor: '#ccc', height:80,
-          backgroundColor:'#fff', justifyContent:"center", alignItems:'center' }, 
+          backgroundColor:'#fff', justifyContent:"center", alignItems:'center' },
   modalContent: {
     backgroundColor: 'white',
-    padding: 40,
+    padding: 30,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 4,
     borderColor: 'rgba(0, 0, 0, 0.1)',
+    flexDirection: 'column'
   },
   loginBtn:{
     padding:5, marginTop:20, flexDirection:'row', width:'60%', alignSelf:'center', alignItems:'center', backgroundColor:'#0B486B',

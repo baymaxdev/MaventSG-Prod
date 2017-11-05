@@ -63,7 +63,7 @@ class SkillPage extends Component {
         this.editMavenActionSheet.show();
       }});
     } else {
-      Actions.refresh({rightButtonImage: require('../../../assets/icons/copy1.png'), onRight: () => {
+      Actions.refresh({rightButtonImage: require('../../../assets/icons/more1.png'), onRight: () => {
         this.genericMavenActionSheet.show();
       }});
     }
@@ -306,7 +306,7 @@ class SkillPage extends Component {
             }
             <View style={ [styles.viewContainer,{ paddingTop:0 }] } >
               <Text style={ styles.subjectText }>{this.state.title}</Text>
-              <Text style={[ styles.subjectText, {fontSize: 19, fontWeight: 'bold'} ]}>Skill Description</Text>
+              <Text style={ styles.subjectText }>Skill Description</Text>
                 <Text style={ styles.contentText }>{this.state.description}</Text>
             </View>
             <View style={ [styles.viewContainer, { flexDirection:'row', justifyContent:'space-between' }] } >
