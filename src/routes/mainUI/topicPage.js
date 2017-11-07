@@ -10,33 +10,17 @@ import Search from 'react-native-search-box';
 import PickerModal from '../../components/picker';
 import Placeholder from 'rn-placeholder';
 import ReadMore from '@expo/react-native-read-more-text';
+import GalleryComponent from '../../components/galleryComponent';
+import ActionSheet from 'react-native-actionsheet';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const {width, height} = Dimensions.get('window');
 const HORIZONTAL_PADDING = 8;
-const data = [{pic: require('../../../assets/images/user1.jpg'), name: 'Sunny Lee', day: 'a moment ago', comments: 589, likes:168,
-              topic: 'Anyone knows what to look out for when it comes to hiring a freelancer?' },
-
-              {pic: require('../../../assets/images/profile.png'), name: 'Christina Toh', day: '3h ago', comments: 888, likes:1688,
-              image: require('../../../assets/images/Announcement_banner.jpg')},
-
-              {pic: require('../../../assets/images/user2.jpg'), name: 'Keeva Sharma', day: '4h ago', comments: 534, likes:765,
-              topic: 'How do you value your hourly rate?' },
-
-              {pic: require('../../../assets/images/user3.jpg'), name: 'Shankar Sharma', day: '3h ago', comments: 888, likes:1688,
-              image: require('../../../assets/images/CarouselView/Image2-1.jpg')},
-
-              {pic: require('../../../assets/images/user4.jpg'), name: 'Sandy Lou', day: '1d ago', comments: 534, likes:765,
-              topic: 'SCAMMER ALERT!' },
-
-            ]
-const pickerData = Platform.OS==="android"?['Please Select...','Take photo...','Choose from Library...']:['Take photo...','Choose from Library...'];
 
 class TopicPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      likeList:[],
       reportList: [],
       data: [],
       modalVisible: false,
@@ -48,6 +32,9 @@ class TopicPage extends Component {
       requestLoading: true,
       refreshing: false,
       sortBy: 0,
+      galleryVisible: false,
+      picUrl: null,
+      postText: '',
     }
   }
 
@@ -57,19 +44,38 @@ class TopicPage extends Component {
 
   componentDidMount() {
     Actions.refresh({rightButtonImage: require('../../../assets/icons/more.png'), rightButtonIconStyle: { width: 20, height:20}, onRight: ()=>{this.setModalVisible(true, 1)}})
-    // let tempReport = [];
-    // data.map((item, index)=>{
-    //   tempReport.push(false);
-    // })
-    // this.setState({ reportList: tempReport });
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ data: nextProps.topic.topics, requestLoading: false, refreshing: false });
+    if (this.state.likeSelected) {
+      let index = this.state.likeSelected;
+      let temp = this.state.data;
+      temp[index].liked = !temp[index].liked;
+      temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
+      this.setState({data: temp, likeSelected: false});
+      return;
+    }
+
+    var sortedData = nextProps.topic.topics;
+    if (this.state.sortBy == 0) {
+      sortedData.sort(function(a, b) {
+        da = new Date(a.createdDate);
+        db = new Date(b.createdDate);
+        return db.getTime() - da.getTime();
+      });
+    } else {
+      sortedData.sort(function(a, b) {
+        return b.heart - a.heart;
+      });
+    }
+    this.setState({ data: sortedData, requestLoading: false, refreshing: false });
   }
 
   navigateToComments = (data) => {
-    Actions.commentsPage({data:data});
+    Actions.commentsPage({data: data, onBack: () => {
+      this.props.getTopics(this.props.category, this.props.auth.token);
+      Actions.pop();
+    }});
   }
 
   onclickReport = (index) =>{
@@ -79,11 +85,10 @@ class TopicPage extends Component {
   }
 
   onclickLike = (index) =>{
-    this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token);
-    let temp = this.state.data;
-    temp[index].liked = !temp[index].liked;
-    temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
-    this.setState({data: temp});
+    this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token, () => {
+      
+    });
+    this.setState({likeSelected: index});
   }
 
   onClickAdd = () => {
@@ -108,7 +113,7 @@ class TopicPage extends Component {
     this.setState((prev) => ({postModal: !prev.postModal}))
   }
 
-  getDateString(date) {
+  getStringFromDate(date) {
     let createdDate = new Date(date);
     let currentDate = new Date();
     let diffMin = (currentDate - createdDate) / 1000 / 60;
@@ -192,7 +197,6 @@ class TopicPage extends Component {
   }
 
   renderItem(item, index) {
-    console.log(item);
     return (
       <View style = {{ borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginBottom: 13}}>
         <View style = {{flexDirection: "row", justifyContent: 'space-between', padding: 10}}>
@@ -201,7 +205,7 @@ class TopicPage extends Component {
             <View style = {{paddingHorizontal: 10}} >
               <Text style = {styles.nameText} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
               <View style={{ height: 5 }}></View>
-              <Text style ={{ color: '#a4a4a4', fontSize: 14}} >{this.getDateString(item.createdDate)}</Text>
+              <Text style ={{ color: '#a4a4a4', fontSize: 14}} >{this.getStringFromDate(item.createdDate)}</Text>
             </View>
           </View>
           <TouchableOpacity style={{paddingTop: 5, paddingRight: 5 }} onPress={() => {this.onclickReport(index)}}>
@@ -227,13 +231,11 @@ class TopicPage extends Component {
           }
           {
             item.image &&
-              <View>
-                <Text style = {[styles.nameText, {paddingHorizontal: 10}]}>
-                  {item.userID.firstName + ' ' + item.userID.lastName}
-                  <Text style = {{ color: '#ababab', fontSize: 15}}> added a new photo.</Text>
-                </Text>
+              <TouchableOpacity onPress={() => {
+                this.setState({galleryVisible: true, galleryPicUrl: item.image});
+                }}>
                 <Image source = {{uri: item.image}} style ={{ marginTop: 10,  width: '100%', height: 200}}/>
-              </View>
+              </TouchableOpacity>
           }
         </View>
         <View style = {{ flexDirection: 'row', alignItems:'center', paddingHorizontal: 10, paddingBottom: 5}}>
@@ -250,6 +252,10 @@ class TopicPage extends Component {
             <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.commentsCount}</Text>
           </View>
         </View>
+        <GalleryComponent picUrl={[this.state.galleryPicUrl]} modalVisible={this.state.galleryVisible} initialPage={0}
+          onClose={() => {
+            this.setState({galleryVisible: false})
+          }}/>
       </View>
     );
   }
@@ -263,40 +269,39 @@ class TopicPage extends Component {
   }
 
   onUploadImage = () => {
-    this.setState({ showPicker: true });
+    this.ActionSheet.show();
   }
 
   onCancel = () => {
-    this.setState({modalVisible: false, picUrl: null});
+    this.setState({modalVisible: false, picUrl: null, postText: ''});
   }
 
   onPost = () => {
-    this.setState({modalVisible: false, picUrl: null});
-  }
-
-  changeValue = (value) => {
-    if(Platform.OS==="android"){
-      if(value === 1) this.takePhoto();
-      else if(value === 2) this._openCameraRoll();
-    }
-    else{
-      if(value === 0) this.takePhoto();
-      else if(value === 1) this._openCameraRoll();
-    }
+    this.props.createTopic(this.props.category, this.state.picUrl, this.state.postText, this.props.auth.token, () => {
+      this.setState({requestLoading: true, modalVisible: false, postModal: false, picUrl: null, postText: ''});
+      this.props.getTopics(this.props.category, this.props.auth.token);
+    });
   }
 
   _openCameraRoll = async () => {
     let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
     if(!image.cancelled) {
-      this.setState({picUrl: {uri: image.uri}});
+      this.setState({picUrl: image.uri});
     }
   }
 
   takePhoto = async () => {
       let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[4,3]});
       if(!image.cancelled) {
-        this.setState({picUrl: {uri: image.uri}});
+        this.setState({picUrl: image.uri});
       }
+  }
+
+  handlePress = (i) => {
+    if (i === 1)
+      this._openCameraRoll();
+    else if (i === 2)
+      this.takePhoto();
   }
 
   renderPlaceholder() {
@@ -326,18 +331,20 @@ class TopicPage extends Component {
   }
 
   _onRefresh() {
-    this.setState({refreshing: true});
+    this.setState({refreshing: true, data: []});
     this.props.getTopics(this.props.category, this.props.auth.token);
   }
 
   onSortByRecent() {
-    this.setState({sortBy: 0});
-    this.setModalVisible(false)
+    this.setModalVisible(false);
+    this.setState({sortBy: 0, data: [], requestLoading: true});
+    this.props.getTopics(this.props.category, this.props.auth.token);
   }
 
   onSortByMostHearts() {
-    this.setState({sortBy: 1});
-    this.setModalVisible(false)
+    this.setModalVisible(false);
+    this.setState({sortBy: 1, data: [], requestLoading: true});
+    this.props.getTopics(this.props.category, this.props.auth.token);
   }
 
   render() {
@@ -345,31 +352,25 @@ class TopicPage extends Component {
       inputRange: [0, 1],
       outputRange: ['0deg', '-135deg']
     })
-    var sortedData = this.state.data;
-    let _this = this;
-    sortedData.sort(function(a, b) {
-      if (_this.state.sortBy === 0) 
-        return Date(b.createdDate) - Date(a.createdDate);
-      else
-        return b.heart - a.heart;
-    });
 
     return (
       <Container>
         <Modal transparent={true} visible={this.state.modalVisible} onRequestClose={() => null} >
-          { this.state.modalID === 1 &&
-          <TouchableOpacity style={styles.navModal} onPressOut={() => {this.setModalVisible(false)}}>
-            <View style={styles.innerNavModal}>
-              <TouchableOpacity onPress={() => {this.onSortByRecent()}}>
-                <Text style={{color: '#fff'}}>Recent</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => {this.onSortByMostHearts()}}>
-                <Text style={{color: '#fff', marginTop: 5}}>Most Hearts</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+          {
+            this.state.modalID === 1 &&
+            <TouchableOpacity style={styles.navModal} onPressOut={() => {this.setModalVisible(false)}}>
+              <View style={styles.innerNavModal}>
+                <TouchableOpacity onPress={() => {this.onSortByRecent()}}>
+                  <Text style={{color: '#fff', fontSize: 20}}>Recent</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {this.onSortByMostHearts()}}>
+                  <Text style={{color: '#fff', marginTop: 5, fontSize: 20}}>Most Hearts</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
           }
-          { this.state.modalID === 3 &&
+          {
+            this.state.modalID === 3 &&
             <TouchableWithoutFeedback onPress = {(e)=> this.setState({modalVisible: false})} >
               <View style={styles.postModal} >
                 <View style={{ marginBottom:50,  width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
@@ -379,7 +380,7 @@ class TopicPage extends Component {
                   <TouchableOpacity onPress = {(e) => this.onUploadImage()}  style = {{ marginTop: 10, height:150, width: '100%', borderWidth: 1, borderColor: '#515151', borderRadius: 3, justifyContent: 'center', alignItems: 'center' }}>
                     {
                       this.state.picUrl ?
-                      <Image source = {this.state.picUrl} style = {{ width: '100%',  height: '100%' }} />
+                      <Image source = {{uri: this.state.picUrl}} style = {{ width: '100%',  height: '100%' }} />
                       :
                       <Text style = {{ color: '#515151', fontSize: 17 }} >Click here to post image</Text>
                     }
@@ -393,13 +394,11 @@ class TopicPage extends Component {
                     </TouchableOpacity>
                   </View>
                 </View>
-                <View style={{position: 'absolute', bottom: 0, width: '100%'}}>
-                  {this.state.showPicker ? <PickerModal closeModal={() => this.setState({ showPicker: false })} data={pickerData} offSet={this.state.offSet}  changeValue={this.changeValue} /> : null}
-                </View>
               </View>
             </TouchableWithoutFeedback>
           }
-          { this.state.modalID === 4 &&
+          {
+            this.state.modalID === 4 &&
             <TouchableWithoutFeedback onPress = {(e)=> this.setState({modalVisible: false})} >
               <View style={styles.postModal} >
                 <View style={{ width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
@@ -417,7 +416,6 @@ class TopicPage extends Component {
                 </View>
               </View>
             </TouchableWithoutFeedback>
-
           }
 
         </Modal>
@@ -431,7 +429,7 @@ class TopicPage extends Component {
               onRefresh={this._onRefresh.bind(this)}
         />}>
        {
-         sortedData.map((item, index)=>{
+         this.state.data.map((item, index)=>{
            return <View key={index}>
              {this.renderItem(item, index)}
             </View>
@@ -458,6 +456,13 @@ class TopicPage extends Component {
        <TouchableOpacity onPress={(e) => this.onClickAdd()} style={{position: 'absolute', bottom: 30, right: 30}}>
           <Animated.Image source = {require('../../../assets/icons/plus.png')} style={{ transform: [{rotate: spin}], height: 50, width: 50}} />
        </TouchableOpacity>
+       <ActionSheet
+            ref={o => this.ActionSheet = o}
+            title={null}
+            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            cancelButtonIndex={0}
+            onPress={this.handlePress}
+        />
       </Container>
     );
   }
@@ -475,8 +480,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)'
   },
   innerNavModal: {
-    backgroundColor:'#353535', paddingHorizontal:10, paddingVertical:10,
-    width:'30%', height: '10%',
+    backgroundColor:'#353535', padding: 10, justifyContent: 'center', height: 80, 
     borderWidth: 1, borderRadius: 3, borderColor: '#353535'
   },
   postModal: {
@@ -484,9 +488,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)'
   },
   innerPostModal: {
-    flexDirection: 'row', alignItems: 'center', paddingLeft: '5%',
+    flexDirection: 'row', alignItems: 'center',
     backgroundColor:'rgba(0, 0, 0, 0.8)',
-    width:'100%', height: '12%',
+    width:'100%', paddingHorizontal: 10, paddingVertical: 5,
     borderWidth: 1, borderRadius: 5, borderColor: '#ffffff',
   },
   plusModal: {
@@ -518,7 +522,8 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
-  setLike: (id, type, token) => dispatch(actions.setLike(id, type, token)),
+  createTopic: (category, imageUrl, text, token, next) => dispatch(actions.createTopic(category, imageUrl, text, token, next)),
+  setLike: (id, type, token, next) => dispatch(actions.setLike(id, type, token, next)),
   actions: bindActionCreators(actions, dispatch)
 });
 

@@ -30,6 +30,9 @@ import {
   SAVE_MAVEN_ERROR,
   REPORT_MAVEN,
   REPORT_MAVEN_ERROR,
+  REQUEST_UPDATE_PROFILE_IMAGE,
+  UPDATE_PROFILE_IMAGE,
+  UPDATE_PROFILE_IMAGE_ERROR,
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -37,10 +40,12 @@ const INITIAL_STATE = {
   user: {},
   error: null,
   loading: false,
-  mavenLoading: true,
-  mavenImageLoading: true,
+  mavenLoading: false,
+  mavenImageLoading: false,
   mavenRegSuccess: false,
   mavenImageSuccess: false,
+  imageUpdating: false,
+  imageUpdateSuccess: false,
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -105,6 +110,12 @@ export default function (state = INITIAL_STATE, action) {
       return { ...state };
     case REPORT_MAVEN_ERROR:
       return { ...state, error: action.error };
+    case REQUEST_UPDATE_PROFILE_IMAGE:
+      return { ...state, imageUpdating: true, imageUpdateSuccess: false };
+    case UPDATE_PROFILE_IMAGE:
+      return { ...state, imageUpdating: false, imageUpdateSuccess: true };
+    case UPDATE_PROFILE_IMAGE_ERROR:
+      return { ...state, error: action.error, imageUpdating: false, imageUpdateSuccess: false };
 
     default:
       return state;

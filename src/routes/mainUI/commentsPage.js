@@ -12,9 +12,15 @@ import {
   KeyboardAvoidingView,
   ScrollView
 } from 'react-native';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actions from '../../actions';
 import {Actions} from 'react-native-router-flux';
 import {Icon, Container, Content} from 'native-base';
 import Search from 'react-native-search-box';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import Placeholder from 'rn-placeholder';
+
 const SCREEN_WIDTH = Dimensions
   .get('window')
   .width;
@@ -31,101 +37,204 @@ class CommentsPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data,
-      isLike: false,
-      likeList:[],
+      comments: [],
+      topic: {},
+      commentText: '',
+      requestLoading: true,
     }
   }
 
-  componentDidMount() {
-    let temp = [];
-    data.map((item, index)=>{
-      temp.push(false);
-    })
-    this.setState({ likeList: temp })   
+  componentWillMount() {
+    this.props.getComments(this.props.data.topicID, this.props.auth.token);
+    this.setState({topic: this.props.data});
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({comments: nextProps.topic.comments, requestLoading: false, commentText: ''});
+  }
+
+  getStringFromDate(date) {
+    let createdDate = new Date(date);
+    let currentDate = new Date();
+    let diffMin = (currentDate - createdDate) / 1000 / 60;
+    var date = '';
+    if (diffMin < 60) {
+      date = Math.floor(diffMin) + ' minute';
+    } else if ((diffMin / 60) < 24) {
+      date = Math.floor(diffMin / 60) + ' hour';
+    } else {
+      let diffYear = currentDate.getUTCFullYear() - createdDate.getUTCFullYear();
+      let diffMon = currentDate.getUTCMonth() - createdDate.getUTCMonth();
+      let diffDay = currentDate.getUTCDate() - createdDate.getUTCDate();
+
+      if (diffMon == 0) {
+        if (diffYear > 0) {
+          if (diffDay < 0) {
+            date = '11 month';
+          } else {
+            date = '1 year';
+          }
+        } else {
+          date = Math.floor(diffMin / 60 / 24) + ' day';
+        }
+      } else if (diffMon == 1) {
+        if (diffYear > 0) {
+          date = diffYear + ' year';
+        } else {
+          if (diffDay < 0) {
+            date = Math.floor(diffMin / 60 / 24) + ' day';
+          } else {
+            date = diffMon + ' month';
+          }
+        }
+      } else if (diffMon > 1) {
+        if (diffYear > 0) {
+          date = diffYear + ' year';
+        } else {
+          if (diffDay < 0) {
+            date = (diffMon - 1) + ' month';
+          } else {
+            date = diffMon + ' month';
+          }
+        }
+      } else {
+        if (diffYear == 1) {
+          if (diffDay < 0) {
+            date = (12 + diffMon - 1) + ' month';
+          } else {
+            date = (12 + diffMon) + ' month';
+          }
+        } else {
+          date = (diffYear - 1) + ' year';
+        }
+      }
+    }
+    if (date[0] == '1' && date[1] == ' ') {
+      date += ' ago';
+    } else {
+      date += 's ago';
+    }
+    return date;
   }
   
   renderItem(item, index) {
     return (
-          <View>
-            <View style = {{flexDirection: "row", padding: 10}}>
-              <Image source = {item.pic} style = {{ width: 50, height: 50, borderRadius: 25 }}/>
-              <View style = {{paddingHorizontal: 10, flex:1}} >
-                <View style = {{ backgroundColor: '#ececec', padding: 10, borderRadius: 20 }}>
-                  <Text style = {{fontSize:15}} >{item.name}</Text>
-                  <Text style={{paddingVertical: 5}} >{item.content}</Text>
-                </View>
-                <View style = {{ flexDirection: 'row', padding: 10}}>
-                  <Text style={{color: '#b5b5b5'}} >{item.day}</Text>
-                  <View style = {{ flexDirection: 'row', paddingHorizontal: 15 }}>
-                    <TouchableOpacity onPress={(e)=>this.onLikeList(index)} >
-                      <Icon style={{ fontSize:17, color: '#515151' }} name = {this.state.likeList[index]?'ios-heart':'ios-heart-outline'} />
-                    </TouchableOpacity>
-                     <Text style ={{ color: '#515151', paddingHorizontal: 5}} >Like</Text>
-                  </View>
-                </View>
+      <View>
+        <View style = {{flexDirection: "row", padding: 10}}>
+          <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 50, height: 50, borderRadius: 25 }}/>
+          <View style = {{paddingHorizontal: 10, flex:1}} >
+            <View style = {{ backgroundColor: '#ececec', padding: 10, borderRadius: 20 }}>
+              <Text style = {{fontSize:15}} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
+              <Text style={{paddingVertical: 5}} >{item.text}</Text>
+            </View>
+            <View style = {{ flexDirection: 'row', padding: 10}}>
+              <Text style={{color: '#b5b5b5'}} >{this.getStringFromDate(item.createdDate)}</Text>
+              <View style = {{ flexDirection: 'row', paddingHorizontal: 15 }}>
+                <TouchableOpacity onPress={(e)=>this.onLikeList(index)} >
+                  <Icon style={{ fontSize:17, color: '#515151' }} name = {item.liked?'ios-heart':'ios-heart-outline'} />
+                </TouchableOpacity>
+                  <Text style ={{ color: '#515151', paddingHorizontal: 5}} >{item.heart}</Text>
               </View>
             </View>
           </View>
+        </View>
+      </View>
     );
   }
 
   onclickLike = () => {
-    this.setState((prev)=>({ isLike: !prev.isLike}));
+    this.props.setLike(this.state.topic.topicID, 0, this.props.auth.token);
+    let temp = this.state.topic;
+    temp.liked = !temp.liked;
+    this.setState({topic: temp});
   }
 
   onLikeList = (index) =>{
-    let temp = this.state.likeList;
-    temp[index] = !temp[index];
-    let tempData = this.state.data;
-    tempData[index].likes = temp[index] ? tempData[index].likes + 1 : tempData[index].likes - 1
-    this.setState({likeList: temp, data: tempData});
+    this.props.setLike(this.state.comments[index].commentID, 1, this.props.auth.token);
+    let temp = this.state.comments;
+    temp[index].liked = !temp[index].liked;
+    temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
+    this.setState({comments: temp});
+  }
+
+  renderPlaceholder() {
+    var ret = [];
+    for (var i = 0; i < 5; i++) {
+        ret.push(
+            <View key={i} style={{padding:20, height: 75}}>
+                <Placeholder.ImageContent
+                    onReady={false}
+                    lineNumber={2}
+                    animate="shine"
+                    lastLineWidth="70%"
+                    >
+                </Placeholder.ImageContent>
+            </View>
+        );
+    }
+    return ret;
   }
 
   render() {
     return (
-      <KeyboardAvoidingView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} >
-        <Container style = {{ marginBottom: 5, backgroundColor: '#fff'}}>
+      <KeyboardAwareScrollView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} scrollEnabled={false} >
+        <Container style = {{ backgroundColor: '#fff' }}>
           <Content>
             <ScrollView>
               <View style = {{flexDirection: "row", alignItems: 'center', padding: 20, paddingBottom: 0}}>
-                <Image source = {this.props.data.pic} style = {{ width: 60, height: 60, borderRadius: 30 }}/>
+                <Image source = {this.state.topic.userID.displayPicture?{uri: this.state.topic.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 60, height: 60, borderRadius: 30 }}/>
                 <View style = {{paddingHorizontal: 10, justifyContent: 'space-between', height: 40}} >
-                  <Text style = {{fontSize:16}} >{this.props.data.name}</Text>
-                  <Text style = {{color: '#515151', fontSize:12}}>{this.props.data.day}</Text>
+                  <Text style = {{fontSize:16}} >{this.state.topic.userID.firstName + ' ' + this.state.topic.userID.lastName}</Text>
+                  <Text style = {{color: '#515151', fontSize:12}}>{this.getStringFromDate(this.state.topic.createdDate)}</Text>
                 </View>
               </View>
               <View style = {{ paddingVertical: 10, paddingHorizontal: 20}}>
                 <Text style = {{ fontSize:18 }}>
-                  {this.props.data.topic}
+                  {this.state.topic.text}
                 </Text>
               </View>
               <View style = {{ padding: 10}}>
                 <View style = {{paddingVertical:10, paddingHorizontal:20, flexDirection: 'row', alignItems:'center', borderColor: '#ececec', borderBottomWidth: 1, borderTopWidth: 1 }}>
                   <TouchableOpacity onPress={(e)=>this.onclickLike()} >
-                    <Icon style={{ fontSize:27, color: '#515151', marginTop: 2 }} name = {this.state.isLike?'ios-thumbs-up':'ios-thumbs-up-outline'} />
+                    <Icon style={{ fontSize:27, color: '#515151', marginTop: 2 }} name = {this.state.topic.liked?'ios-thumbs-up':'ios-thumbs-up-outline'} />
                   </TouchableOpacity>
                   <Text style ={{ color: '#515151', fontSize: 17, paddingHorizontal: 10}} >Like</Text>
                 </View>
               </View>
-              
-            {
-              this.state.data.map((item, index)=>{
-                return <View key={index}>
-                  {this.renderItem(item, index)}
-                  </View>
-              })
-            }
+              {
+                this.state.requestLoading
+                ?
+                this.renderPlaceholder()
+                :
+                this.state.comments.map((item, index)=>{
+                  return <View key={index}>
+                    {this.renderItem(item, index)}
+                    </View>
+                })
+              }
             </ScrollView>
           </Content>
         </Container>
         <View style = {{flexDirection: 'row', alignItems: 'center', borderWidth: 1, paddingHorizontal:10, borderColor: '#b5b5b5', backgroundColor: '#fff'}}>
-          <TextInput returnKeyType="next" multiline={true} placeholder = "Write a comments..." style = {{ fontSize:15, flex: 1, height:50 }}/>
-          <TouchableOpacity onPress = {(e)=>{}}>
+          <TextInput
+            returnKeyType="next"
+            multiline
+            placeholder = "Write a comments..."
+            value={this.state.commentText}
+            onChangeText={(text) => {this.setState({commentText: text})}}
+            style = {{ fontSize:15, flex: 1, height:50 }}/>
+          <TouchableOpacity onPress = {(e)=>{
+            if (this.state.commentText !== '') {
+              this.setState({requestLoading: true});
+              this.props.addComment(this.state.topic.topicID, this.state.commentText, this.props.auth.token, () => {
+                this.props.getComments(this.props.data.topicID, this.props.auth.token);
+              });
+            }
+          }}>
             <Icon name = "ios-happy-outline" style={{ color: '#b5b5b5' }}/>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     );
   }
 }
@@ -140,4 +249,15 @@ const styles = StyleSheet.create({
   }
 });
 
-export default CommentsPage;
+const mapStateToProps = (state) =>({
+  auth: state.auth,
+  topic: state.topic,
+});
+const mapDispatchToProps = (dispatch) =>({
+  getComments: (topicId, token) => dispatch(actions.getComments(topicId, token)),
+  addComment: (topicId, text, token, next) => dispatch(actions.addComment(topicId, text, token, next)),
+  setLike: (id, type, token) => dispatch(actions.setLike(id, type, token)),
+  actions: bindActionCreators(actions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(CommentsPage);

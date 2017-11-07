@@ -54,6 +54,7 @@ class SkillPage extends Component {
         idVerified: false,
         refreshing: false,
         reportText: '',
+        successModalVisible: false
     };
   }
 
@@ -100,7 +101,7 @@ class SkillPage extends Component {
         else
           avt[i].value = false;
       }
-      this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price,
+      this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, title: m.title, 
         rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, refreshing: false, idVerified: m.userID.idVerified});
     }
   }
@@ -133,16 +134,15 @@ class SkillPage extends Component {
 
   _openCameraRoll = async () => {
     let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
-    if (!image.cancelled) {
-      let pictures = this.state.picUrl;
-      pictures[this.state.picNumber] = image.uri;
-      this.setState({picUrl: pictures, requestLoading: true});
-      this.props.addMavenImage(this.state.maven.maven._id, image.uri, this.props.auth.token);
-    }
+    this.addPhoto(image);
   }
 
   takePhoto = async () => {
     let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[4,3]});
+    this.addPhoto(image);
+  }
+
+  addPhoto (image) {
     if (!image.cancelled) {
       let pictures = this.state.picUrl;
       pictures[this.state.picNumber] = image.uri;
@@ -160,8 +160,7 @@ class SkillPage extends Component {
 
   handleEditMavenPress = (i) => {
     if (i === 1) {
-      this.props.checkId(this.props.auth.token);
-      Actions.skillList({ isEdit: true , maven: this.state.maven.maven });
+      Actions.skillList({ isEdit: true });
     }
     else if (i === 2)
       this.props.deleteMaven(this.state.maven.maven._id, this.props.auth.token, () => {
@@ -180,9 +179,14 @@ class SkillPage extends Component {
 
   handleGenericMavenPress = (i) => {
     if (i == 1) {
-      this.props.saveMaven(this.state.maven.maven._id, this.props.auth.token);
+      this.props.saveMaven(this.state.maven.maven._id, this.props.auth.token, () => {
+        this.setState({successModalVisible: true});
+        setTimeout(() => {
+          this.setState({successModalVisible: false});
+        }, 1000);
+      });
     } else if (i == 2) {
-      this.setState({reportModalVisible: true});
+      this.setState({reportModalVisible: true, reportText: ''});
     }
   }
 
@@ -304,8 +308,10 @@ class SkillPage extends Component {
                 }
               </View>
             }
-            <View style={ [styles.viewContainer,{ paddingTop:0 }] } >
+            <View style={ styles.viewContainer } >
               <Text style={ styles.subjectText }>{this.state.title}</Text>
+            </View>
+            <View style={ styles.viewContainer } >
               <Text style={ styles.subjectText }>Skill Description</Text>
                 <Text style={ styles.contentText }>{this.state.description}</Text>
             </View>
@@ -474,10 +480,27 @@ class SkillPage extends Component {
             <TouchableOpacity style={[styles.loginBtn,{backgroundColor:'#0B486B', padding:10, marginBottom:10}]} onPress={(e)=>{
               this.setState({reportModalVisible: false});
               let _this = this;
-              this.props.reportMaven(this.state.maven.maven._id, this.state.reportText, this.props.auth.token);
+              this.props.reportMaven(this.state.maven.maven._id, this.state.reportText, this.props.auth.token, () => {
+                this.setState({successModalVisible: true});
+                setTimeout(() => {
+                  this.setState({successModalVisible: false});
+                }, 1000);
+              });
             }}>
               <Text style={styles.btnText}>REPORT</Text>
             </TouchableOpacity>
+          </View>
+        </Modal>
+        <Modal
+          isVisible={this.state.successModalVisible}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
           </View>
         </Modal>
         <GalleryComponent picUrl={this.state.picUrl} modalVisible={this.state.modalVisible} initialPage={initialPage}
@@ -519,6 +542,14 @@ const styles = StyleSheet.create({
     height: 1
     }
   },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
 });
 
 const mapStateToProps = (state) =>({
@@ -533,9 +564,8 @@ const mapDispatchToProps = (dispatch) =>({
   addMavenImage: (mavenId, imageUrl, token) => dispatch(actions.addMavenImage(mavenId, imageUrl, token)),
   deleteMavenImage: (mavenId, index, token, next) => dispatch(actions.deleteMavenImage(mavenId, index, token, next)),
   deleteMaven: (mavenId, token, next) => dispatch(actions.deleteMaven(mavenId, token, next)),
-  saveMaven: (mavenId, token) => dispatch(actions.saveMaven(mavenId, token)),
-  reportMaven: (mavenId, description, token) => dispatch(actions.reportMaven(mavenId, description, token)),
-  checkId: (token) => dispatch(actions.checkId(token)),
+  saveMaven: (mavenId, token, next) => dispatch(actions.saveMaven(mavenId, token, next)),
+  reportMaven: (mavenId, description, token, next) => dispatch(actions.reportMaven(mavenId, description, token, next)),
   actions: bindActionCreators(actions, dispatch)
 });
 

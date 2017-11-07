@@ -31,6 +31,9 @@ import {
   SAVE_MAVEN_ERROR,
   REPORT_MAVEN,
   REPORT_MAVEN_ERROR,
+  REQUEST_UPDATE_PROFILE_IMAGE,
+  UPDATE_PROFILE_IMAGE,
+  UPDATE_PROFILE_IMAGE_ERROR,
 } from './types';
 
 export const getMyProfileInfo = (token) => {
@@ -93,7 +96,8 @@ export const registerMaven = (mavenData, token) => {
   let timeAvailable = mavenData.timeAvailable;
   let price = mavenData.price;
   let idPictures = mavenData.idPictures;
-  let pictures = mavenData.pictures;
+  var pictures = mavenData.pictures;
+  pictures[2] = mavenData.selfie;
   let formData = new FormData();
   formData.append('mainCategory', mainCategory);
   formData.append('category', category);
@@ -378,7 +382,7 @@ export const editAbout = (about, token, next) => {
   }
 }
 
-export const saveMaven = (mavenId, token) => {
+export const saveMaven = (mavenId, token, next) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -401,7 +405,7 @@ export const saveMaven = (mavenId, token) => {
   }
 }
 
-export const reportMaven = ( mavenId, description, token ) => {
+export const reportMaven = ( mavenId, description, token, next ) => {
   let data = {
     mavenID: mavenId,
     description: description
@@ -431,6 +435,7 @@ export const reportMaven = ( mavenId, description, token ) => {
     .then(res => {
       if (res.status === 200) {
         dispatch({ type: REPORT_MAVEN });
+        next();
       }
       else {
         dispatch({ type: REPORT_MAVEN_ERROR, error: res.msg });
@@ -438,6 +443,40 @@ export const reportMaven = ( mavenId, description, token ) => {
     })
     .catch(err => {
       dispatch({ type: REPORT_MAVEN_ERROR, error: err });
+    })  
+  }
+}
+
+export const updateProfileImage = ( imageUrl, token ) => {
+  let formData = new FormData();
+  let filename = imageUrl.split('/').pop();
+  let match = /\.(\w+)$/.exec(filename);
+  let type = match ? match[1] : '';
+  let file = { uri: imageUrl, name: _generateUUID() + `.${type}`, type: `image/${type}`};
+  formData.append(`photo`, file);
+  let option = { 
+    method: 'PUT',
+    body: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `user/uploadProfileImage`;
+    dispatch({ type: REQUEST_UPDATE_PROFILE_IMAGE });
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: UPDATE_PROFILE_IMAGE });
+        dispatch(getMyProfileInfo(token));
+      }
+      else {
+        dispatch({ type: UPDATE_PROFILE_IMAGE_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: UPDATE_PROFILE_IMAGE_ERROR, error: err });
     })  
   }
 }

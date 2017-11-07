@@ -103,17 +103,21 @@ class SkillList extends Component {
         modalData:data,
         pictures: [],
         idPictures: [],
+        selfie: undefined,
         requestLoading: false,
         price: '',
         modalVisible: false,
         information: '',
+        postalCodeEditable: false,
+        postalCode: '',
       };
   }
 
   componentWillMount() {
+    this.props.checkId(this.props.auth.token);
     if (this.props.isEdit) {
       Actions.refresh({title: 'Edit Maven Details'});
-      var m = this.props.maven;
+      var m = this.props.explore.maven.maven;
       var da = m.dayAvailable.split(',').map(function(item) {
         return parseInt(item, 10);
       });
@@ -173,15 +177,17 @@ class SkillList extends Component {
   componentWillReceiveProps(nextProps) {
     if(this.props.profile.mavenLoading !== nextProps.profile.mavenLoading && !nextProps.profile.mavenLoading && nextProps.profile.mavenRegSuccess){
       this.setState({requestLoading: false});
-      this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
+      this.props.getMavenDetails(this.props.explore.maven.maven._id, this.props.profile.location, this.props.auth.token);
       Actions.pop();
     }
     else if(this.props.profile.mavenLoading !== nextProps.profile.mavenLoading && !nextProps.profile.mavenLoading && !nextProps.profile.mavenRegSuccess){
       this.setState({requestLoading: false});
       alert(nextProps.profile.error);
     }
-    if (this.props.isEdit && !this.state.postalCode) {
-      this.setState({postalCode: nextProps.profile.postalCode});
+    if (nextProps.profile.postalCode) {
+      this.setState({postalCode: nextProps.profile.postalCode, postalCodeEditable: false});
+    } else {
+      this.setState({postalCodeEditable: true});
     }
   }
 
@@ -257,10 +263,12 @@ class SkillList extends Component {
         let tempPictures = this.state.pictures;
         tempPictures[this.state.picNumber] = image.uri;
         this.setState({pictures: tempPictures});
-      } else {
+      } else if (this.state.picNumber < 5) {
         let tempPictures = this.state.idPictures;
         tempPictures[this.state.picNumber - 3] = image.uri;
         this.setState({idPictures: tempPictures});
+      } else {
+        this.setState({selfie: image.uri});
       }
     }
   }
@@ -271,10 +279,12 @@ class SkillList extends Component {
         let tempPictures = this.state.pictures;
         tempPictures[this.state.picNumber] = image.uri;
         this.setState({pictures: tempPictures});
-      } else {
+      } else if (this.state.picNumber < 5) {
         let tempPictures = this.state.idPictures;
         tempPictures[this.state.picNumber - 3] = image.uri;
         this.setState({idPictures: tempPictures});
+      } else {
+        this.setState({selfie: image.uri});
       }
   }
 
@@ -298,6 +308,12 @@ class SkillList extends Component {
     if(!this.state.price || this.state.price.length < 0) {
       alert('Please input price.');
       return;
+    }
+    if (this.state.idPictures[0] === undefined || this.state.idPictures[1] === undefined || this.state.selfie === undefined) {
+      if (!(this.state.idPictures[0] === undefined && this.state.idPictures[1] === undefined && this.state.selfie === undefined)) {
+        alert('Please select all ID pictures and selfie');
+        return;
+      }
     }
     let dayList = [];
     if(this.state.Sun) dayList.push(0);
@@ -332,7 +348,8 @@ class SkillList extends Component {
       timeAvailable: timeList.join(','),
       price: this.state.price,
       idPictures: this.state.idPictures,
-      pictures: this.state.pictures
+      pictures: this.state.pictures,
+      selfie: this.state.selfie
     }
     this.setState({requestLoading: true});
     this.props.registerMaven(data, this.props.auth.token);
@@ -372,8 +389,8 @@ class SkillList extends Component {
       return;
     }
     let data = {
-      mavenId: this.props.maven._id,
-      title: this.props.maven.title,
+      mavenId: this.props.explore.maven.maven._id,
+      title: this.props.explore.maven.maven.title,
       description: this.state.description,
       dayAvailable: dayList.join(','),
       timeAvailable: timeList.join(','),
@@ -596,7 +613,7 @@ class SkillList extends Component {
                       returnKeyType='go'
                       keyboardType="numeric"
                       maxLength={6}
-                      editable={this.props.isEdit?false:true}
+                      editable={this.state.postalCodeEditable}
                       value={this.state.postalCode}
                       onChangeText = {postalCode => this.setState({postalCode})}
                       underlineColorAndroid='transparent'
@@ -708,7 +725,7 @@ class SkillList extends Component {
                         }}>
                         {
                           this.state.idPictures[0]?
-                          <Image source={ this.state.idPictures[0] } style={{ width:'100%', height:'100%' }}/>
+                          <Image source={{ uri: this.state.idPictures[0] }} style={{ width:'100%', height:'100%' }}/>
                           :
                           <Icon name="md-add-circle"/>
                         }
@@ -719,7 +736,31 @@ class SkillList extends Component {
                         }}>
                         {
                           this.state.idPictures[1]?
-                          <Image source={ this.state.idPictures[1] } style={{ width:'100%', height:'100%' }}/>
+                          <Image source={{ uri: this.state.idPictures[1] }} style={{ width:'100%', height:'100%' }}/>
+                          :
+                          <Icon name="md-add-circle"/>
+                        }
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                }
+                {
+                  this.props.isEdit?null:
+                  <View style={{ width: 0.85 * SCREEN_WIDTH, marginTop: 15 }}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={{ fontSize: 16, fontWeight: '600' }}>Selfie</Text>
+                      <TouchableOpacity onPress={() => this.onQuestionMark('verification')}>
+                        <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ marginTop: 5,  flexDirection:'row' }}>
+                      <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
+                        this.setState({ picNumber:5 });
+                        this.ActionSheet.show();
+                        }}>
+                        {
+                          this.state.selfie?
+                          <Image source={{ uri: this.state.selfie }} style={{ width:'100%', height:'100%' }}/>
                           :
                           <Icon name="md-add-circle"/>
                         }
@@ -842,12 +883,14 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) =>({
   auth: state.auth,
-  profile: state.profile
+  profile: state.profile,
+  explore: state.explore
 });
 const mapDispatchToProps = (dispatch) =>({
   registerMaven: (mavenData, token) => dispatch(actions.registerMaven(mavenData, token)),
   editMavenDetails: (mavenData, token) => dispatch(actions.editMavenDetails(mavenData, token)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  checkId: (token) => dispatch(actions.checkId(token)),
   actions: bindActionCreators(actions, dispatch)
 });
 export default connect(mapStateToProps, mapDispatchToProps)(SkillList);

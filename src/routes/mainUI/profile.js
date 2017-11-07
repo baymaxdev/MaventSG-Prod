@@ -10,6 +10,8 @@ import SkillRowComponent from '../../components/skillRowComponent';
 import ReviewComponent from '../../components/reviewComponent';
 import LoadingComponent from '../../components/loadingComponent';
 import Modal from 'react-native-modal';
+import ActionSheet from 'react-native-actionsheet';
+import { ImagePicker } from 'expo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -65,7 +67,7 @@ class Profile extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.isMe) {
       if(this.props.profile.myInfo !== nextProps.profile.myInfo && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.reviews, aboutMe: nextProps.profile.myInfo.about});
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.reviews, aboutMe: nextProps.profile.myInfo.about, displayPicture: nextProps.profile.myInfo.displayPicture});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -74,9 +76,16 @@ class Profile extends Component {
           }, 1000);
         }
       }
+      if(this.props.profile.imageUpdating !== nextProps.profile.imageUpdating && !nextProps.profile.imageUpdating && nextProps.profile.imageUpdateSuccess){
+        this.setState({requestLoading: false, displayPicture: nextProps.profile.myInfo.displayPicture});
+      }
+      else if(this.props.profile.imageUpdating !== nextProps.profile.imageUpdating && !nextProps.profile.imageUpdating && !nextProps.profile.imageUpdateSuccess){
+        this.setState({requestLoading: false, displayPicture: nextProps.profile.myInfo.displayPicture});
+        alert(nextProps.profile.error);
+      }
     } else {
       if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews});
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews, displayPicture: nextProps.profile.user.displayPicture});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -96,6 +105,30 @@ class Profile extends Component {
   onSuccessModal() {
     this.modalFlag = true;
     this.updateProfileInfo();
+  }
+
+  handlePress = (i) => {
+    if (i === 1)
+      this._openCameraRoll();
+    else if (i === 2)
+      this.takePhoto();
+  }
+
+  _openCameraRoll = async () => {
+    let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
+    this.addPhoto(image);
+  }
+
+  takePhoto = async () => {
+    let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[4,3]});
+    this.addPhoto(image);
+  }
+
+  addPhoto (image) {
+    if (!image.cancelled) {
+      this.setState({requestLoading: true, displayPicture: null});
+      this.props.updateProfileImage(image.uri, this.props.auth.token );
+    }
   }
 
   render() {
@@ -144,9 +177,11 @@ class Profile extends Component {
             <Image source={require('../../../assets/images/CarouselView/Image1.jpg')} style={{ position:'absolute',flex:1, width: width}}>
               <View style={{ backgroundColor:'rgba(11, 72, 107, 0.9)', width:'100%', height:'100%'}}/>
             </Image>
-            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }}>
-              <Image source={ user.displayPicture ? {uri: user.displayPicture} : require('../../../assets/images/avatar.png')} style={{ height: 150, width: 150, borderRadius: 50, borderWidth:3, borderColor:'#fff' }} />
-            </View>
+            <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }} disabled={!this.state.isMe} onPress={() => {
+              this.ActionSheet.show();
+            }}>
+              <Image source={ this.state.displayPicture ? {uri: this.state.displayPicture} : require('../../../assets/images/avatar.png')} style={{ height: 150, width: 150, borderRadius: 50, borderWidth:3, borderColor:'#fff' }} />
+            </TouchableOpacity>
             <View style={{ flexDirection:'row', alignItems: 'center', justifyContent:'center', paddingTop: 2 }}>
               <Text style={{ fontSize: 20, color: 'white', fontWeight: '500' }}>{user.firstName + ' ' + user.lastName}</Text>
               {
@@ -203,7 +238,9 @@ class Profile extends Component {
                       <Text style={{ fontSize: 16, color:'#515151' }}>Reviews</Text>
                       <Text style={{color:'#b5b5b5'}}> (</Text><Text style={{color:'#b5b5b5'}}>{user.reviews.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
                     </View>
-                    <TouchableOpacity onPress={() => this.setState({ reviewData: user.reviews })}>
+                    <TouchableOpacity onPress={() => {
+                      Actions.reviewPage();
+                      }}>
                       <Text style={{ color:'#FFA838' }} >View all</Text>
                     </TouchableOpacity>
                   </View>
@@ -262,8 +299,14 @@ class Profile extends Component {
             <Text>Success!</Text>
           </View>
         </Modal>
+        <ActionSheet
+            ref={o => this.ActionSheet = o}
+            title={null}
+            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            cancelButtonIndex={0}
+            onPress={this.handlePress}
+        />
       </Container>
-
     );
   }
 }
@@ -326,6 +369,7 @@ const mapDispatchToProps = (dispatch) =>({
     getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     editAbout: (about, token, next) => dispatch(actions.editAbout(about, token, next)),
+    updateProfileImage: (imageUrl, token) => dispatch(actions.updateProfileImage(imageUrl, token)),
     actions: bindActionCreators(actions, dispatch)
 });
 

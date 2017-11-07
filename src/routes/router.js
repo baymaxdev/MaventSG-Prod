@@ -23,6 +23,7 @@ import GenericBooking from './mainUI/genericBookingPage';
 import SkillPage from './mainUI/skillPage';
 import TopicPage from './mainUI/topicPage';
 import CommentsPage from './mainUI/commentsPage';
+import ReviewPage from './mainUI/reviewPage';
 import TabIcon from '../components/tabIcon';
 import Chat from '../components/chatComponent';
 import BlankPage from './mainUI/BlankView';
@@ -120,6 +121,7 @@ class RouterComponent extends React.Component {
             <Scene key="topicPage" component={TopicPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="topicPage" />
             <Scene key="commentsPage" component={CommentsPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Comments" />
             <Scene key="otherProfile" component={Profile} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Profile" />
+            <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="All Reviews" />
             <Scene key="blankView" component={BlankPage} back={Platform.OS === "android" ? false : true} title="ChatPage" />
           </Scene>
 
