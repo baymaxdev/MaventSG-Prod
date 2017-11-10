@@ -4,86 +4,179 @@ import {
   View,
   Image,
   Platform,
+  Dimensions,
   Text, TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl
 } from 'react-native';
 import { Container, Content, Icon } from 'native-base';
-import data from '../services/request.json';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actions from '../../actions';
 import { Actions } from 'react-native-router-flux';
-import StarRating from 'react-native-star-rating';
+import ActivityItem from '../../components/activityItem';
+import Firebase from '../../helper/firebasehelper';
+import Placeholder from 'rn-placeholder';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 class MySkills extends Component {
   constructor() {
     super();
     this.state = {
-      offered: true,
+      data: [],
+      requestLoading: true,
+      refreshing: false,
+      isMavenUser: false,
     };
   }
   // This is to remove fb token for retry purposes
-  componentDidMount() {
+  componentWillMount() {
+    this.props.getActivities(0, this.props.auth.token);
+    this.props.checkId(this.props.auth.token);
+  }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.activity.mySkills !== undefined) {
+      let dataTemp = nextProps.activity.mySkills;
+      var data = [];
+      var temp = [];
+      if (this.props.isViewChats === true) {
+        for (var i = 0; i < dataTemp.length; i++) {
+          if (dataTemp[i].mavenID._id === this.props.maven._id) {
+            data.push(dataTemp[i]);
+          }
+        }  
+      } else {
+        data = dataTemp;
+      }
+
+      for (var i = 0; i < data.length; i++) {
+        temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
+      }
+
+      Firebase.initialize();
+      Firebase.getLastMessages(temp, (messages) => {
+        for (i = 0; i < data.length; i++) {
+          data[i].lastMessage = messages[i];
+        }
+        this.setState({data: data, requestLoading: false, refreshing: false});
+      });
+    }
+    if (nextProps.profile.postalCode) {
+      this.setState({isMavenUser: false});
+    } else {
+      this.setState({isMavenUser: true});
+    }
+  }
+
+  renderPlaceholder() {
+    var ret = [];
+    for (var i = 0; i < 10; i++) {
+        ret.push(
+            <View key={i} style={{padding: 20, height: 150}}>
+                <Placeholder.ImageContent
+                    onReady={false}
+                    lineNumber={4}
+                    animate="shine"
+                    lastLineWidth="50%"
+                    >
+                </Placeholder.ImageContent>
+            </View>
+        );
+    }
+    return ret;
+  }
+
+  _onRefresh() {
+    this.setState({refreshing: true});
+    this.props.getActivities(0, this.props.auth.token);
   }
 
   render() {
     return (
-      <Container>
-        <Content>
-          {
-            data.map((provider) => {
-              return (
-                <View key={provider.id} style = {{ paddingHorizontal:10, backgroundColor:'#fff' }}>
-                <View key={provider.id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }}>
-                  <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
-                    <Image source={require('../../../assets/images/profile.png')} style={{ height: 70, width: 70, borderRadius: 25 }} />
-                  </View>
-                  <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
-                    <TextInput defaultValue={provider.tags.toString()} editable={false} style={{ fontSize:13, color:'#515151', fontWeight:'400', height:17, width:150}}></TextInput>
-                    <TextInput defaultValue={provider.Service} editable={false} style={{ color:'#145775', height:23,width:150, fontSize:12, fontWeight:'400' }}></TextInput>
-                    <Text style={styles.text}>{provider.Name}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:3}}>
-                      <StarRating
-                        disabled
-                        maxStars={5}
-                        rating={provider.rate}
-                        starSize={15}
-                        starColor="#FFA838"
-                        starStyle={{paddingHorizontal:2}}
-                      />
-                      <Text style={{ color:'#b5b5b5'}}>({provider.rate})</Text>
-                    </View>
-                    <Text style={styles.text}>{provider.Message}</Text>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                      <Text style={ styles.text} >Offer:</Text>
-                      <Text style={{ color:'#FFA838', fontSize:15 }} >${provider.price}</Text>
-                    </View>
-                  </View>
-                  <View style={{ justifyContent: 'space-around', flex: 1, alignItems: 'flex-end', paddingHorizontal:10 }}>
-                    <View style={{ justifyContent:'center', alignItems:'center'}}>
-                      <TouchableOpacity>
-                        <Icon name="ios-checkmark-circle" style={{ color:'#00B356' }}/>
-                      </TouchableOpacity>
-                      <TouchableOpacity>
-                        <Icon name="ios-close-circle" style={{ color:'#F52422' }}/>
-                      </TouchableOpacity>
-                    </View>                    
-                    <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-                      <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
-                      <Text style={{ fontSize: 15, color:'#b5b5b5', }}>{provider.Dist}</Text>
-                    </View>
-                  </View>
-                </View>
+      <View style={{flex: 1, backgroundColor: '#fff'}}>
+      {
+        this.props.isViewChats && 
+        <TouchableOpacity onPress={() => {
+          this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
+          Actions.skillPage({ title: this.props.maven.userID.firstName + ' ' + this.props.maven.userID.lastName, isMe: true, from: 'chats' });
+        }}>
+          <View style={{flexDirection: 'row', height: 70, alignItems: 'center', backgroundColor: '#E9E9EE'}}>
+            <Image source={{uri: this.props.maven.userID.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
+            <View style={{flex: 1, justifyContent: 'center'}}>
+              <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.props.maven.userID.firstName + ' ' + this.props.maven.userID.lastName}</Text>
+              <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={{flex: 1, fontSize: 16}}>{this.props.maven.title}</Text>
+                <Text style={{flex: 1, fontSize: 16, marginLeft: 10}}>${this.props.maven.price}</Text>
               </View>
-              );
-            })}
-        </Content>
-      </Container>
-
+            </View>
+            <Icon name="ios-arrow-forward" style={{ fontSize: 25, color: '#90939B', marginHorizontal: 10}} />
+          </View>
+        </TouchableOpacity>
+      }
+      {
+        this.state.requestLoading?this.renderPlaceholder():null
+      }
+      {
+        this.state.isMavenUser?
+          this.state.data.length === 0?
+          <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
+            <Image style={styles.emptyImage} source={require('../../../assets/icons/coffee.png')}/>
+            <Text style={styles.emptyText}>Relax~ Have a coffee while your requests are coming in!</Text>
+          </View>
+          :
+          <Container>
+            <Content refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh.bind(this)}
+              />
+            }>
+              {
+                this.state.data.map((provider) => {
+                  return (
+                    <ActivityItem key={provider._id} provider={provider}/>
+                  );
+                })}
+            </Content>
+          </Container>
+        :
+        <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
+          <Image style={styles.emptyImage} source={require('../../../assets/icons/money_pig.png')}/>
+          <Text style={styles.emptyText}>Don't worry! Start earning money now~</Text>
+          <TouchableOpacity onPress={() => {
+            Actions.skillList();
+          }}>
+            <Text style={{color: '#479EE2', fontSize: 22, marginTop: 20}}>Register me now!</Text>
+          </TouchableOpacity>
+        </View>
+      }
+      </View>
     );
   }
 }
 
 const styles = {
-  text:{ fontSize: 12, color:'#b5b5b5' }
+  emptyImage: {
+    marginTop: 120
+  },
+  emptyText: {
+    width: '70%', fontSize: 20, marginTop: 30, color: '#7F7F7F',
+  },
 };
 
-export default MySkills;
+const mapStateToProps = (state) =>({
+  auth: state.auth,
+  profile: state.profile,
+  activity: state.activity,
+});
+const mapDispatchToProps = (dispatch) =>({
+  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
+  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  checkId: (token) => dispatch(actions.checkId(token)),
+  actions: bindActionCreators(actions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(MySkills);

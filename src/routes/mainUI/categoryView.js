@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Dimensions, AsyncStorage, Platform, Text, Image } from 'react-native';
+import { StyleSheet, View, Dimensions, AsyncStorage, Platform, Text, Image, BackHandler, ToastAndroid } from 'react-native';
 import { Container, Content } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import RenderItem from '../../components/categoryItem';
@@ -30,11 +30,40 @@ const imageDetails = [
         },
   ];
 
-
+var backButtonPressedOnce = false;
 class CategoryView extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+        }
+      }
 
     componentDidMount() {
         Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
+        BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
+    }
+
+    componentWillUnmount () {
+        BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
+    }
+
+    onBackPress () {
+        if (Actions.currentScene === '_categoryView') {
+            if (backButtonPressedOnce === true) {
+                Actions.pop();
+                Actions.pop();
+            } else {
+                ToastAndroid.show('Press one more time to go back', ToastAndroid.SHORT);
+                backButtonPressedOnce = true;
+                setTimeout(function() {
+                    backButtonPressedOnce = false;
+                }, 2000);
+            }
+            return true;
+        }
+        Actions.pop();
+        return true;
     }
 
     render() {

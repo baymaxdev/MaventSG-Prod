@@ -44,8 +44,6 @@ const INITIAL_STATE = {
   mavenImageLoading: false,
   mavenRegSuccess: false,
   mavenImageSuccess: false,
-  imageUpdating: false,
-  imageUpdateSuccess: false,
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -111,11 +109,11 @@ export default function (state = INITIAL_STATE, action) {
     case REPORT_MAVEN_ERROR:
       return { ...state, error: action.error };
     case REQUEST_UPDATE_PROFILE_IMAGE:
-      return { ...state, imageUpdating: true, imageUpdateSuccess: false };
+      return { ...state };
     case UPDATE_PROFILE_IMAGE:
-      return { ...state, imageUpdating: false, imageUpdateSuccess: true };
+      return { ...state };
     case UPDATE_PROFILE_IMAGE_ERROR:
-      return { ...state, error: action.error, imageUpdating: false, imageUpdateSuccess: false };
+      return { ...state, error: action.error };
 
     default:
       return state;

@@ -33,9 +33,15 @@ class GenericBookingPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.activity.status === 200) {
+    if (nextProps.activity.createOfferSuccess === true) {      
+      var m = {};
+      m.sender = this.props.profile.myInfo.userId;
+      m.receiver = this.props.maven.userID._id;
+      m.maven = this.props.maven._id;
+      m.text = 'I would like to make you an offer of $' + this.state.price + ', for your advertised service on ' + this.state.date + '. \nAdditional information: ' + this.state.message;
+      m.createdAt = new Date().toISOString();
       this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
-      Actions.chatPage({title: this.props.title, date: this.state.date, message: this.state.message, price: this.state.price});
+      Actions.chatPage({title: this.props.title, bookingMessage: m});
     } else {
       alert(nextProps.activity.error);
       Actions.pop();
@@ -51,7 +57,7 @@ class GenericBookingPage extends Component {
       alert("Please input offer price.");
       return;
     }
-    this.props.createOffer(this.props.maven._id, this.state.price, this.props.auth.token);
+    this.props.createOffer(this.props.maven._id, this.state.price, this.state.date,this.props.auth.token);
   }
 
   render() {
@@ -189,7 +195,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
   getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-  createOffer: (mavenId, price, token) => dispatch(actions.createOffer(mavenId, price, token)),
+  createOffer: (mavenId, price, serviceDate, token) => dispatch(actions.createOffer(mavenId, price, serviceDate, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

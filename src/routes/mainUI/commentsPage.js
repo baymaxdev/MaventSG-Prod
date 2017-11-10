@@ -146,6 +146,7 @@ class CommentsPage extends Component {
     this.props.setLike(this.state.topic.topicID, 0, this.props.auth.token);
     let temp = this.state.topic;
     temp.liked = !temp.liked;
+    temp.heart = temp.liked ? temp.heart + 1 : temp.heart - 1;
     this.setState({topic: temp});
   }
 
@@ -198,7 +199,7 @@ class CommentsPage extends Component {
                   <TouchableOpacity onPress={(e)=>this.onclickLike()} >
                     <Icon style={{ fontSize:27, color: '#515151', marginTop: 2 }} name = {this.state.topic.liked?'ios-thumbs-up':'ios-thumbs-up-outline'} />
                   </TouchableOpacity>
-                  <Text style ={{ color: '#515151', fontSize: 17, paddingHorizontal: 10}} >Like</Text>
+                  <Text style ={{ color: '#515151', fontSize: 17, paddingHorizontal: 10}} >{this.state.topic.heart}</Text>
                 </View>
               </View>
               {
@@ -231,7 +232,7 @@ class CommentsPage extends Component {
               });
             }
           }}>
-            <Icon name = "ios-happy-outline" style={{ color: '#b5b5b5' }}/>
+            <Text style={{color: '#0080FF', fontSize: 18, fontWeight: 'bold'}}>Send</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>

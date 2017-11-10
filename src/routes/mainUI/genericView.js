@@ -286,7 +286,7 @@ class GenericView extends Component {
               }}>
               <Image source={require('../../../assets/icons/first.png')} />
               <View style={{ height: 10 }}></View>
-                <Text style={{fontSize: 18}}>No Maven here yet. Tap here to be the first!</Text>
+                <Text style={{fontSize: 18, color: '#7F7F7F'}}>No Maven here yet. Tap here to be the first!</Text>
               </TouchableOpacity>
             </View>:
             <FlatList

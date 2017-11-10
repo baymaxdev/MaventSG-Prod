@@ -26,13 +26,15 @@ class Login extends Component {
      super(props);
      this.state = {
        showLoginModal: false,
-       email:'howilliams8837@gmail.com',
-       password:'dddddd'
+       email:'demo3@gmail.com',
+       password:'password'
+        // email: 'howilliams8837@gmail.com',
+        // password: 'dddddd'
      };
    }
 
   componentWillMount() {
-      this.getLocationAsync();
+    this.getLocationAsync();
   }
 
   componentWillReceiveProps(nextProps) {

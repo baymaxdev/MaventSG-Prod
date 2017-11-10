@@ -22,6 +22,7 @@ import * as actions from '../../actions';
 import StarRating from 'react-native-star-rating';
 import DatePicker from 'react-native-datepicker';
 import { ImagePicker } from 'expo';
+import ReviewComponent from '../../components/reviewComponent';
 import LoadingComponent from '../../components/loadingComponent';
 import ActionSheet from 'react-native-actionsheet';
 import Modal from 'react-native-modal';
@@ -54,12 +55,14 @@ class SkillPage extends Component {
         idVerified: false,
         refreshing: false,
         reportText: '',
-        successModalVisible: false
+        successModalVisible: false,
+        chats: []
     };
   }
 
   componentDidMount() {
     if (this.props.isMe) {
+      this.props.getActivities(0, this.props.auth.token);
       Actions.refresh({rightButtonImage: require('../../../assets/icons/edit.png'), onRight: () => {
         this.editMavenActionSheet.show();
       }});
@@ -78,7 +81,8 @@ class SkillPage extends Component {
       this.setState({requestLoading: false});
       alert(nextProps.profile.error);
     }
-    if (nextProps.maven != undefined) {
+
+    if (nextProps.maven.maven !== undefined) {
       var m = nextProps.maven.maven;
       var da = m.dayAvailable.split(',').map(function(item) {
         return parseInt(item, 10);
@@ -101,8 +105,19 @@ class SkillPage extends Component {
         else
           avt[i].value = false;
       }
-      this.setState({maven: nextProps.maven, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, title: m.title, 
+      this.setState({maven: m, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, title: m.title, 
         rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, refreshing: false, idVerified: m.userID.idVerified});
+
+      if (nextProps.activity.mySkills !== undefined) {
+        var temp = nextProps.activity.mySkills;
+        var chats = [];
+        for (var i = 0; i < temp.length; i++) {
+          if (temp[i].mavenID._id === m._id) {
+            chats.push(temp[i]);
+          }
+        }
+        this.setState({chats});
+      }
     }
   }
 
@@ -147,7 +162,7 @@ class SkillPage extends Component {
       let pictures = this.state.picUrl;
       pictures[this.state.picNumber] = image.uri;
       this.setState({picUrl: pictures, requestLoading: true});
-      this.props.addMavenImage(this.state.maven.maven._id, image.uri, this.props.auth.token);
+      this.props.addMavenImage(this.state.maven._id, image.uri, this.props.auth.token);
     }
   }
 
@@ -163,7 +178,7 @@ class SkillPage extends Component {
       Actions.skillList({ isEdit: true });
     }
     else if (i === 2)
-      this.props.deleteMaven(this.state.maven.maven._id, this.props.auth.token, () => {
+      this.props.deleteMaven(this.state.maven._id, this.props.auth.token, () => {
         this.props.getMyProfileInfo(this.props.auth.token);
         Actions.pop();
       });
@@ -171,7 +186,7 @@ class SkillPage extends Component {
 
   handleDeleteImagePress = (i) => {
     if (i === 1) {
-      this.props.deleteMavenImage(this.state.maven.maven._id, this.state.deleteImageIndex, this.props.auth.token, () => {
+      this.props.deleteMavenImage(this.state.maven._id, this.state.deleteImageIndex, this.props.auth.token, () => {
         this._onRefresh();
       });
     }
@@ -179,7 +194,7 @@ class SkillPage extends Component {
 
   handleGenericMavenPress = (i) => {
     if (i == 1) {
-      this.props.saveMaven(this.state.maven.maven._id, this.props.auth.token, () => {
+      this.props.saveMaven(this.state.maven._id, this.props.auth.token, () => {
         this.setState({successModalVisible: true});
         setTimeout(() => {
           this.setState({successModalVisible: false});
@@ -192,7 +207,7 @@ class SkillPage extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
+    this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
   }
 
   _onDeleteImage(index) {
@@ -364,25 +379,8 @@ class SkillPage extends Component {
               </View>
             </View>
             {
-              this.state.reviewData.map((item,index)=>{
-                return <View key={index} style={ [styles.viewContainer, {flexDirection:'row', alignItems:'center' }] }>
-                  <Image source={require('../../../assets/images/profile.png')} style={{ height: 70, width: 70, borderRadius: 25 }} />
-                  <View style={{paddingHorizontal:10, flex:1}} >
-                    <Text style={ styles.subjectText }>{item.name}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                      <StarRating
-                        disabled
-                        maxStars={5}
-                        rating={item.rating}
-                        starSize={15}
-                        starColor="#FFA838"
-                        starStyle={{paddingHorizontal:2}}
-                      />
-                      <Text style={{ color:'#b5b5b5'}}>({item.rating})</Text>
-                    </View>
-                    <Text style={ styles.contentText }>{item.description}</Text>
-                  </View>
-                </View>
+              this.state.reviewData.map((item, index)=>{
+                return <ReviewComponent key={index} data={item}/>
               })
             }
             {
@@ -404,10 +402,14 @@ class SkillPage extends Component {
           this.props.isMe?
           <View style={{ flexDirection:'row'}} >
             <View style={{justifyContent:'center', alignItems:'center', padding:15, backgroundColor:'#004869'}}>
-              <Text style={styles.btnText}>21</Text>
+              <Text style={styles.btnText}>{this.state.chats.length}</Text>
             </View>
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-
+              if (this.props.from === 'chats') {
+                Actions.pop();
+              } else {
+                Actions.viewChats({isViewChats: true, maven: this.state.maven});
+              }
             }} >
               <Text style={styles.btnText}>View Chats</Text>
             </TouchableOpacity>
@@ -415,13 +417,17 @@ class SkillPage extends Component {
           :
           <View style={{ flexDirection:'row'}} >
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#004869'}] } onPress={() => {
-              Actions.genericBooking({ title: this.props.title, maven: this.state.maven.maven });
+              Actions.genericBooking({ title: this.props.title, maven: this.state.maven });
               }}>
               <Text style={styles.btnText}>SKILL REQUEST</Text>
             </TouchableOpacity>
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-              this.props.getMavenDetails(this.state.maven.maven._id, this.props.profile.location, this.props.auth.token);
-              Actions.chatPage({title: this.props.title});
+              if (this.props.from === 'chats') {
+                Actions.pop();
+              } else {
+                this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
+                Actions.chatPage({title: this.props.title});
+              }
             }} >
               <Text style={styles.btnText}>CHAT</Text>
             </TouchableOpacity>
@@ -479,13 +485,14 @@ class SkillPage extends Component {
             </Form>
             <TouchableOpacity style={[styles.loginBtn,{backgroundColor:'#0B486B', padding:10, marginBottom:10}]} onPress={(e)=>{
               this.setState({reportModalVisible: false});
-              let _this = this;
-              this.props.reportMaven(this.state.maven.maven._id, this.state.reportText, this.props.auth.token, () => {
-                this.setState({successModalVisible: true});
-                setTimeout(() => {
-                  this.setState({successModalVisible: false});
-                }, 1000);
-              });
+              setTimeout(() => {
+                this.props.reportMaven(this.state.maven._id, this.state.reportText, this.props.auth.token, () => {
+                  this.setState({successModalVisible: true});
+                  setTimeout(() => {
+                    this.setState({successModalVisible: false});
+                  }, 1000);
+                });
+              }, 500);
             }}>
               <Text style={styles.btnText}>REPORT</Text>
             </TouchableOpacity>
@@ -555,7 +562,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) =>({
   auth: state.auth,
   profile: state.profile,
-  maven: state.explore.maven
+  maven: state.explore.maven,
+  activity: state.activity,
 });
 
 const mapDispatchToProps = (dispatch) =>({
@@ -566,6 +574,7 @@ const mapDispatchToProps = (dispatch) =>({
   deleteMaven: (mavenId, token, next) => dispatch(actions.deleteMaven(mavenId, token, next)),
   saveMaven: (mavenId, token, next) => dispatch(actions.saveMaven(mavenId, token, next)),
   reportMaven: (mavenId, description, token, next) => dispatch(actions.reportMaven(mavenId, description, token, next)),
+  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

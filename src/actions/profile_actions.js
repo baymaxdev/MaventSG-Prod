@@ -469,7 +469,7 @@ export const updateProfileImage = ( imageUrl, token ) => {
     .then(res => {
       if (res.status === 200) {
         dispatch({ type: UPDATE_PROFILE_IMAGE });
-        dispatch(getMyProfileInfo(token));
+        // dispatch(getMyProfileInfo(token)); 
       }
       else {
         dispatch({ type: UPDATE_PROFILE_IMAGE_ERROR, error: res.msg });

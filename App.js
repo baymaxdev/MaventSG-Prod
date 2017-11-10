@@ -11,6 +11,8 @@ import Router from './src/routes/router';
 const middleware = applyMiddleware(promise(),thunk)
 const store = createStore(allReducers, middleware);
 
+console.disableYellowBox = true;
+
 export default class App extends React.Component {
   render() {
     return (

@@ -35,6 +35,7 @@ class TopicPage extends Component {
       galleryVisible: false,
       picUrl: null,
       postText: '',
+      likeSelected: null,
     }
   }
 
@@ -47,12 +48,12 @@ class TopicPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.state.likeSelected) {
+    if (this.state.likeSelected !== null) {
       let index = this.state.likeSelected;
       let temp = this.state.data;
       temp[index].liked = !temp[index].liked;
       temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
-      this.setState({data: temp, likeSelected: false});
+      this.setState({data: temp, likeSelected: null});
       return;
     }
 
@@ -78,13 +79,13 @@ class TopicPage extends Component {
     }});
   }
 
-  onclickReport = (index) =>{
+  onclickReport = (index) => {
     let list = this.state.reportList;
     list[index] = !list[index];
     this.setState({reportList: list});
   }
 
-  onclickLike = (index) =>{
+  onclickLike = (index) => {
     this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token, () => {
       
     });

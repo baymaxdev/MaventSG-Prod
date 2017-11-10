@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableWithoutFeedback ,StyleSheet, Dimensions, Modal } from 'react-native';
+import { View, Text, TouchableWithoutFeedback ,StyleSheet, Dimensions, Modal } from 'react-native';
 import Gallery from 'react-native-image-gallery';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -32,7 +32,9 @@ export default class GalleryComponent extends React.Component {
           visible={this.props.modalVisible}
           onRequestClose={() => {alert("Modal has been closed.")}}>
             <TouchableWithoutFeedback  onPress={() => {this.onClose()}}>
-              <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black'}}></View>
+              <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{color: '#fff', fontSize: 16}}>Tap here to go back</Text>
+              </View>
             </TouchableWithoutFeedback>
             <Gallery
               initialPage={this.props.initialPage}
@@ -40,7 +42,9 @@ export default class GalleryComponent extends React.Component {
               images={images}
             />
             <TouchableWithoutFeedback  onPress={() => {this.onClose()}}>
-              <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black'}}></View>
+              <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{color: '#fff', fontSize: 16}}>Tap here to go back</Text>
+              </View>
             </TouchableWithoutFeedback>
         </Modal>
       </View>

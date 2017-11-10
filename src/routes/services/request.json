@@ -1,61 +1,218 @@
 [
   {
-    "id": 0,
-    "Name": "John Lim",
-    "Service": "Photography",
-    "tags":"Freelance Photographer",
-    "Dist": "0.2 km",
-    "Message": "Need your assistance now!",
-    "price":39,
-    "rate":4
+      "_id": "5a035638837ceb223ecdd8bb",
+      "price": 55,
+      "mavenUserID": {
+          "_id": "59e717aba0ca39749451cc4a",
+          "lastName": "Tan",
+          "firstName": "Jolene",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/cd139368-8840-4c70-a965-fcf6a5478e24.jpg"
+      },
+      "mavenID": {
+          "_id": "59e74e78a0ca39749451cc5f",
+          "title": "Event packages available!",
+          "category": "photography"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 0
   },
   {
-    "id": 1,
-    "Name": "Xiao Hei",
-    "Service": "Education",
-    "tags":"Math Tutor",
-    "Dist": "0.3 km",
-    "Message": "Need your assistance now!",
-    "price":30,
-    "rate":4.5
+      "_id": "5a035920837ceb223ecdd8bc",
+      "price": 55,
+      "mavenUserID": {
+          "_id": "59e6ffaba0ca39749451cc3e",
+          "lastName": "Foo",
+          "firstName": "Jeanne",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/9b6d7e3a-b380-408b-a781-bf9173b3d164.jpg"
+      },
+      "mavenID": {
+          "_id": "59e70b39a0ca39749451cc48",
+          "title": "Pokemon Go Egg Hatcher!",
+          "category": "others_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 1
   },
   {
-    "id": 2,
-    "Name": "Muhd Asraf",
-    "Service": "Beauty",
-    "tags":"Make Up Artist",
-    "Dist": "0.4 km",
-    "Message": "Need your assistance now!",
-    "price":29,
-    "rate":3.5
+      "_id": "5a035a38837ceb223ecdd8bd",
+      "price": 111,
+      "mavenUserID": {
+          "_id": "59e71838a0ca39749451cc4b",
+          "lastName": "Low",
+          "firstName": "Ban Kok",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/e48d4c78-f427-42b8-a886-078edc48e11a.jpg"
+      },
+      "mavenID": {
+          "_id": "59e74deaa0ca39749451cc5e",
+          "title": "Wedding packages available!",
+          "category": "photography"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 2
   },
   {
-    "id": 3,
-    "Name": "John Lim",
-    "Service": "Photography",
-    "tags":"Freelance Photographer",
-    "Dist": "0.2 km",
-    "Message": "Need your assistance now!",
-    "price":39,
-    "rate":4
+      "_id": "5a035b1e837ceb223ecdd8be",
+      "price": 5,
+      "mavenUserID": {
+          "_id": "59e71838a0ca39749451cc4b",
+          "lastName": "Low",
+          "firstName": "Ban Kok",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/e48d4c78-f427-42b8-a886-078edc48e11a.jpg"
+      },
+      "mavenID": {
+          "_id": "59e721e6a0ca39749451cc56",
+          "title": "Wifi Fix!",
+          "category": "information_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 3
   },
   {
-    "id": 4,
-    "Name": "Xiao Hei",
-    "Service": "Education",
-    "tags":"Math Tutor",
-    "Dist": "0.3 km",
-    "Message": "Need your assistance now!",
-    "price":30,
-    "rate":4.5
+      "_id": "5a035bf3837ceb223ecdd8bf",
+      "price": 5,
+      "mavenUserID": {
+          "_id": "59e6ff05a0ca39749451cc3c",
+          "lastName": "Chan",
+          "firstName": "Zhi Ying",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/5566f6e6-eb2a-4d23-a8e7-a67a1585841e.jpg"
+      },
+      "mavenID": {
+          "_id": "59e74c8da0ca39749451cc5b",
+          "title": "Freelance photog at your service!",
+          "category": "photography"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 4
   },
   {
-    "id": 5,
-    "Name": "Muhd Asraf",
-    "Service": "Beauty",
-    "tags":"Make Up Artist",
-    "Dist": "0.4 km",
-    "price":29,
-    "rate":3.5
+      "_id": "5a035deb837ceb223ecdd8c0",
+      "price": 55,
+      "mavenUserID": {
+          "_id": "59e6ff05a0ca39749451cc3c",
+          "lastName": "Chan",
+          "firstName": "Zhi Ying",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/5566f6e6-eb2a-4d23-a8e7-a67a1585841e.jpg"
+      },
+      "mavenID": {
+          "_id": "59e70a0da0ca39749451cc46",
+          "title": "Makeup Artist",
+          "category": "beauty"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 5
+  },
+  {
+      "_id": "5a035e36837ceb223ecdd8c1",
+      "price": 5,
+      "mavenUserID": {
+          "_id": "59e6fe1ba0ca39749451cc3a",
+          "lastName": "Lavie",
+          "firstName": "Indrani",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/3c44a0bc-4815-4a79-b2a0-63a5a10679ed.jpg"
+      },
+      "mavenID": {
+          "_id": "59e71faca0ca39749451cc50",
+          "title": "Western Chef!",
+          "category": "cooking_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 6
+  },
+  {
+      "_id": "5a035eac837ceb223ecdd8c2",
+      "price": 2,
+      "mavenUserID": {
+          "_id": "59e6ffe3a0ca39749451cc3f",
+          "lastName": "Lee",
+          "firstName": "Kar Wai",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/d577ba33-dcec-4c67-9ace-6d9fd4153dee.jpg"
+      },
+      "mavenID": {
+          "_id": "59e70bb0a0ca39749451cc49",
+          "title": "IT Guru!",
+          "category": "information_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 7
+  },
+  {
+      "_id": "5a03603f837ceb223ecdd8c3",
+      "price": 5,
+      "mavenUserID": {
+          "_id": "59e6ff82a0ca39749451cc3d",
+          "lastName": "Leng",
+          "firstName": "Jasmin",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/8ee46fd7-1816-420d-b6a9-208c62743184.jpg"
+      },
+      "mavenID": {
+          "_id": "59e74d23a0ca39749451cc5c",
+          "title": "Event photog at your service!",
+          "category": "photography"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 8
+  },
+  {
+      "_id": "5a036366837ceb223ecdd8c4",
+      "price": 1,
+      "mavenUserID": {
+          "_id": "59e6ff82a0ca39749451cc3d",
+          "lastName": "Leng",
+          "firstName": "Jasmin",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/8ee46fd7-1816-420d-b6a9-208c62743184.jpg"
+      },
+      "mavenID": {
+          "_id": "59e720aca0ca39749451cc53",
+          "title": "Indian Cuisine!",
+          "category": "cooking_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 9
+  },
+  {
+      "_id": "5a0364a9837ceb223ecdd8c5",
+      "price": 5,
+      "mavenUserID": {
+          "_id": "59e858f6a0ca39749451cc62",
+          "lastName": "Lee",
+          "firstName": "Kris",
+          "displayPicture": "https://s3-ap-southeast-1.amazonaws.com/mavent--bucket/maven_pictures/a8e5245d-8c4f-4cf9-9556-4ac145d32387.jpg"
+      },
+      "mavenID": {
+          "_id": "59e8595aa0ca39749451cc63",
+          "title": "WIfi Expert!",
+          "category": "information_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 0
+  },
+  {
+      "_id": "5a03659c837ceb223ecdd8c6",
+      "price": 41,
+      "mavenUserID": {
+          "_id": "59e6fd0ea0ca39749451cc37",
+          "lastName": "Tan",
+          "firstName": "Xin Yi",
+          "displayPicture": "https://mavent--bucket.s3-ap-southeast-1.amazonaws.com/profile_pictures/f5b9f794-f192-4e25-8999-674a82fcf2a2.png"
+      },
+      "mavenID": {
+          "_id": "59e71cbaa0ca39749451cc4d",
+          "title": "Home Cook Food Guru",
+          "category": "cooking_service"
+      },
+      "userID": "59e6fda4a0ca39749451cc39",
+      "createdDate": "2017-11-07T15:12:53.500Z",
+      "status": 9
   }
 ]

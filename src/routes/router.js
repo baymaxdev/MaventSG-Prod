@@ -17,6 +17,8 @@ import SubCategory from './mainUI/subCategory';
 import Discovery from './mainUI/discovery';
 import Profile from './mainUI/profile';
 import MySkills from './mainUI/mySkills';
+import RequestedSkills from './mainUI/requestedSkills';
+import ArchivedSkills from './mainUI/archivedSkills';
 import SkillList from './mainUI/skillList';
 import GenericView from './mainUI/genericView';
 import GenericBooking from './mainUI/genericBookingPage';
@@ -105,10 +107,10 @@ class RouterComponent extends React.Component {
               <Scene key="MySkills" component={MySkills} tabBarLabel='My Skills' back={false}
                 navigationBarStyle={{ height: 0 }} renderRightButton={null} title='' icon={AcitivityIcon1}
               />
-              <Scene key="RequestedSkills" component={MySkills} tabBarLabel='Requested Skills' back={false}
+              <Scene key="RequestedSkills" component={RequestedSkills} tabBarLabel='Requested Skills' back={false}
                 navigationBarStyle={{ height: 0 }} renderRightButton={null} title='' icon={AcitivityIcon2}
               />
-              <Scene key="Archived" component={MySkills} tabBarLabel='Archived' back={false}
+              <Scene key="Archived" component={ArchivedSkills} tabBarLabel='Archived' back={false}
                 navigationBarStyle={{ height: 0 }} renderRightButton={null} title='' icon={AcitivityIcon3}
               />
             </Scene>
@@ -122,6 +124,7 @@ class RouterComponent extends React.Component {
             <Scene key="commentsPage" component={CommentsPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Comments" />
             <Scene key="otherProfile" component={Profile} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Profile" />
             <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="All Reviews" />
+            <Scene key="viewChats" component={MySkills} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Chats" />
             <Scene key="blankView" component={BlankPage} back={Platform.OS === "android" ? false : true} title="ChatPage" />
           </Scene>
 

@@ -718,7 +718,7 @@ class SkillList extends Component {
                         <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                       </TouchableOpacity>
                     </View>
-                    <View style={{ marginTop: 3,  flexDirection:'row' }}>
+                    <View style={{ marginTop: 3,  flexDirection:'row', width: 0.85 * SCREEN_WIDTH / 3 * 2, alignSelf: 'center'}}>
                       <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
                         this.setState({ picNumber:3 });
                         this.ActionSheet.show();
@@ -753,7 +753,7 @@ class SkillList extends Component {
                         <Image source={require('../../../assets/icons/questionmark.png')} style={{marginLeft: 5, marginBottom: 5, width: 20, height: 20}}/>
                       </TouchableOpacity>
                     </View>
-                    <View style={{ marginTop: 5,  flexDirection:'row' }}>
+                    <View style={{ marginTop: 5,  flexDirection:'row', width: 0.85 * SCREEN_WIDTH / 3, alignSelf: 'center' }}>
                       <TouchableOpacity style={ styles.photoView } onPress={(e)=>{
                         this.setState({ picNumber:5 });
                         this.ActionSheet.show();

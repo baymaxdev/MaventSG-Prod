@@ -67,7 +67,7 @@ class Profile extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.isMe) {
       if(this.props.profile.myInfo !== nextProps.profile.myInfo && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.reviews, aboutMe: nextProps.profile.myInfo.about, displayPicture: nextProps.profile.myInfo.displayPicture});
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.mavenReviews, aboutMe: nextProps.profile.myInfo.about, displayPicture: nextProps.profile.myInfo.displayPicture});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -76,16 +76,9 @@ class Profile extends Component {
           }, 1000);
         }
       }
-      if(this.props.profile.imageUpdating !== nextProps.profile.imageUpdating && !nextProps.profile.imageUpdating && nextProps.profile.imageUpdateSuccess){
-        this.setState({requestLoading: false, displayPicture: nextProps.profile.myInfo.displayPicture});
-      }
-      else if(this.props.profile.imageUpdating !== nextProps.profile.imageUpdating && !nextProps.profile.imageUpdating && !nextProps.profile.imageUpdateSuccess){
-        this.setState({requestLoading: false, displayPicture: nextProps.profile.myInfo.displayPicture});
-        alert(nextProps.profile.error);
-      }
     } else {
       if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.reviews, displayPicture: nextProps.profile.user.displayPicture});
+        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.mavenReviews, displayPicture: nextProps.profile.user.displayPicture});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -115,18 +108,18 @@ class Profile extends Component {
   }
 
   _openCameraRoll = async () => {
-    let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
+    let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[1,1]});
     this.addPhoto(image);
   }
 
   takePhoto = async () => {
-    let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[4,3]});
+    let image = await ImagePicker.launchCameraAsync({allowsEditing:true, aspect:[1,1]});
     this.addPhoto(image);
   }
 
   addPhoto (image) {
     if (!image.cancelled) {
-      this.setState({requestLoading: true, displayPicture: null});
+      this.setState({displayPicture: image.uri});
       this.props.updateProfileImage(image.uri, this.props.auth.token );
     }
   }
@@ -180,7 +173,9 @@ class Profile extends Component {
             <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }} disabled={!this.state.isMe} onPress={() => {
               this.ActionSheet.show();
             }}>
+            {
               <Image source={ this.state.displayPicture ? {uri: this.state.displayPicture} : require('../../../assets/images/avatar.png')} style={{ height: 150, width: 150, borderRadius: 50, borderWidth:3, borderColor:'#fff' }} />
+            }
             </TouchableOpacity>
             <View style={{ flexDirection:'row', alignItems: 'center', justifyContent:'center', paddingTop: 2 }}>
               <Text style={{ fontSize: 20, color: 'white', fontWeight: '500' }}>{user.firstName + ' ' + user.lastName}</Text>
@@ -236,7 +231,7 @@ class Profile extends Component {
                   <View style={{ padding: 10, flexDirection:'row', alignItems:'center', justifyContent:'space-between' }}>
                     <View style={{  flexDirection: 'row', alignItems:'center' }}>
                       <Text style={{ fontSize: 16, color:'#515151' }}>Reviews</Text>
-                      <Text style={{color:'#b5b5b5'}}> (</Text><Text style={{color:'#b5b5b5'}}>{user.reviews.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
+                      <Text style={{color:'#b5b5b5'}}> (</Text><Text style={{color:'#b5b5b5'}}>{user.mavenReviews.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
                     </View>
                     <TouchableOpacity onPress={() => {
                       Actions.reviewPage();
