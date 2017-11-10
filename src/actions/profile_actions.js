@@ -97,7 +97,6 @@ export const registerMaven = (mavenData, token) => {
   let price = mavenData.price;
   let idPictures = mavenData.idPictures;
   var pictures = mavenData.pictures;
-  pictures[2] = mavenData.selfie;
   let formData = new FormData();
   formData.append('mainCategory', mainCategory);
   formData.append('category', category);

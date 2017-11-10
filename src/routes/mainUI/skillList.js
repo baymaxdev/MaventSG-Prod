@@ -103,7 +103,6 @@ class SkillList extends Component {
         modalData:data,
         pictures: [],
         idPictures: [],
-        selfie: undefined,
         requestLoading: false,
         price: '',
         modalVisible: false,
@@ -177,7 +176,9 @@ class SkillList extends Component {
   componentWillReceiveProps(nextProps) {
     if(this.props.profile.mavenLoading !== nextProps.profile.mavenLoading && !nextProps.profile.mavenLoading && nextProps.profile.mavenRegSuccess){
       this.setState({requestLoading: false});
-      this.props.getMavenDetails(this.props.explore.maven.maven._id, this.props.profile.location, this.props.auth.token);
+      if (this.props.isEdit === true) {
+        this.props.getMavenDetails(this.props.explore.maven.maven._id, this.props.profile.location, this.props.auth.token);
+      }
       Actions.pop();
     }
     else if(this.props.profile.mavenLoading !== nextProps.profile.mavenLoading && !nextProps.profile.mavenLoading && !nextProps.profile.mavenRegSuccess){
@@ -267,8 +268,6 @@ class SkillList extends Component {
         let tempPictures = this.state.idPictures;
         tempPictures[this.state.picNumber - 3] = image.uri;
         this.setState({idPictures: tempPictures});
-      } else {
-        this.setState({selfie: image.uri});
       }
     }
   }
@@ -283,8 +282,6 @@ class SkillList extends Component {
         let tempPictures = this.state.idPictures;
         tempPictures[this.state.picNumber - 3] = image.uri;
         this.setState({idPictures: tempPictures});
-      } else {
-        this.setState({selfie: image.uri});
       }
   }
 
@@ -309,8 +306,8 @@ class SkillList extends Component {
       alert('Please input price.');
       return;
     }
-    if (this.state.idPictures[0] === undefined || this.state.idPictures[1] === undefined || this.state.selfie === undefined) {
-      if (!(this.state.idPictures[0] === undefined && this.state.idPictures[1] === undefined && this.state.selfie === undefined)) {
+    if (this.state.idPictures[0] === undefined || this.state.idPictures[1] === undefined || this.state.idPictures[2] === undefined) {
+      if (!(this.state.idPictures[0] === undefined && this.state.idPictures[1] === undefined && this.state.idPictures[2] === undefined)) {
         alert('Please select all ID pictures and selfie');
         return;
       }
@@ -349,7 +346,6 @@ class SkillList extends Component {
       price: this.state.price,
       idPictures: this.state.idPictures,
       pictures: this.state.pictures,
-      selfie: this.state.selfie
     }
     this.setState({requestLoading: true});
     this.props.registerMaven(data, this.props.auth.token);
@@ -759,8 +755,8 @@ class SkillList extends Component {
                         this.ActionSheet.show();
                         }}>
                         {
-                          this.state.selfie?
-                          <Image source={{ uri: this.state.selfie }} style={{ width:'100%', height:'100%' }}/>
+                          this.state.idPictures[2]?
+                          <Image source={{ uri: this.state.idPictures[2] }} style={{ width:'100%', height:'100%' }}/>
                           :
                           <Icon name="md-add-circle"/>
                         }

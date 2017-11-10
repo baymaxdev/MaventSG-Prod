@@ -65,9 +65,9 @@ class MySkills extends Component {
       });
     }
     if (nextProps.profile.postalCode) {
-      this.setState({isMavenUser: false});
-    } else {
       this.setState({isMavenUser: true});
+    } else {
+      this.setState({isMavenUser: false});
     }
   }
 
