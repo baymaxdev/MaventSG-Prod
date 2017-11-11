@@ -28,14 +28,18 @@ class Chat extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.maven != undefined && nextProps.activity.initChat !== true) {
       let maven = nextProps.maven.maven;
-      let user = maven.userID;
-      this.setState({maven: maven, requestLoading: false});
+      var user = maven.userID;
+      if (this.props.userID !== undefined) {
+        user = this.props.userID;
+      }
+
+      this.setState({maven: maven, user: user, requestLoading: false});
 
       Firebase.getMessages((snapshot) => {
         var m = {};
         let val = snapshot.val();
         if (val.maven === maven._id && 
-          (val.sender === this.props.profile.myInfo.userId && val.receiver === user._id) || (val.sender === user._id && val.receiver === this.props.profile.myInfo.userId)) {
+          ((val.sender === this.props.profile.myInfo.userId && val.receiver === user._id) || (val.sender === user._id && val.receiver === this.props.profile.myInfo.userId))) {
           m._id = snapshot.key;
           m.text = val.text;
           m.createdAt = new Date(val.createdAt);
@@ -63,12 +67,16 @@ class Chat extends Component {
   onSend(messages = []) {
     var m = {};
     m.sender = this.props.profile.myInfo.userId;
-    m.receiver = this.state.maven.userID._id;
+    m.receiver = this.state.user._id;
     m.maven = this.state.maven._id;
     m.text = messages[0].text;
     m.createdAt = messages[0].createdAt.toISOString();
     Firebase.pushMessage(m);
-    Firebase.setLastMessage(m.maven, m.sender, m.text);
+    if (this.props.userID !== undefined) {
+      Firebase.setLastMessage(m.maven, m.receiver, m.text);
+    } else {
+      Firebase.setLastMessage(m.maven, m.sender, m.text);
+    }
     if (this.state.messages.length === 0) {
       this.props.initChat(this.state.maven._id, this.props.auth.token);
     }
@@ -82,13 +90,14 @@ class Chat extends Component {
       <View style={{flex: 1}}>
         <TouchableOpacity onPress={() => {
           this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
-          Actions.skillPage({ title: this.props.title, isMe: false, from: 'chats' });
+          var isMe = this.props.userID !== undefined?true:false;
+          Actions.skillPage({ title: this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName, isMe: isMe, from: 'chats' });
         }}>
           <View style={{flexDirection: 'row', height: 70, alignItems: 'center'}}>
             <Image source={{uri: this.state.maven.userID.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
             <View style={{flex: 1, justifyContent: 'center'}}>
-              <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.props.title}</Text>
-              <Text style={{flex: 1, fontSize: 16}}>{this.props.title}</Text>
+              <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName}</Text>
+              <Text style={{flex: 1, fontSize: 16}}>{this.state.maven.title}</Text>
             </View>
             <Icon name="ios-arrow-forward" style={{ fontSize: 25, color: '#90939B', marginHorizontal: 10}} />
           </View>

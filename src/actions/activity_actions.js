@@ -4,10 +4,12 @@ import {
   GET_ACTIVITIES_REQUESTED_SKILLS,
   GET_ACTIVITIES_ARCHIVED_SKILLS,
   GET_ACTIVITIES_ERROR,
-  CREATE_OFFER,
-  CREATE_OFFER_ERROR,
   INIT_CHAT,
   INIT_CHAT_ERROR,
+  CREATE_OFFER,
+  CREATE_OFFER_ERROR,
+  ACCEPT_OFFER,
+  ACCEPT_OFFER_ERROR,
 } from './types';
 
 export const getActivities = (mode, token) => {
@@ -84,6 +86,30 @@ export const initChat = (mavenId, token) => {
     })
     .catch(err => {
       dispatch({ type: INIT_CHAT_ERROR, error: err });  
+    })  
+  }
+}
+
+export const acceptOffer = (actId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `activity/acceptOffer?actID=${actId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: ACCEPT_OFFER });
+      }
+      else {
+        dispatch({ type: ACCEPT_OFFER_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: ACCEPT_OFFER_ERROR, error: err });  
     })  
   }
 }

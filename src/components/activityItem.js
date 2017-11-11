@@ -51,118 +51,126 @@ class ActivityItem extends Component {
 
   render() {
     let provider = this.props.provider;
+    let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
+    let name = isMaven?provider.userID.firstName + ' ' + provider.userID.lastName:provider.mavenUserID.firstName + ' ' + provider.mavenUserID.lastName;
     return (
       <View key={provider._id} style = {{ paddingHorizontal:10, backgroundColor:'#fff' }}>
-      <View key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }}>
-        <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
-        {
-          this.props.profile.myInfo.userId === provider.mavenUserID._id?
-          <Image source={provider.userID.displayPicture?{uri: provider.userID.displayPicture}:require('../../assets/images/avatar.png')} style={{ height: 70, width: 70, borderRadius: 25 }} />
+        <TouchableOpacity key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }} onPress={() => {
+          this.props.getMavenDetails(provider.mavenID._id, this.props.profile.location, this.props.auth.token);
+          isMaven?
+          Actions.chatPage({ title: name, userID: provider.userID })
           :
-          <Image source={provider.mavenUserID.displayPicture?{uri: provider.mavenUserID.displayPicture}:require('../../assets/images/avatar.png')} style={{ height: 70, width: 70, borderRadius: 25 }} />
-        }
-        </View>
-        <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
-          <TextInput defaultValue={provider.mavenID.title} editable={false} style={{ fontSize:13, color:'#515151', fontWeight:'400', height:17}}></TextInput>
-          <TextInput defaultValue={categoryName[provider.mavenID.category]} editable={false} style={{ color:'#145775', height:23, fontSize:12, fontWeight:'400' }}></TextInput>
+          Actions.chatPage({ title: name })
+        }}>
+          <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
           {
-            this.props.profile.myInfo.userId === provider.mavenUserID._id?
-            <Text style={styles.text}>{provider.userID.firstName + ' ' + provider.userID.lastName}</Text>
+            isMaven?
+            <Image source={provider.userID.displayPicture?{uri: provider.userID.displayPicture}:require('../../assets/images/avatar.png')} style={{ height: 70, width: 70, borderRadius: 25 }} />
             :
-            <Text style={styles.text}>{provider.mavenUserID.firstName + ' ' + provider.mavenUserID.lastName}</Text>
+            <Image source={provider.mavenUserID.displayPicture?{uri: provider.mavenUserID.displayPicture}:require('../../assets/images/avatar.png')} style={{ height: 70, width: 70, borderRadius: 25 }} />
           }
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:3}}>
-            <StarRating
-              disabled
-              maxStars={5}
-              rating={4.5}
-              starSize={15}
-              starColor="#FFA838"
-              starStyle={{paddingHorizontal:2}}
-            />
-            <Text style={{ color:'#b5b5b5'}}>({4})</Text>
           </View>
-          <Text style={styles.text}>{provider.lastMessage}</Text>
-          {
-            provider.status !== 0 && 
-            <View style={{flexDirection:'row', alignItems:'center'}}>
-              <Text style={ styles.text} >Offer:</Text>
-              <Text style={{ color:'#FFA838', fontSize:15 }} >${provider.price}</Text>
+          <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
+            <Text style={{ fontSize:13, color:'#515151', fontWeight:'400', height:23 }} numberOfLines={1} ellipsizeMode='tail'>{provider.mavenID.title}</Text>
+            <Text style={{ color:'#145775', height:23, fontSize:12, fontWeight:'400', paddingBottom: 2 }}>{categoryName[provider.mavenID.category]}</Text>
+            {
+              this.props.profile.myInfo.userId === provider.mavenUserID._id?
+              <Text style={styles.text}>{name}</Text>
+              :
+              <Text style={styles.text}>{name}</Text>
+            }
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:3}}>
+              <StarRating
+                disabled
+                maxStars={5}
+                rating={4.5}
+                starSize={15}
+                starColor="#FFA838"
+                starStyle={{paddingHorizontal:2}}
+              />
+              <Text style={{ color:'#b5b5b5'}}>({4})</Text>
             </View>
-          }
-        </View>
-        <View style={{ flex: 1, alignItems: 'flex-end', paddingRight:10 }}>
-          {
-            (provider.status === 0 || provider.status === 6 || provider.status === 7 || provider.status === 8) &&
-            <View style={styles.container}>
-            </View>
-          }
-          {
-            provider.status === 1 && this.props.profile.myInfo.userId === provider.mavenUserID._id &&
-            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <TouchableOpacity>
-                <Icon name="ios-checkmark-circle" style={{ color:'#00B356' }}/>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Icon name="ios-close-circle" style={{ color:'#F52422' }}/>
-              </TouchableOpacity>
-            </View>
-          }
-          {
-            provider.status === 1 && this.props.profile.myInfo.userId !== provider.mavenUserID._id &&
-            <View style={styles.container}>
-              <View style={[styles.btnContainer, {backgroundColor: '#FDF251'}]}>
-                  <Text style={styles.btnText}>Offered</Text>
+            <Text style={styles.text}>{provider.lastMessage}</Text>
+            {
+              provider.status !== 0 && 
+              <View style={{flexDirection:'row', alignItems:'center'}}>
+                <Text style={ styles.text} >Offer:</Text>
+                <Text style={{ color:'#FFA838', fontSize:15 }} >${provider.price}</Text>
               </View>
-            </View>
-          }
-          {
-            provider.status === 2 &&
-            <View style={styles.container}>
-              <View style={[styles.btnContainer, {backgroundColor: '#54AD57'}]}>
-                  <Text style={styles.btnText}>Accepted</Text>
-              </View>
-            </View>
-          }
-          {
-            provider.status === 3 &&
-            <View style={styles.container}>
-              <View style={[styles.btnContainer, {backgroundColor: '#DA3832'}]}>
-                  <Text style={styles.btnText}>Rejected</Text>
-              </View>
-            </View>
-          }
-          {
-            provider.status === 4 &&
-            <View style={styles.container}>
-              <View style={[styles.btnContainer, {backgroundColor: '#EE8640'}]}>
-                  <Text style={styles.btnText}>Cancelled</Text>
-              </View>
-            </View>
-          }
-          {
-            provider.status === 5 &&
-            <View style={styles.container}>
-              <View style={[styles.btnContainer, {backgroundColor: '#7F7F7F'}]}>
-                  <Text style={styles.btnText}>Completed</Text>
-              </View>
-            </View>
-          }
-          {
-            provider.status === 9 &&
-            <View style={styles.container}>
-              <View style={[styles.btnContainer, {backgroundColor: '#C3C3C3'}]}>
-                  <Text style={styles.btnText}>Archived</Text>
-              </View>
-            </View>
-          }
-          <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-            <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
-            <Text style={{ fontSize: 15, color:'#b5b5b5', }}>{0.2} km</Text>
+            }
           </View>
-        </View>
+          <View style={{ flex: 1, alignItems: 'flex-end', paddingRight:10 }}>
+            {
+              (provider.status === 0 || provider.status === 6 || provider.status === 7 || provider.status === 8) &&
+              <View style={styles.container}>
+              </View>
+            }
+            {
+              provider.status === 1 && this.props.profile.myInfo.userId === provider.mavenUserID._id &&
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <TouchableOpacity>
+                  <Icon name="ios-checkmark-circle" style={{ color:'#00B356' }}/>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <Icon name="ios-close-circle" style={{ color:'#F52422' }}/>
+                </TouchableOpacity>
+              </View>
+            }
+            {
+              provider.status === 1 && this.props.profile.myInfo.userId !== provider.mavenUserID._id &&
+              <View style={styles.container}>
+                <View style={[styles.btnContainer, {backgroundColor: '#FDF251'}]}>
+                    <Text style={styles.btnText}>Offered</Text>
+                </View>
+              </View>
+            }
+            {
+              provider.status === 2 &&
+              <View style={styles.container}>
+                <View style={[styles.btnContainer, {backgroundColor: '#54AD57'}]}>
+                    <Text style={styles.btnText}>Accepted</Text>
+                </View>
+              </View>
+            }
+            {
+              provider.status === 3 &&
+              <View style={styles.container}>
+                <View style={[styles.btnContainer, {backgroundColor: '#DA3832'}]}>
+                    <Text style={styles.btnText}>Rejected</Text>
+                </View>
+              </View>
+            }
+            {
+              provider.status === 4 &&
+              <View style={styles.container}>
+                <View style={[styles.btnContainer, {backgroundColor: '#EE8640'}]}>
+                    <Text style={styles.btnText}>Cancelled</Text>
+                </View>
+              </View>
+            }
+            {
+              provider.status === 5 &&
+              <View style={styles.container}>
+                <View style={[styles.btnContainer, {backgroundColor: '#7F7F7F'}]}>
+                    <Text style={styles.btnText}>Completed</Text>
+                </View>
+              </View>
+            }
+            {
+              provider.status === 9 &&
+              <View style={styles.container}>
+                <View style={[styles.btnContainer, {backgroundColor: '#C3C3C3'}]}>
+                    <Text style={styles.btnText}>Archived</Text>
+                </View>
+              </View>
+            }
+            <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+              <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
+              <Text style={{ fontSize: 15, color:'#b5b5b5', }}>{0.2} km</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
       </View>
-    </View>
     );
   }
 }
@@ -180,6 +188,7 @@ const mapStateToProps = (state) =>({
   activity: state.activity,
 });
 const mapDispatchToProps = (dispatch) =>({
+  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

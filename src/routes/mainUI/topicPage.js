@@ -199,7 +199,7 @@ class TopicPage extends Component {
 
   renderItem(item, index) {
     return (
-      <View style = {{ borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginBottom: 13}}>
+      <View style = {{flex:1, borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginVertical: 6, marginHorizontal: 10 }}>
         <View style = {{flexDirection: "row", justifyContent: 'space-between', padding: 10}}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
@@ -355,6 +355,7 @@ class TopicPage extends Component {
     })
 
     return (
+      <View style={{flex: 1, backgroundColor:'#fff', flexDirection: 'column'}}>
       <Container>
         <Modal transparent={true} visible={this.state.modalVisible} onRequestClose={() => null} >
           {
@@ -423,7 +424,7 @@ class TopicPage extends Component {
         {
             this.state.requestLoading?this.renderPlaceholder():null
         }
-        <Content padder style = {{backgroundColor: '#fff'}}
+        <Content padder={false} style = {{backgroundColor: '#fff'}}
         refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
@@ -431,9 +432,7 @@ class TopicPage extends Component {
         />}>
        {
          this.state.data.map((item, index)=>{
-           return <View key={index}>
-             {this.renderItem(item, index)}
-            </View>
+           return this.renderItem(item, index)
          })
        }
        </Content>
@@ -465,6 +464,7 @@ class TopicPage extends Component {
             onPress={this.handlePress}
         />
       </Container>
+      </View>
     );
   }
 }

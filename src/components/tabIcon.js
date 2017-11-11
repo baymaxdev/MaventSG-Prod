@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from 'native-base';
-import { Text, View } from 'react-native';
+import { Text, View, Platform } from 'react-native';
 
 const TabIcon = (props) => {
   if (props.type === 'main') {
@@ -15,7 +15,7 @@ const TabIcon = (props) => {
       width: 120, height: 30, 
         justifyContent:'center', alignItems:'center'
     }}>
-      <Text style={{ fontSize:14, fontWeight:'bold', textAlign: 'center', color: props.focused ? '#fff' : '#fff' }}> {props.title} </Text>
+      <Text style={{ fontSize:Platform.OS === 'android'?12:14, fontWeight:'bold', textAlign: 'center', color: props.focused ? '#fff' : '#fff' }}> {props.title} </Text>
         <View style={{marginTop:5, width:15,height:0,
                     borderBottomWidth: 15,
                     borderBottomColor: props.focused?'#fff':'#0B486B',
