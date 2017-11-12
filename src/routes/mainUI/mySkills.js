@@ -94,6 +94,10 @@ class MySkills extends Component {
     this.props.getActivities(0, this.props.auth.token);
   }
 
+  onRefreshItem() {
+    this.props.getActivities(0, this.props.auth.token);
+  }
+
   render() {
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
@@ -137,7 +141,7 @@ class MySkills extends Component {
               {
                 this.state.data.map((provider) => {
                   return (
-                    <ActivityItem key={provider._id} provider={provider}/>
+                    <ActivityItem key={provider._id} provider={provider} refreshItem={this.onRefreshItem.bind(this)}/>
                   );
                 })}
             </Content>

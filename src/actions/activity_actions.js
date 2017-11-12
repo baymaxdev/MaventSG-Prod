@@ -10,6 +10,8 @@ import {
   CREATE_OFFER_ERROR,
   ACCEPT_OFFER,
   ACCEPT_OFFER_ERROR,
+  REJECT_OFFER,
+  REJECT_OFFER_ERROR,
 } from './types';
 
 export const getActivities = (mode, token) => {
@@ -110,6 +112,30 @@ export const acceptOffer = (actId, token) => {
     })
     .catch(err => {
       dispatch({ type: ACCEPT_OFFER_ERROR, error: err });  
+    })  
+  }
+}
+
+export const rejectOffer = (actId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `activity/rejectOffer?actID=${actId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: REJECT_OFFER });
+      }
+      else {
+        dispatch({ type: REJECT_OFFER_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: REJECT_OFFER_ERROR, error: err });  
     })  
   }
 }

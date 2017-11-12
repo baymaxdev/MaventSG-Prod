@@ -9,6 +9,8 @@ import {
   CREATE_OFFER_ERROR,
   ACCEPT_OFFER,
   ACCEPT_OFFER_ERROR,
+  REJECT_OFFER,
+  REJECT_OFFER_ERROR,
 } from '../actions/types';
   
   const INITIAL_STATE = {
@@ -37,6 +39,10 @@ export default function (state = INITIAL_STATE, action) {
       return { ...state, acceptOfferSuccess: true };
     case ACCEPT_OFFER_ERROR:
       return { ...state, error: action.error, acceptOfferSuccess: false };
+    case REJECT_OFFER:
+      return { ...state, rejectOfferSuccess: true };
+    case REJECT_OFFER_ERROR:
+      return { ...state, error: action.error, rejectOfferSuccess: false };
     default:
       return state;
   }

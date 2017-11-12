@@ -49,6 +49,10 @@ class ActivityItem extends Component {
     
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.props.refreshItem();
+  }
+
   render() {
     let provider = this.props.provider;
     let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
@@ -108,10 +112,14 @@ class ActivityItem extends Component {
             {
               provider.status === 1 && this.props.profile.myInfo.userId === provider.mavenUserID._id &&
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                  this.props.acceptOffer(provider._id, this.props.auth.token);
+                }}>
                   <Icon name="ios-checkmark-circle" style={{ color:'#00B356' }}/>
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                  this.props.rejectOffer(provider._id, this.props.auth.token);
+                }}>
                   <Icon name="ios-close-circle" style={{ color:'#F52422' }}/>
                 </TouchableOpacity>
               </View>
@@ -189,6 +197,8 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  acceptOffer: (actId, token) => dispatch(actions.acceptOffer(actId, token)),
+  rejectOffer: (actId, token) => dispatch(actions.rejectOffer(actId, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 
