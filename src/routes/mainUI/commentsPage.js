@@ -179,7 +179,7 @@ class CommentsPage extends Component {
 
   render() {
     return (
-      <KeyboardAwareScrollView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} scrollEnabled={false} >
+      <KeyboardAwareScrollView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} scrollEnabled={false} keyboardShouldPersistTaps={true}>
         <Container style = {{ backgroundColor: '#fff' }}>
           <Content>
             <ScrollView>

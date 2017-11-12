@@ -50,7 +50,7 @@ class ActivityItem extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    
+
   }
 
   render() {
@@ -94,7 +94,7 @@ class ActivityItem extends Component {
               />
               <Text style={{ color:'#b5b5b5'}}>({4})</Text>
             </View>
-            <Text style={styles.text}>{provider.lastMessage}</Text>
+            <Text style={styles.text} numberOfLines={1} ellipsizeMode='tail'>{provider.lastMessage}</Text>
             {
               provider.status !== 0 && 
               <View style={{flexDirection:'row', alignItems:'center'}}>
