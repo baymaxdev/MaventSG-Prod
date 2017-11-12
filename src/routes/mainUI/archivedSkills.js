@@ -115,7 +115,7 @@ const styles = {
     marginTop: 120
   },
   emptyText: {
-    width: '70%', fontSize: 20, marginTop: 30, color: '#7F7F7F',
+    width: '70%', fontSize: 18, marginTop: 30, marginLeft: 16, color: '#7F7F7F', textAlign: 'center'
   },
 };
 

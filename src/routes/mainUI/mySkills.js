@@ -47,7 +47,7 @@ class MySkills extends Component {
           if (dataTemp[i].mavenID._id === this.props.maven._id) {
             data.push(dataTemp[i]);
           }
-        }  
+        }
       } else {
         data = dataTemp;
       }
@@ -102,7 +102,7 @@ class MySkills extends Component {
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
       {
-        this.props.isViewChats && 
+        this.props.isViewChats &&
         <TouchableOpacity onPress={() => {
           this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
           Actions.skillPage({ title: this.props.maven.userID.firstName + ' ' + this.props.maven.userID.lastName, isMe: true, from: 'chats' });
@@ -167,7 +167,7 @@ const styles = {
     marginTop: 120
   },
   emptyText: {
-    width: '70%', fontSize: 20, marginTop: 30, color: '#7F7F7F',
+    width: '70%', fontSize: 20, marginTop: 30, color: '#7F7F7F', textAlign: 'center'
   },
 };
 

@@ -87,7 +87,7 @@ class TopicPage extends Component {
 
   onclickLike = (index) => {
     this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token, () => {
-      
+
     });
     this.setState({likeSelected: index});
   }
@@ -205,7 +205,7 @@ class TopicPage extends Component {
             <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
             <View style = {{paddingHorizontal: 10}} >
               <Text style = {styles.nameText} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
-              <View style={{ height: 5 }}></View>
+              <View style={{ height: 3 }}></View>
               <Text style ={{ color: '#a4a4a4', fontSize: 14}} >{this.getStringFromDate(item.createdDate)}</Text>
             </View>
           </View>
@@ -227,7 +227,7 @@ class TopicPage extends Component {
               renderTruncatedFooter={this._renderTruncatedFooter}
               renderRevealedFooter={this._renderRevealedFooter}
               onReady={this._handleTextReady}>
-              <Text style ={{ color: '#ababab', fontSize: 15, paddingHorizontal: 10}}>{item.text}</Text>
+              <Text style ={{ fontSize: 15, paddingHorizontal: 10}}>{item.text}</Text>
             </ReadMore>
           }
           {
@@ -459,7 +459,7 @@ class TopicPage extends Component {
        <ActionSheet
             ref={o => this.ActionSheet = o}
             title={null}
-            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            options={['Cancel', 'Choose from Library', 'Take a picture']}
             cancelButtonIndex={0}
             onPress={this.handlePress}
         />
@@ -474,14 +474,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff'
   },
-  nameText: {color: '#656565', fontSize:17, fontWeight: '500' },
+  nameText: { fontSize:15, fontWeight: '500' },
   navModal: {
     flex:1, flexDirection: 'row', justifyContent: 'flex-end',
     paddingTop: '18%', paddingHorizontal: 5,
     backgroundColor: 'rgba(0,0,0,0.5)'
   },
   innerNavModal: {
-    backgroundColor:'#353535', padding: 10, justifyContent: 'center', height: 80, 
+    backgroundColor:'#353535', padding: 10, justifyContent: 'center', height: 80,
     borderWidth: 1, borderRadius: 3, borderColor: '#353535'
   },
   postModal: {

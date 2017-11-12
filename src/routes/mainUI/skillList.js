@@ -519,7 +519,7 @@ class SkillList extends Component {
                       ref={(input) => this.desc = input}
                       value={this.state.description}
                       onChangeText = {description => this.setState({description})}
-                      maxLength={140}
+                      maxLength={1000}
                       autoCorrect={false}
                       style={{ width: 0.80 * SCREEN_WIDTH, alignItems: 'center', padding: 8, justifyContent: 'center', fontSize: 16, }}
                       underlineColorAndroid="transparent"

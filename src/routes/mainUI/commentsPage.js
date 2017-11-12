@@ -20,6 +20,7 @@ import {Icon, Container, Content} from 'native-base';
 import Search from 'react-native-search-box';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Placeholder from 'rn-placeholder';
+import { AutoGrowTextInput } from 'react-native-auto-grow-textinput';
 
 const SCREEN_WIDTH = Dimensions
   .get('window')
@@ -31,7 +32,7 @@ const data = [{pic: require('../../../assets/images/profile.png'), name: 'Laura 
               {pic: require('../../../assets/images/profile.png'), name: 'John David', day: '4d ago', comments: 1, likes:14,
               content: 'I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills' },
               {pic: require('../../../assets/images/profile.png'), name: 'Eric Lou', day: '4d ago', comments: 1, likes:14,
-              content: 'I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills' },                            
+              content: 'I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills' },
             ]
 class CommentsPage extends Component {
   constructor(props) {
@@ -116,20 +117,20 @@ class CommentsPage extends Component {
     }
     return date;
   }
-  
+
   renderItem(item, index) {
     return (
       <View>
-        <View style = {{flexDirection: "row", padding: 10}}>
+        <View style = {{flexDirection: "row", padding: 5}}>
           <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 50, height: 50, borderRadius: 25 }}/>
           <View style = {{paddingHorizontal: 10, flex:1}} >
-            <View style = {{ backgroundColor: '#ececec', padding: 10, borderRadius: 20 }}>
-              <Text style = {{fontSize:15}} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
-              <Text style={{paddingVertical: 5}} >{item.text}</Text>
+            <View style = {{ backgroundColor: '#ececec', padding: 8, borderRadius: 20 }}>
+              <Text style = {{fontSize:14, fontWeight: '600'}} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
+              <Text selectable style={{paddingVertical: 5 }} >{item.text}</Text>
             </View>
-            <View style = {{ flexDirection: 'row', padding: 10}}>
+            <View style = {{ flexDirection: 'row', padding: 5}}>
               <Text style={{color: '#b5b5b5'}} >{this.getStringFromDate(item.createdDate)}</Text>
-              <View style = {{ flexDirection: 'row', paddingHorizontal: 15 }}>
+              <View style = {{ flexDirection: 'row', paddingHorizontal: 10 }}>
                 <TouchableOpacity onPress={(e)=>this.onLikeList(index)} >
                   <Icon style={{ fontSize:17, color: '#515151' }} name = {item.liked?'ios-heart':'ios-heart-outline'} />
                 </TouchableOpacity>
@@ -184,20 +185,20 @@ class CommentsPage extends Component {
             <ScrollView>
               <View style = {{flexDirection: "row", alignItems: 'center', padding: 20, paddingBottom: 0}}>
                 <Image source = {this.state.topic.userID.displayPicture?{uri: this.state.topic.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 60, height: 60, borderRadius: 30 }}/>
-                <View style = {{paddingHorizontal: 10, justifyContent: 'space-between', height: 40}} >
-                  <Text style = {{fontSize:16}} >{this.state.topic.userID.firstName + ' ' + this.state.topic.userID.lastName}</Text>
+                <View style = {{paddingHorizontal: 10, justifyContent: 'space-between', height: 35}} >
+                  <Text style = {{fontSize:16, fontWeight: '600'}} >{this.state.topic.userID.firstName + ' ' + this.state.topic.userID.lastName}</Text>
                   <Text style = {{color: '#515151', fontSize:12}}>{this.getStringFromDate(this.state.topic.createdDate)}</Text>
                 </View>
               </View>
               <View style = {{ paddingVertical: 10, paddingHorizontal: 20}}>
-                <Text style = {{ fontSize:18 }}>
+                <Text style = {{ fontSize:16 }}>
                   {this.state.topic.text}
                 </Text>
               </View>
               <View style = {{ padding: 10}}>
                 <View style = {{paddingVertical:10, paddingHorizontal:20, flexDirection: 'row', alignItems:'center', borderColor: '#ececec', borderBottomWidth: 1, borderTopWidth: 1 }}>
                   <TouchableOpacity onPress={(e)=>this.onclickLike()} >
-                    <Icon style={{ fontSize:27, color: '#515151', marginTop: 2 }} name = {this.state.topic.liked?'ios-thumbs-up':'ios-thumbs-up-outline'} />
+                    <Icon style={{ fontSize:27, color: '#515151', marginTop: 2 }} name = {this.state.topic.liked?'ios-heart':'ios-heart-outline'} />
                   </TouchableOpacity>
                   <Text style ={{ color: '#515151', fontSize: 17, paddingHorizontal: 10}} >{this.state.topic.heart}</Text>
                 </View>
@@ -216,14 +217,14 @@ class CommentsPage extends Component {
             </ScrollView>
           </Content>
         </Container>
-        <View style = {{flexDirection: 'row', alignItems: 'center', borderWidth: 1, paddingHorizontal:10, borderColor: '#b5b5b5', backgroundColor: '#fff'}}>
-          <TextInput
+        <View style = {{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, paddingHorizontal: 10, borderColor: '#b5b5b5', backgroundColor: '#fff', height: "9%"}}>
+          <AutoGrowTextInput
             returnKeyType="next"
-            multiline
-            placeholder = "Write a comments..."
-            value={this.state.commentText}
+            placeholder='Write a comment...'
             onChangeText={(text) => {this.setState({commentText: text})}}
-            style = {{ fontSize:15, flex: 1, height:50 }}/>
+            value={this.state.commentText}
+            maxHeight={ 50 }
+            style={{ width: "85%", fontSize:15, backgroundColor: 'pink', borderRadius:50, borderWidth: 1, borderColor: '#b5b5b5', backgroundColor: '#f0f0f0', paddingHorizontal: 10}} />
           <TouchableOpacity onPress = {(e)=>{
             if (this.state.commentText !== '') {
               this.setState({requestLoading: true});
