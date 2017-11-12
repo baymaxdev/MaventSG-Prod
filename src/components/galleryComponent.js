@@ -41,6 +41,10 @@ export default class GalleryComponent extends React.Component {
               style={{backgroundColor: 'white', flex: 1}}
               images={images}
             />
+            <TouchableWithoutFeedback  onPress={() => {this.onClose()}}>
+              <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
+              </View>
+            </TouchableWithoutFeedback>
         </Modal>
       </View>
     );

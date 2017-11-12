@@ -75,8 +75,8 @@ class ActivityItem extends Component {
           }
           </View>
           <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
-            <Text style={{ fontSize:13, color:'#515151', fontWeight:'400', height:23 }} numberOfLines={1} ellipsizeMode='tail'>{provider.mavenID.title}</Text>
-            <Text style={{ color:'#145775', height:23, fontSize:12, fontWeight:'400', paddingBottom: 2 }}>{categoryName[provider.mavenID.category]}</Text>
+            <Text style={{ fontSize:16, color:'#515151', fontWeight:'400', height:18 }} numberOfLines={1} ellipsizeMode='tail'>{provider.mavenID.title}</Text>
+            <Text style={{ color:'#145775', height:16, fontSize:13, fontWeight:'400' }}>{categoryName[provider.mavenID.category]}</Text>
             {
               this.props.profile.myInfo.userId === provider.mavenUserID._id?
               <Text style={styles.text}>{name}</Text>
@@ -88,18 +88,18 @@ class ActivityItem extends Component {
                 disabled
                 maxStars={5}
                 rating={4.5}
-                starSize={15}
+                starSize={14}
                 starColor="#FFA838"
-                starStyle={{paddingHorizontal:2}}
+                starStyle={{paddingHorizontal:1}}
               />
               <Text style={{ color:'#b5b5b5'}}>({4})</Text>
             </View>
-            <Text style={styles.text} numberOfLines={1} ellipsizeMode='tail'>{provider.lastMessage}</Text>
+            <Text style={{ fontSize: 15 }} numberOfLines={1} ellipsizeMode='tail'>{provider.lastMessage}</Text>
             {
-              provider.status !== 0 && 
-              <View style={{flexDirection:'row', alignItems:'center'}}>
-                <Text style={ styles.text} >Offer:</Text>
-                <Text style={{ color:'#FFA838', fontSize:15 }} >${provider.price}</Text>
+              provider.status !== 0 &&
+              <View style={{flexDirection:'row', alignItems:'center', paddingTop: 5}}>
+                <Text style={ styles.text} >Offer: </Text>
+                <Text style={{ color:'#FFA838', fontSize:15, fontWeight:"500" }} >${provider.price}</Text>
               </View>
             }
           </View>
@@ -184,7 +184,7 @@ class ActivityItem extends Component {
 }
 
 const styles = {
-  text:{ fontSize: 12, color:'#b5b5b5' },
+  text:{ fontSize: 13, color:'#b5b5b5' },
   container: {flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%'},
   btnContainer: {width: '100%', paddingVertical: 10, borderRadius: 5, justifyContent: 'center', alignItems: 'center'},
   btnText: {fontWeight: 'bold', fontSize: 15, color: '#fff'},
