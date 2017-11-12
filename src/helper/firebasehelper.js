@@ -61,6 +61,8 @@ class Firebase {
                 }
             });
             callback(temp);
+        }, (err) => {
+            alert(err);
         })
     }
 }

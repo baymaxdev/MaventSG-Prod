@@ -64,10 +64,17 @@ class MySkills extends Component {
         this.setState({data: data, requestLoading: false, refreshing: false});
       });
     }
+
     if (nextProps.profile.postalCode) {
       this.setState({isMavenUser: true});
     } else {
       this.setState({isMavenUser: false});
+    }
+
+    if(this.props.activity.offerLoading !== nextProps.activity.offerLoading && !nextProps.activity.offerLoading && nextProps.activity.offerSuccess) {
+      this.refreshItem();
+    } else if(this.props.activity.offerLoading !== nextProps.activity.offerLoading && !nextProps.activity.offerLoading && !nextProps.activity.offerSuccess) {
+      alert(nextProps.activity.error);
     }
   }
 
@@ -94,7 +101,7 @@ class MySkills extends Component {
     this.props.getActivities(0, this.props.auth.token);
   }
 
-  onRefreshItem() {
+  refreshItem() {
     this.props.getActivities(0, this.props.auth.token);
   }
 
@@ -141,7 +148,7 @@ class MySkills extends Component {
               {
                 this.state.data.map((provider) => {
                   return (
-                    <ActivityItem key={provider._id} provider={provider} refreshItem={this.onRefreshItem.bind(this)}/>
+                    <ActivityItem key={provider._id} provider={provider}/>
                   );
                 })}
             </Content>

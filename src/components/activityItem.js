@@ -46,11 +46,11 @@ class ActivityItem extends Component {
   }
 
   componentWillMount() {
-    
+
   }
 
   componentWillReceiveProps(nextProps) {
-    this.props.refreshItem();
+    
   }
 
   render() {

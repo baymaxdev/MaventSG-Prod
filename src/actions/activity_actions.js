@@ -6,10 +6,13 @@ import {
   GET_ACTIVITIES_ERROR,
   INIT_CHAT,
   INIT_CHAT_ERROR,
+  CREATE_OFFER_REQUEST,
   CREATE_OFFER,
   CREATE_OFFER_ERROR,
+  ACCEPT_OFFER_REQUEST,
   ACCEPT_OFFER,
   ACCEPT_OFFER_ERROR,
+  REJECT_OFFER_REQUEST,
   REJECT_OFFER,
   REJECT_OFFER_ERROR,
 } from './types';
@@ -53,6 +56,7 @@ export const createOffer = (mavenId, price, serviceDate, token) => {
   };
   return dispatch => {
     const url = `activity/createOffer?mavenID=${mavenId}&price=${price}&serviceDate=${serviceDate}`;
+    dispatch({ type: CREATE_OFFER_REQUEST });
     request(url, option)
     .then(res => {
       if (res.status === 200) {
@@ -100,6 +104,7 @@ export const acceptOffer = (actId, token) => {
     },
   };
   return dispatch => {
+    dispatch({ type: ACCEPT_OFFER_REQUEST });
     const url = `activity/acceptOffer?actID=${actId}`;
     request(url, option)
     .then(res => {
@@ -124,6 +129,7 @@ export const rejectOffer = (actId, token) => {
     },
   };
   return dispatch => {
+    dispatch({ type: REJECT_OFFER_REQUEST });
     const url = `activity/rejectOffer?actID=${actId}`;
     request(url, option)
     .then(res => {

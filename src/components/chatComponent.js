@@ -17,12 +17,13 @@ class Chat extends Component {
 
   componentWillMount() {
     Firebase.initialize();
-    if (this.props.bookingMessage) {
-      Firebase.pushMessage(this.props.bookingMessage);
-    }    
   }
 
   componentDidMount() {
+    if (this.props.bookingMessage) {
+      Firebase.pushMessage(this.props.bookingMessage);
+      Firebase.setLastMessage(this.props.bookingMessage.maven, this.props.bookingMessage.sender, this.props.bookingMessage.text);
+    }
   }
 
   componentWillReceiveProps(nextProps) {

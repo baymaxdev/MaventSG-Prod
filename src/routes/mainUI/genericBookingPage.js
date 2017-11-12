@@ -33,7 +33,7 @@ class GenericBookingPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.activity.createOfferSuccess === true) {      
+    if(this.props.activity.offerLoading !== nextProps.activity.offerLoading && !nextProps.activity.offerLoading && nextProps.activity.offerSuccess) {
       var m = {};
       m.sender = this.props.profile.myInfo.userId;
       m.receiver = this.props.maven.userID._id;
@@ -42,7 +42,7 @@ class GenericBookingPage extends Component {
       m.createdAt = new Date().toISOString();
       this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
       Actions.chatPage({title: this.props.title, bookingMessage: m});
-    } else {
+    } else if(this.props.activity.offerLoading !== nextProps.activity.offerLoading && !nextProps.activity.offerLoading && !nextProps.activity.offerSuccess) {
       alert(nextProps.activity.error);
       Actions.pop();
     }

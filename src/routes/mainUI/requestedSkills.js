@@ -40,11 +40,14 @@ class RequestedSkills extends Component {
       let data = nextProps.activity.requestedSkills;
       var temp = [];
       for (var i = 0; i < data.length; i++) {
-        temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
+        temp.push(data[i].mavenID._id + '-' + data[i].mavenUserID._id);
       }
+
+      console.log(temp);
 
       Firebase.initialize();
       Firebase.getLastMessages(temp, (messages) => {
+        console.log('lastMessages',  messages);
         for (i = 0; i < data.length; i++) {
           data[i].lastMessage = messages[i];
         }
