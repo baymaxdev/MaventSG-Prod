@@ -10,7 +10,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
-  ScrollView
+  ScrollView,
+  RefreshControl
 } from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -42,6 +43,7 @@ class CommentsPage extends Component {
       topic: {},
       commentText: '',
       requestLoading: true,
+      refreshing: false,
     }
   }
 
@@ -51,7 +53,7 @@ class CommentsPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({comments: nextProps.topic.comments, requestLoading: false, commentText: ''});
+    this.setState({comments: nextProps.topic.comments, requestLoading: false, refreshing: false, commentText: ''});
   }
 
   getStringFromDate(date) {
@@ -177,11 +179,21 @@ class CommentsPage extends Component {
     return ret;
   }
 
+  _onRefresh() {
+    this.setState({refreshing: true});
+    this.props.getComments(this.props.data.topicID, this.props.auth.token);
+  }
+
   render() {
     return (
       <KeyboardAwareScrollView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} scrollEnabled={false} keyboardShouldPersistTaps={true}>
         <Container style = {{ backgroundColor: '#fff' }}>
-          <Content>
+          <Content refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh.bind(this)}
+            />
+          }>
             <ScrollView>
               <View style = {{flexDirection: "row", alignItems: 'center', padding: 20, paddingBottom: 0}}>
                 <Image source = {this.state.topic.userID.displayPicture?{uri: this.state.topic.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 60, height: 60, borderRadius: 30 }}/>

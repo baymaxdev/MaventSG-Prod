@@ -51,6 +51,13 @@ class RequestedSkills extends Component {
         this.setState({data: data, requestLoading: false, refreshing: false});
       });
     }
+
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      this.refreshItem();
+    } else if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
+      console.log(nextProps.activity.error);
+      alert(nextProps.activity.error);
+    }
   }
 
   renderPlaceholder() {
@@ -87,7 +94,9 @@ class RequestedSkills extends Component {
           <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
             <Image style={styles.emptyImage} source={require('../../../assets/icons/req_skill.png')}/>
             <Text style={styles.emptyText}>You have not requested any job from our mavens!</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+              Actions.popTo('_categoryView');
+            }}>
               <Text style={{color: '#479EE2', fontSize: 22, marginTop: 20}}>Start hiring now!</Text>
             </TouchableOpacity>
           </View>

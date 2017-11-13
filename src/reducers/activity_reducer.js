@@ -14,11 +14,23 @@ import {
   REJECT_OFFER_REQUEST,
   REJECT_OFFER,
   REJECT_OFFER_ERROR,
+  CANCEL_OFFER_REQUEST,
+  CANCEL_OFFER,
+  CANCEL_OFFER_ERROR,
+  EDIT_OFFER_REQUEST,
+  EDIT_OFFER,
+  EDIT_OFFER_ERROR,
+  END_JOB_REQUEST,
+  END_JOB,
+  END_JOB_ERROR,
+  ARCHIVE_ACTIVITY_REQUEST,
+  ARCHIVE_ACTIVITY,
+  ARCHIVE_ACTIVITY_ERROR,
 } from '../actions/types';
   
-  const INITIAL_STATE = {
-    
-  };
+const INITIAL_STATE = {
+  
+};
   
 export default function (state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -35,23 +47,47 @@ export default function (state = INITIAL_STATE, action) {
     case INIT_CHAT_ERROR:
       return { ...state, error: action.error, initChat: false };
     case CREATE_OFFER_REQUEST:
-      return { ...state, offerLoading: true };
+      return { ...state, activityLoading: true };
     case CREATE_OFFER:
-      return { ...state, offerLoading: false, offerSuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true };
     case CREATE_OFFER_ERROR:
-      return { ...state, error: action.error, offerLoading: false, offerSuccess: false };
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case ACCEPT_OFFER_REQUEST:
-      return { ...state, offerLoading: true };
+      return { ...state, activityLoading: true };
     case ACCEPT_OFFER:
-      return { ...state, offerLoading: false, offerSuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true };
     case ACCEPT_OFFER_ERROR:
-      return { ...state, error: action.error, offerLoading: false, offerSuccess: false };
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case REJECT_OFFER_REQUEST:
-      return { ...state, offerLoading: true };
+      return { ...state, activityLoading: true };
     case REJECT_OFFER:
-      return { ...state, offerLoading: false, offerSuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true };
     case REJECT_OFFER_ERROR:
-      return { ...state, error: action.error, offerLoading: false, offerSuccess: false };
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
+    case CANCEL_OFFER_REQUEST:
+      return { ...state, activityLoading: true };
+    case CANCEL_OFFER:
+      return { ...state, activityLoading: false, activitySuccess: true };
+    case CANCEL_OFFER_ERROR:
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
+    case EDIT_OFFER_REQUEST:
+      return { ...state, activityLoading: true };
+    case EDIT_OFFER:
+      return { ...state, activityLoading: false, activitySuccess: true };
+    case EDIT_OFFER_ERROR:
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
+    case END_JOB_REQUEST:
+      return { ...state, activityLoading: true };
+    case END_JOB:
+      return { ...state, activityLoading: false, activitySuccess: true };
+    case END_JOB_ERROR:
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
+    case ARCHIVE_ACTIVITY_REQUEST:
+      return { ...state, activityLoading: true };
+    case ARCHIVE_ACTIVITY:
+      return { ...state, activityLoading: false, activitySuccess: true };
+    case ARCHIVE_ACTIVITY_ERROR:
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     default:
       return state;
   }

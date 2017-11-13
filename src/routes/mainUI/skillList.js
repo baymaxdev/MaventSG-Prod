@@ -264,7 +264,7 @@ class SkillList extends Component {
         let tempPictures = this.state.pictures;
         tempPictures[this.state.picNumber] = image.uri;
         this.setState({pictures: tempPictures});
-      } else if (this.state.picNumber < 5) {
+      } else {
         let tempPictures = this.state.idPictures;
         tempPictures[this.state.picNumber - 3] = image.uri;
         this.setState({idPictures: tempPictures});
@@ -278,7 +278,7 @@ class SkillList extends Component {
         let tempPictures = this.state.pictures;
         tempPictures[this.state.picNumber] = image.uri;
         this.setState({pictures: tempPictures});
-      } else if (this.state.picNumber < 5) {
+      } else {
         let tempPictures = this.state.idPictures;
         tempPictures[this.state.picNumber - 3] = image.uri;
         this.setState({idPictures: tempPictures});

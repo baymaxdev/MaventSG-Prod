@@ -15,6 +15,18 @@ import {
   REJECT_OFFER_REQUEST,
   REJECT_OFFER,
   REJECT_OFFER_ERROR,
+  CANCEL_OFFER_REQUEST,
+  CANCEL_OFFER,
+  CANCEL_OFFER_ERROR,
+  EDIT_OFFER_REQUEST,
+  EDIT_OFFER,
+  EDIT_OFFER_ERROR,
+  END_JOB_REQUEST,
+  END_JOB,
+  END_JOB_ERROR,
+  ARCHIVE_ACTIVITY_REQUEST,
+  ARCHIVE_ACTIVITY,
+  ARCHIVE_ACTIVITY_ERROR,
 } from './types';
 
 export const getActivities = (mode, token) => {
@@ -47,6 +59,30 @@ export const getActivities = (mode, token) => {
   }
 }
 
+export const initChat = (mavenId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `activity/init-chat?mavenID=${mavenId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: INIT_CHAT });
+      }
+      else {
+        dispatch({ type: INIT_CHAT_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: INIT_CHAT_ERROR, error: err });  
+    })  
+  }
+}
+
 export const createOffer = (mavenId, price, serviceDate, token) => {
   let option = { 
     method: 'GET',
@@ -68,30 +104,6 @@ export const createOffer = (mavenId, price, serviceDate, token) => {
     })
     .catch(err => {
       dispatch({ type: CREATE_OFFER_ERROR, error: err });  
-    })  
-  }
-}
-
-export const initChat = (mavenId, token) => {
-  let option = { 
-    method: 'GET',
-    headers: {
-      'Authorization': `JWT ${token}`,
-    },
-  };
-  return dispatch => {
-    const url = `activity/init-chat?mavenID=${mavenId}`;
-    request(url, option)
-    .then(res => {
-      if (res.status === 200) {
-        dispatch({ type: INIT_CHAT });
-      }
-      else {
-        dispatch({ type: INIT_CHAT_ERROR, error: res.msg });
-      }
-    })
-    .catch(err => {
-      dispatch({ type: INIT_CHAT_ERROR, error: err });  
     })  
   }
 }
@@ -142,6 +154,106 @@ export const rejectOffer = (actId, token) => {
     })
     .catch(err => {
       dispatch({ type: REJECT_OFFER_ERROR, error: err });  
+    })  
+  }
+}
+
+export const cancelOffer = (actId, type, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    dispatch({ type: CANCEL_OFFER_REQUEST });
+    const url = `activity/cancelOffer?type=${type}&actID=${actId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: CANCEL_OFFER });
+      }
+      else {
+        dispatch({ type: CANCEL_OFFER_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: CANCEL_OFFER_ERROR, error: err });  
+    })  
+  }
+}
+
+export const editOffer = (actId, price, serviceDate, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `activity/editOffer?actId=${actId}&price=${price}&serviceDate=${serviceDate}`;
+    dispatch({ type: EDIT_OFFER_REQUEST });
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: EDIT_OFFER, status: res.status });   
+      }
+      else {
+        dispatch({ type: EDIT_OFFER_ERROR, error: res.msg, status: res.status });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: EDIT_OFFER_ERROR, error: err });  
+    })  
+  }
+}
+
+export const endJob = (actId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    dispatch({ type: END_JOB_REQUEST });
+    const url = `activity/end?actID=${actId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: END_JOB });
+      }
+      else {
+        dispatch({ type: END_JOB_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: END_JOB_ERROR, error: err });  
+    })  
+  }
+}
+
+export const archiveActivity = (actId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    dispatch({ type: ARCHIVE_ACTIVITY_REQUEST });
+    const url = `activity/archive?actID=${actId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: ARCHIVE_ACTIVITY });
+      }
+      else {
+        dispatch({ type: ARCHIVE_ACTIVITY_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: ARCHIVE_ACTIVITY_ERROR, error: err });
     })  
   }
 }

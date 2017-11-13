@@ -14,6 +14,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from '../actions';
 import { Actions } from 'react-native-router-flux';
 import StarRating from 'react-native-star-rating';
+import Modal from 'react-native-modal';
 
 const categoryName = {
   'cooking_service' : 'Cooking & Baking',
@@ -41,7 +42,7 @@ class ActivityItem extends Component {
   constructor() {
     super();
     this.state = {
-
+      modalVisible: false,
     };
   }
 
@@ -53,10 +54,121 @@ class ActivityItem extends Component {
 
   }
 
+  showModal() {
+    this.setState({modalVisible: true});
+  }
+
+  onPressBtn1() {
+    this.setState({modalVisible: false});
+
+    let provider = this.props.provider;
+    if (provider.status === 2) {  // Accepted
+      this.props.endJob(provider._id, this.props.auth.token);
+    } else if (provider.status === 4) {   // Cancelled
+      this.props.archiveActivity(provider._id, this.props.auth.token);
+    } else if (provider.status === 5) {   // Completed
+      
+    } else if (provider.status === 6) {   // CReviewed
+      if (provider.mavenUserID._id !== this.props.profile.myInfo.userId) {
+
+      }
+    } else if (provider.status === 7) {   // MReviewed
+      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
+
+      }
+    } else if (provider.status === 8) {   // Both Reviewed
+      this.props.archiveActivity(provider._id, this.props.auth.token);
+    }
+  }
+
+  onPressBtn2() {
+    this.setState({modalVisible: false});
+    
+    let provider = this.props.provider;
+    if (provider.status === 2) {  // Accepted
+      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
+        this.props.cancelOffer(provider._id, 1, this.props.auth.token);
+      } else {
+        this.props.cancelOffer(provider._id, 0, this.props.auth.token);
+      }
+    }
+  }
+
   render() {
     let provider = this.props.provider;
     let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
     let name = isMaven?provider.userID.firstName + ' ' + provider.userID.lastName:provider.mavenUserID.firstName + ' ' + provider.mavenUserID.lastName;
+
+    var modalText = btnText1 = btnText2 = boxText = boxColor = '', boxDisabled = false;
+    if (provider.status === 1 && this.props.profile.myInfo.userId !== provider.mavenUserID._id) {   // Offered
+      modalText = 'Edit offer?';
+      btnText1 = 'Yes';
+      btnText2 = 'No';
+      boxText = 'Offered';
+      boxColor = '#FDF251';
+    } else if (provider.status === 2) {     // Accepted
+      modalText = '"Job completed?" or "Cancel job?"';
+      btnText1 = 'Completed';
+      btnText2 = 'Cancel job';
+      boxText = 'Accepted';
+      boxColor = '#54AD57';
+    } else if (provider.status === 3) {     // Rejected
+      modalText = 'Edit offer?';
+      btnText1 = 'Yes';
+      btnText2 = 'No';
+      boxText = 'Rejected';
+      boxColor = '#DA3832';
+      boxDisabled = true;
+    } else if (provider.status === 4) {     // Cancelled
+      modalText = 'Archive Job?';
+      btnText1 = 'Yes';
+      btnText2 = 'No';
+      boxText = 'Cancelled';
+      boxColor = '#EE8640';
+    } else if (provider.status === 5) {     // Completed
+      modalText = 'Give Review?';
+      btnText1 = 'Yes';
+      btnText2 = 'No';
+      boxText = 'Completed';
+      boxColor = '#7F7F7F';
+    } else if (provider.status === 6) {     // CReviewed
+      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
+        modalText = 'Please leave some review for your customer!';
+        btnText1 = 'Yes';
+        btnText2 = 'No';
+        boxText = 'Completed';
+        boxColor = '#7F7F7F';
+      } else {
+        modalText = "Pending Maven's review...";
+        btnText1 = 'Got it';
+        boxText = 'Completed';
+        boxColor = '#7F7F7F';
+      }
+    } else if (provider.status === 7) {     // MReviewed
+      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
+        modalText = 'Pending customer review...';
+        btnText1 = 'Got it';
+        boxText = 'Completed';
+        boxColor = '#7F7F7F';
+      } else {
+        modalText = 'Please leave some review for your maven!';
+        btnText1 = 'Yes';
+        btnText2 = 'No';
+        boxText = 'Completed';
+        boxColor = '#7F7F7F';
+      }
+    } else if (provider.status === 8) {     // Both Reviewed
+      modalText = 'Archive Job';
+      btnText1 = 'Yes';
+      btnText2 = 'No';
+      boxText = 'Completed';
+      boxColor = '#7F7F7F';
+    } else if (provider.status === 9) {     // Archived
+      boxText = 'Archived';
+      boxColor = '#C3C3C3';
+      boxDisabled = true;
+    }
+
     return (
       <View key={provider._id} style = {{ paddingHorizontal:10, backgroundColor:'#fff' }}>
         <TouchableOpacity key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }} onPress={() => {
@@ -105,12 +217,11 @@ class ActivityItem extends Component {
           </View>
           <View style={{ flex: 1, alignItems: 'flex-end', paddingRight:10 }}>
             {
-              (provider.status === 0 || provider.status === 6 || provider.status === 7 || provider.status === 8) &&
+              provider.status === 0?
               <View style={styles.container}>
               </View>
-            }
-            {
-              provider.status === 1 && this.props.profile.myInfo.userId === provider.mavenUserID._id &&
+              :
+              (provider.status === 1 && this.props.profile.myInfo.userId === provider.mavenUserID._id)?
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => {
                   this.props.acceptOffer(provider._id, this.props.auth.token);
@@ -123,54 +234,12 @@ class ActivityItem extends Component {
                   <Icon name="ios-close-circle" style={{ color:'#F52422' }}/>
                 </TouchableOpacity>
               </View>
-            }
-            {
-              provider.status === 1 && this.props.profile.myInfo.userId !== provider.mavenUserID._id &&
-              <View style={styles.container}>
-                <View style={[styles.btnContainer, {backgroundColor: '#FDF251'}]}>
-                    <Text style={styles.btnText}>Offered</Text>
+              :
+              <TouchableOpacity style={styles.container} disabled={boxDisabled} onPress={this.showModal.bind(this)}>
+                <View style={[styles.btnContainer, {backgroundColor: boxColor}]}>
+                    <Text style={styles.btnText}>{boxText}</Text>
                 </View>
-              </View>
-            }
-            {
-              provider.status === 2 &&
-              <View style={styles.container}>
-                <View style={[styles.btnContainer, {backgroundColor: '#54AD57'}]}>
-                    <Text style={styles.btnText}>Accepted</Text>
-                </View>
-              </View>
-            }
-            {
-              provider.status === 3 &&
-              <View style={styles.container}>
-                <View style={[styles.btnContainer, {backgroundColor: '#DA3832'}]}>
-                    <Text style={styles.btnText}>Rejected</Text>
-                </View>
-              </View>
-            }
-            {
-              provider.status === 4 &&
-              <View style={styles.container}>
-                <View style={[styles.btnContainer, {backgroundColor: '#EE8640'}]}>
-                    <Text style={styles.btnText}>Cancelled</Text>
-                </View>
-              </View>
-            }
-            {
-              provider.status === 5 &&
-              <View style={styles.container}>
-                <View style={[styles.btnContainer, {backgroundColor: '#7F7F7F'}]}>
-                    <Text style={styles.btnText}>Completed</Text>
-                </View>
-              </View>
-            }
-            {
-              provider.status === 9 &&
-              <View style={styles.container}>
-                <View style={[styles.btnContainer, {backgroundColor: '#C3C3C3'}]}>
-                    <Text style={styles.btnText}>Archived</Text>
-                </View>
-              </View>
+              </TouchableOpacity>
             }
             <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
               <Icon name='md-pin' style={{fontSize:15, paddingRight:2, color:'#BFD9E7'}} />
@@ -178,6 +247,30 @@ class ActivityItem extends Component {
             </View>
           </View>
         </TouchableOpacity>
+        <Modal
+          isVisible={this.state.modalVisible}
+          >
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+              this.setState({modalVisible: false});
+              }}>
+                <Icon name='close' style={{fontSize:40}}/>
+            </TouchableOpacity>
+            <Text style={{fontSize: 20}}>{modalText}</Text>
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity style={styles.modalBtn} onPress={this.onPressBtn1.bind(this)}>
+                <Text style={styles.btnText}>{btnText1}</Text>
+              </TouchableOpacity>
+              {
+                !((provider.status === 6 && provider.mavenUserID._id === this.props.profile.myInfo.userId) || 
+                (provider.status === 7 && provider.mavenUserID._id !== this.props.profile.myInfo.userId)) && 
+                <TouchableOpacity style={styles.modalBtn} onPress={this.onPressBtn2.bind(this)}>
+                  <Text style={styles.btnText}>{btnText2}</Text>
+                </TouchableOpacity>
+              }
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -188,6 +281,26 @@ const styles = {
   container: {flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%'},
   btnContainer: {width: '100%', paddingVertical: 10, borderRadius: 5, justifyContent: 'center', alignItems: 'center'},
   btnText: {fontWeight: 'bold', fontSize: 15, color: '#fff'},
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  modalBtn:{
+    flex:1, padding:10, marginBottom:10, marginTop: 30, marginHorizontal: 10, flexDirection:'row', alignItems:'center',
+    justifyContent:'center', borderRadius:10, backgroundColor:'#0B486B',
+    height: 50,
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    shadowOffset: {
+      width: 0,
+      height: 1
+    }
+  },
 };
 
 const mapStateToProps = (state) =>({
@@ -199,6 +312,10 @@ const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   acceptOffer: (actId, token) => dispatch(actions.acceptOffer(actId, token)),
   rejectOffer: (actId, token) => dispatch(actions.rejectOffer(actId, token)),
+  cancelOffer: (actId, type, token) => dispatch(actions.cancelOffer(actId, type, token)),
+  editOffer: (actId, price, serviceDate, token) => dispatch(actions.editOffer(actId, price, serviceDate, token)),
+  endJob: (actId, token) => dispatch(actions.endJob(actId, token)),
+  archiveActivity: (actId, token) => dispatch(actions.archiveActivity(actId, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 
