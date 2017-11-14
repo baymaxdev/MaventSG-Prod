@@ -1,7 +1,7 @@
 import React from 'react';
 import { Scene, Router, Actions, Reducer } from 'react-native-router-flux';
 import { connect } from 'react-redux';
-import { Text, TouchableOpacity, Image, Platform } from 'react-native';
+import { Text, TouchableOpacity, Image, Platform, Button } from 'react-native';
 import { Icon } from 'native-base';
 
 import Login from './auth/login';
@@ -25,6 +25,7 @@ import GenericBooking from './mainUI/genericBookingPage';
 import SkillPage from './mainUI/skillPage';
 import TopicPage from './mainUI/topicPage';
 import CommentsPage from './mainUI/commentsPage';
+import AllReviewPage from './mainUI/allReviewPage';
 import ReviewPage from './mainUI/reviewPage';
 import TabIcon from '../components/tabIcon';
 import Chat from '../components/chatComponent';
@@ -123,8 +124,9 @@ class RouterComponent extends React.Component {
             <Scene key="topicPage" component={TopicPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="topicPage" />
             <Scene key="commentsPage" component={CommentsPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Comments" />
             <Scene key="otherProfile" component={Profile} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Profile" />
-            <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="All Reviews" />
+            <Scene key="allReviewPage" component={AllReviewPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="All Reviews" />
             <Scene key="viewChats" component={MySkills} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Chats" />
+            <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} rightTitle='Submit' back={Platform.OS === "android" ? false : true} title="Leave Feedback" />
             <Scene key="blankView" component={BlankPage} back={Platform.OS === "android" ? false : true} title="ChatPage" />
           </Scene>
 

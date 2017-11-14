@@ -27,6 +27,9 @@ import {
   ARCHIVE_ACTIVITY_REQUEST,
   ARCHIVE_ACTIVITY,
   ARCHIVE_ACTIVITY_ERROR,
+  REVIEW_ACTIVITY_REQUEST,
+  REVIEW_ACTIVITY,
+  REVIEW_ACTIVITY_ERROR,
 } from './types';
 
 export const getActivities = (mode, token) => {
@@ -254,6 +257,32 @@ export const archiveActivity = (actId, token) => {
     })
     .catch(err => {
       dispatch({ type: ARCHIVE_ACTIVITY_ERROR, error: err });
+    })  
+  }
+}
+
+export const reviewActivity = (actId, type, rating, description, token, next) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    dispatch({ type: REVIEW_ACTIVITY_REQUEST });
+    const url = `activity/review?type=${type}&actID=${actId}&rating=${rating}&description=${description}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: REVIEW_ACTIVITY });
+        next();
+      }
+      else {
+        dispatch({ type: REVIEW_ACTIVITY_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: REVIEW_ACTIVITY_ERROR, error: err });
     })  
   }
 }

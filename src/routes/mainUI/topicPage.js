@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl, Keyboard } from 'react-native';
 import {ImagePicker} from 'expo';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -278,10 +278,14 @@ class TopicPage extends Component {
   }
 
   onPost = () => {
-    this.props.createTopic(this.props.category, this.state.picUrl, this.state.postText, this.props.auth.token, () => {
-      this.setState({requestLoading: true, modalVisible: false, postModal: false, picUrl: null, postText: ''});
-      this.props.getTopics(this.props.category, this.props.auth.token);
-    });
+    if (this.state.postText === '') {
+      this.setState({modalVisible: false, picUrl: null, postText: ''});
+    } else {
+      this.props.createTopic(this.props.category, this.state.picUrl, this.state.postText, this.props.auth.token, () => {
+        this.setState({requestLoading: true, modalVisible: false, postModal: false, picUrl: null, postText: ''});
+        this.props.getTopics(this.props.category, this.props.auth.token);
+      });
+    }
   }
 
   _openCameraRoll = async () => {
@@ -373,47 +377,51 @@ class TopicPage extends Component {
           }
           {
             this.state.modalID === 3 &&
-            <View style={styles.postModal} >
-              <View style={{ marginBottom:50,  width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
-                <TextInput multiline={true} placeholder = "What's on your mind today? Share a lobang today!"
-                  onChangeText={(text) => this.setState({postText: text})}
-                  style = {{ width: '100%', padding: 5, fontSize:15, height:70, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
-                <TouchableOpacity onPress = {(e) => this.onUploadImage()}  style = {{ marginTop: 10, height:150, width: '100%', borderWidth: 1, borderColor: '#515151', borderRadius: 3, justifyContent: 'center', alignItems: 'center' }}>
-                  {
-                    this.state.picUrl ?
-                    <Image source = {{uri: this.state.picUrl}} style = {{ width: '100%',  height: '100%' }} />
-                    :
-                    <Text style = {{ color: '#515151', fontSize: 17 }} >Click here to post image</Text>
-                  }
-                </TouchableOpacity>
-                <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
-                  <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
-                    <Text style = {styles.PostBtnText}>Post</Text>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={styles.postModal}>
+                <View style={{ marginBottom:50,  width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
+                  <TextInput multiline={true} placeholder = "What's on your mind today? Share a lobang today!"
+                    onChangeText={(text) => this.setState({postText: text})}
+                    style = {{ width: '100%', padding: 5, fontSize:15, height:70, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
+                  <TouchableOpacity onPress = {(e) => this.onUploadImage()}  style = {{ marginTop: 10, height:150, width: '100%', borderWidth: 1, borderColor: '#515151', borderRadius: 3, justifyContent: 'center', alignItems: 'center' }}>
+                    {
+                      this.state.picUrl ?
+                      <Image source = {{uri: this.state.picUrl}} style = {{ width: '100%',  height: '100%' }} />
+                      :
+                      <Text style = {{ color: '#515151', fontSize: 17 }} >Click here to post image</Text>
+                    }
                   </TouchableOpacity>
-                  <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
-                    <Text style = {styles.PostBtnText}>Cancel</Text>
-                  </TouchableOpacity>
+                  <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
+                    <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
+                      <Text style = {styles.PostBtnText}>Post</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
+                      <Text style = {styles.PostBtnText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           }
           {
             this.state.modalID === 4 &&
-            <View style={styles.postModal} >
-              <View style={{ width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
-                <TextInput multiline={true} placeholder = "Write a description..."
-                  onChangeText={(text) => this.setState({postText: text})}
-                  style = {{ width: '100%', padding: 5, fontSize:15, height:150, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
-                <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
-                  <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
-                    <Text style = {styles.PostBtnText}>Post</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
-                    <Text style = {styles.PostBtnText}>Cancel</Text>
-                  </TouchableOpacity>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={styles.postModal}>
+                <View style={{ width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
+                  <TextInput multiline={true} placeholder = "Write a description..."
+                    onChangeText={(text) => this.setState({postText: text})}
+                    style = {{ width: '100%', padding: 5, fontSize:15, height:150, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
+                  <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
+                    <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
+                      <Text style = {styles.PostBtnText}>Post</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
+                      <Text style = {styles.PostBtnText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           }
 
         </Modal>

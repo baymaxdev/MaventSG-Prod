@@ -82,11 +82,11 @@ class GenericBookingPage extends Component {
                       date={this.state.date}
                       mode="date"
                       placeholder="Service Date"
-                      format="DD-MM-YYYY"
+                      format="DD/MM/YYYY"
                       minDate="02-01-1900"
                       confirmBtnText="Confirm"
                       cancelBtnText="Cancel"
-                      onDateChange={(date) => { this.setState({ date }) }}
+                      onDateChange={(date) => { this.setState({ date }); console.log(date); }}
                       customStyles={{
                             dateInput: {
                                 borderRadius:5, backgroundColor:'#fff'

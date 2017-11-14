@@ -252,7 +252,7 @@ class Signup extends Component {
                             date={this.state.birthDay}
                             mode="date"
                             placeholder="Date of birth"
-                            format="YYYY-MM-DD"
+                            format="DD/MM/YYYY"
                             confirmBtnText="Confirm"
                             cancelBtnText="Cancel"
                             onDateChange={(date) => this.setState({ birthDay: date })}

@@ -234,7 +234,7 @@ class Profile extends Component {
                       <Text style={{color:'#b5b5b5'}}> (</Text><Text style={{color:'#b5b5b5'}}>{user.mavenReviews.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
                     </View>
                     <TouchableOpacity onPress={() => {
-                      Actions.reviewPage();
+                      Actions.allReviewPage();
                       }}>
                       <Text style={{ color:'#FFA838' }} >View all</Text>
                     </TouchableOpacity>

@@ -27,12 +27,15 @@ class Chat extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log(nextProps.activity);
     if (nextProps.maven != undefined && nextProps.activity.initChat !== true) {
       let maven = nextProps.maven.maven;
       var user = maven.userID;
       if (this.props.userID !== undefined) {
         user = this.props.userID;
       }
+
+      this.props.getActivities(this.props.userID!==undefined?0:1, this.props.auth.token);
 
       this.setState({maven: maven, user: user, requestLoading: false});
 
@@ -91,8 +94,9 @@ class Chat extends Component {
       <View style={{flex: 1}}>
         <TouchableOpacity onPress={() => {
           this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
-          var isMe = this.props.userID !== undefined?true:false;
-          Actions.skillPage({ title: this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName, isMe: isMe, from: 'chats' });
+          let isMe = this.props.userID !== undefined?true:false;
+          let from = isMe?'':'chat';
+          Actions.skillPage({ title: this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName, isMe: isMe, from: from });
         }}>
           <View style={{flexDirection: 'row', height: 70, alignItems: 'center'}}>
             <Image source={{uri: this.state.maven.userID.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
@@ -135,6 +139,7 @@ const mapStateToProps = (state) =>({
 
 const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
   initChat: (mavenId, token) => dispatch(actions.initChat(mavenId, token)),
   actions: bindActionCreators(actions, dispatch)
 });

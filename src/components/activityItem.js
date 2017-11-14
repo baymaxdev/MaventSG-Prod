@@ -15,6 +15,7 @@ import * as actions from '../actions';
 import { Actions } from 'react-native-router-flux';
 import StarRating from 'react-native-star-rating';
 import Modal from 'react-native-modal';
+import DatePicker from 'react-native-datepicker'
 
 const categoryName = {
   'cooking_service' : 'Cooking & Baking',
@@ -43,41 +44,68 @@ class ActivityItem extends Component {
     super();
     this.state = {
       modalVisible: false,
+      editOfferModalVisible: false,
+      serviceDate: '',
+      price: '',
     };
-  }
-
-  componentWillMount() {
-
-  }
-
-  componentWillReceiveProps(nextProps) {
-
   }
 
   showModal() {
     this.setState({modalVisible: true});
   }
 
+  showEditOfferModal() {
+    this.setState({price: provider.price.toString(), serviceDate: provider.serviceDate});
+    setTimeout(() => {
+      this.setState({editOfferModalVisible: true});
+    }, 500);
+  }
+
+  navigateToReview(type) {
+    Actions.reviewPage({actId: provider._id, type: type});
+  }
+
   onPressBtn1() {
     this.setState({modalVisible: false});
 
     let provider = this.props.provider;
-    if (provider.status === 2) {  // Accepted
-      this.props.endJob(provider._id, this.props.auth.token);
-    } else if (provider.status === 4) {   // Cancelled
-      this.props.archiveActivity(provider._id, this.props.auth.token);
-    } else if (provider.status === 5) {   // Completed
-      
-    } else if (provider.status === 6) {   // CReviewed
-      if (provider.mavenUserID._id !== this.props.profile.myInfo.userId) {
+    let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
 
-      }
-    } else if (provider.status === 7) {   // MReviewed
-      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
-
-      }
-    } else if (provider.status === 8) {   // Both Reviewed
-      this.props.archiveActivity(provider._id, this.props.auth.token);
+    switch (provider.status) {
+      case 1:          // Offered
+        this.showEditOfferModal();
+        break;
+      case 2:         // Accepted
+        this.props.endJob(provider._id, this.props.auth.token);        
+        break;
+      case 3:         // Rejected
+        this.props.archiveActivity(provider._id, this.props.auth.token);
+        break;
+      case 4:         // Cancelled
+        this.props.archiveActivity(provider._id, this.props.auth.token);
+        break;
+      case 5:         // Completed
+        if (isMaven) {
+          this.navigateToReview(1);
+        } else {
+          this.navigateToReview(0);
+        }
+        break;
+      case 6:         // CReviewed
+        if (isMaven) {
+          this.navigateToReview(1);
+        }
+        break;
+      case 7:         // MReviewed
+        if (!isMaven) {
+          this.navigateToReview(0);
+        }
+        break;
+      case 8:         // Both Reviewed
+        this.props.archiveActivity(provider._id, this.props.auth.token);
+        break;
+      default:
+        break;
     }
   }
 
@@ -85,12 +113,24 @@ class ActivityItem extends Component {
     this.setState({modalVisible: false});
     
     let provider = this.props.provider;
-    if (provider.status === 2) {  // Accepted
-      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
-        this.props.cancelOffer(provider._id, 1, this.props.auth.token);
-      } else {
+    let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
+
+    switch (provider.status) {
+      case 1:          // Offered
         this.props.cancelOffer(provider._id, 0, this.props.auth.token);
-      }
+        break;
+      case 2:         // Accepted
+        if (isMaven) {
+          this.props.cancelOffer(provider._id, 1, this.props.auth.token);
+        } else {
+          this.props.cancelOffer(provider._id, 0, this.props.auth.token);
+        }  
+        break;
+      case 3:         // Rejected
+        this.showEditOfferModal();
+        break;    
+      default:
+        break;
     }
   }
 
@@ -98,75 +138,91 @@ class ActivityItem extends Component {
     let provider = this.props.provider;
     let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
     let name = isMaven?provider.userID.firstName + ' ' + provider.userID.lastName:provider.mavenUserID.firstName + ' ' + provider.mavenUserID.lastName;
-
     var modalText = btnText1 = btnText2 = boxText = boxColor = '', boxDisabled = false;
-    if (provider.status === 1 && this.props.profile.myInfo.userId !== provider.mavenUserID._id) {   // Offered
-      modalText = 'Edit offer?';
-      btnText1 = 'Yes';
-      btnText2 = 'No';
-      boxText = 'Offered';
-      boxColor = '#FDF251';
-    } else if (provider.status === 2) {     // Accepted
-      modalText = '"Job completed?" or "Cancel job?"';
-      btnText1 = 'Completed';
-      btnText2 = 'Cancel job';
-      boxText = 'Accepted';
-      boxColor = '#54AD57';
-    } else if (provider.status === 3) {     // Rejected
-      modalText = 'Edit offer?';
-      btnText1 = 'Yes';
-      btnText2 = 'No';
-      boxText = 'Rejected';
-      boxColor = '#DA3832';
-      boxDisabled = true;
-    } else if (provider.status === 4) {     // Cancelled
-      modalText = 'Archive Job?';
-      btnText1 = 'Yes';
-      btnText2 = 'No';
-      boxText = 'Cancelled';
-      boxColor = '#EE8640';
-    } else if (provider.status === 5) {     // Completed
-      modalText = 'Give Review?';
-      btnText1 = 'Yes';
-      btnText2 = 'No';
-      boxText = 'Completed';
-      boxColor = '#7F7F7F';
-    } else if (provider.status === 6) {     // CReviewed
-      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
-        modalText = 'Please leave some review for your customer!';
+
+    switch (provider.status) {
+      case 1:         // Offered
+        if (!isMaven) {
+          modalText = 'What do you want to do?';
+          btnText1 = 'Cancel Offer';
+          btnText2 = 'Edit Offer';
+          boxText = 'Offered';
+          boxColor = '#FDF251';
+        }
+        break;
+      case 2:         // Accepted
+        modalText = '"Job completed?" or "Cancel job?"';
+        btnText1 = 'Completed';
+        btnText2 = 'Cancel job';
+        boxText = 'Accepted';
+        boxColor = '#54AD57';
+        break;
+      case 3:         // Rejected
+        modalText = 'What do you want to do?';
+        btnText1 = 'Archived';
+        btnText2 = 'Edit Offer';
+        boxText = 'Rejected';
+        boxColor = '#DA3832';
+        if (isMaven) {
+          boxDisabled = true;
+        }
+        break;
+      case 4:         // Cancelled
+        modalText = 'Archive Job?';
+        btnText1 = 'Yes';
+        btnText2 = 'No';
+        boxText = 'Cancelled';
+        boxColor = '#EE8640';
+        break;
+      case 5:         // Completed
+        modalText = 'Give Review?';
         btnText1 = 'Yes';
         btnText2 = 'No';
         boxText = 'Completed';
         boxColor = '#7F7F7F';
-      } else {
-        modalText = "Pending Maven's review...";
-        btnText1 = 'Got it';
-        boxText = 'Completed';
-        boxColor = '#7F7F7F';
-      }
-    } else if (provider.status === 7) {     // MReviewed
-      if (provider.mavenUserID._id === this.props.profile.myInfo.userId) {
-        modalText = 'Pending customer review...';
-        btnText1 = 'Got it';
-        boxText = 'Completed';
-        boxColor = '#7F7F7F';
-      } else {
-        modalText = 'Please leave some review for your maven!';
+        break;
+      case 6:         // CReviewed
+        if (isMaven) {
+          modalText = 'Please leave some review for your customer!';
+          btnText1 = 'Yes';
+          btnText2 = 'No';
+          boxText = 'Completed';
+          boxColor = '#7F7F7F';
+        } else {
+          modalText = "Pending Maven's review...";
+          btnText1 = 'Got it';
+          boxText = 'Completed';
+          boxColor = '#7F7F7F';
+        }
+        break;
+      case 7:         // MReviewed
+        if (isMaven) {
+          modalText = 'Pending customer review...';
+          btnText1 = 'Got it';
+          boxText = 'Completed';
+          boxColor = '#7F7F7F';
+        } else {
+          modalText = 'Please leave some review for your maven!';
+          btnText1 = 'Yes';
+          btnText2 = 'No';
+          boxText = 'Completed';
+          boxColor = '#7F7F7F';
+        }
+        break;
+      case 8:         // Both Reviewed
+        modalText = 'Archive Job';
         btnText1 = 'Yes';
         btnText2 = 'No';
         boxText = 'Completed';
         boxColor = '#7F7F7F';
-      }
-    } else if (provider.status === 8) {     // Both Reviewed
-      modalText = 'Archive Job';
-      btnText1 = 'Yes';
-      btnText2 = 'No';
-      boxText = 'Completed';
-      boxColor = '#7F7F7F';
-    } else if (provider.status === 9) {     // Archived
-      boxText = 'Archived';
-      boxColor = '#C3C3C3';
-      boxDisabled = true;
+        break;
+      case 9:         // Archived
+        boxText = 'Archived';
+        boxColor = '#C3C3C3';
+        boxDisabled = true;
+        break;
+      default:
+        break;
     }
 
     return (
@@ -189,12 +245,7 @@ class ActivityItem extends Component {
           <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
             <Text style={{ fontSize:16, color:'#515151', fontWeight:'400', height:18 }} numberOfLines={1} ellipsizeMode='tail'>{provider.mavenID.title}</Text>
             <Text style={{ color:'#145775', height:16, fontSize:13, fontWeight:'400' }}>{categoryName[provider.mavenID.category]}</Text>
-            {
-              this.props.profile.myInfo.userId === provider.mavenUserID._id?
-              <Text style={styles.text}>{name}</Text>
-              :
-              <Text style={styles.text}>{name}</Text>
-            }
+            <Text style={ styles.text }>{name}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:3}}>
               <StarRating
                 disabled
@@ -221,7 +272,7 @@ class ActivityItem extends Component {
               <View style={styles.container}>
               </View>
               :
-              (provider.status === 1 && this.props.profile.myInfo.userId === provider.mavenUserID._id)?
+              (provider.status === 1 && isMaven)?
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => {
                   this.props.acceptOffer(provider._id, this.props.auth.token);
@@ -262,14 +313,64 @@ class ActivityItem extends Component {
                 <Text style={styles.btnText}>{btnText1}</Text>
               </TouchableOpacity>
               {
-                !((provider.status === 6 && provider.mavenUserID._id === this.props.profile.myInfo.userId) || 
-                (provider.status === 7 && provider.mavenUserID._id !== this.props.profile.myInfo.userId)) && 
+                !((provider.status === 6 && isMaven) || 
+                (provider.status === 7 && !isMaven)) && 
                 <TouchableOpacity style={styles.modalBtn} onPress={this.onPressBtn2.bind(this)}>
                   <Text style={styles.btnText}>{btnText2}</Text>
                 </TouchableOpacity>
               }
             </View>
           </View>
+        </Modal>
+        <Modal isVisible={this.state.editOfferModalVisible}>
+        <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%'}}>
+          <Text style={{ fontSize: 16, fontWeight: '600' }}>Date</Text>
+          <View style={{ marginTop: 3, width: '100%', backgroundColor: 'white', borderRadius: 3, padding: 6 }}>
+            <DatePicker
+              style={{width: '100%'}}
+              date={this.state.serviceDate}
+              mode="date"
+              placeholder="Service Date"
+              format="DD/MM/YYYY"
+              minDate="02-01-1900"
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              onDateChange={(date) => { this.setState({ serviceDate: date }); }}
+              customStyles={{
+                  dateInput: {
+                      borderRadius:5, backgroundColor:'#fff'
+                  }
+              }}
+            />
+          </View>
+          <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 15 }}>Offer Price $</Text>
+          <View style={{ marginTop: 3, width: '100%', backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
+            <TextInput
+              placeholderTextColor="rgba(0,0,0,0.3)"
+              placeholder="Price"
+              returnKeyType='go'
+              keyboardType="numeric"
+              maxLength={6}
+              value={this.state.price}
+              onChangeText={(price) => this.setState({price})}
+              underlineColorAndroid='transparent'
+              style={{ height: 40, width: '100%', padding: 8, fontSize: 16, borderRadius: 3, borderWidth: 1, borderColor: 'grey' }}
+            />
+          </View>
+          <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({editOfferModalVisible: false});
+                this.props.editOffer(provider._id, this.state.price, this.state.serviceDate, this.props.auth.token);
+              }}>
+                <Text style={styles.btnText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({editOfferModalVisible: false});
+              }}>
+                <Text style={styles.btnText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+        </View>
         </Modal>
       </View>
     );

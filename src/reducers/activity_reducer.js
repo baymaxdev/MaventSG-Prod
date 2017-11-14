@@ -26,6 +26,9 @@ import {
   ARCHIVE_ACTIVITY_REQUEST,
   ARCHIVE_ACTIVITY,
   ARCHIVE_ACTIVITY_ERROR,
+  REVIEW_ACTIVITY_REQUEST,
+  REVIEW_ACTIVITY,
+  REVIEW_ACTIVITY_ERROR,
 } from '../actions/types';
   
 const INITIAL_STATE = {
@@ -87,6 +90,12 @@ export default function (state = INITIAL_STATE, action) {
     case ARCHIVE_ACTIVITY:
       return { ...state, activityLoading: false, activitySuccess: true };
     case ARCHIVE_ACTIVITY_ERROR:
+      return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
+    case REVIEW_ACTIVITY_REQUEST:
+      return { ...state, activityLoading: true };
+    case REVIEW_ACTIVITY:
+      return { ...state, activityLoading: false, activitySuccess: true };
+    case REVIEW_ACTIVITY_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     default:
       return state;
