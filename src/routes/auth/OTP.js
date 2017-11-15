@@ -24,6 +24,7 @@ class Otp extends React.Component {
    componentWillReceiveProps(nextProps) {
       if(this.props.auth.verifyLoading !== nextProps.auth.verifyLoading && !nextProps.auth.verifyLoading && nextProps.auth.verifyOtp){
         this.props.getMyProfileInfo(nextProps.auth.token);
+        AsyncStorage.setItem('token', nextProps.auth.token);
         Actions.main();
       }
       if(this.props.auth.verifyLoading !== nextProps.auth.verifyLoading && !nextProps.auth.verifyLoading && !nextProps.auth.verifyOtp){

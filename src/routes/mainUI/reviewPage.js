@@ -10,6 +10,7 @@ import StarRating from 'react-native-star-rating';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+const sampleText = ['Great buyer to deal with!', 'Punctual!', 'Pleasant transaction!'];
 
 class ReviewPage extends Component {
   constructor() {
@@ -32,7 +33,7 @@ class ReviewPage extends Component {
 
   render() {
     return (
-      <View style={{flex: 1, alignItems: 'center', backgroundColor: '#EFEEF3'}}>
+      <View style={{flex: 1, alignItems: 'center'}}>
         <Text style={{marginVertical: 10, fontSize: 16}}>How was your experience?</Text>
         <StarRating
           disabled={false}
@@ -41,7 +42,7 @@ class ReviewPage extends Component {
           selectedStar={(rating) => this.setState({rating})}
           starSize={40}
           starColor="#FFA838"
-          starStyle={{ paddingHorizontal: 2 }}
+          starStyle={{ paddingHorizontal: 5 }}
         />
         <View style={{ marginTop: 10, width: '100%', backgroundColor: 'white', alignItems: 'center', padding: 8 }}>
           <TextInput
@@ -60,18 +61,26 @@ class ReviewPage extends Component {
             underlineColorAndroid="transparent"
           />
         </View>
+        <View style={{ marginTop: 20, justifyContent: 'center', alignItems: 'center', width: '90%', flexDirection: 'row', flexWrap: 'wrap' }} >
+          {
+            sampleText.map((value, index) => {
+              return <TouchableOpacity style={styles.sampleText} onPress={() => {
+                var temp = this.state.message;
+                temp += value + ' ';
+                this.setState({message: temp});
+              }}>
+                <Text style={{fontSize: 18, color: '#9799A0'}}>{value}</Text>
+              </TouchableOpacity>
+            })
+          }
+        </View>
       </View>
     );
   }
 }
 
 const styles = {
-  emptyImage: {
-    marginTop: 120
-  },
-  emptyText: {
-    width: '70%', fontSize: 18, marginTop: 30, color: '#7F7F7F', textAlign: 'center'
-  },
+  sampleText: {justifyContent: 'center', alignItems: 'center', marginTop:10, marginHorizontal:5, paddingHorizontal: 15, paddingVertical: 5, borderRadius: 5, borderWidth: 1, borderColor: '#9799A0'},
 };
 
 const mapStateToProps = (state) =>({

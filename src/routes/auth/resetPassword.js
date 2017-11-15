@@ -38,6 +38,7 @@ class resetPassword extends Component {
     componentWillReceiveProps(nextProps) {
       if(nextProps.auth.resetPasswordSuccess){
         this.props.getMyProfileInfo(nextProps.auth.token);
+        AsyncStorage.setItem('token', nextProps.auth.token);
         Actions.main();
       }
       else

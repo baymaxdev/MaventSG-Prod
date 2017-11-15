@@ -51,6 +51,15 @@ class ArchivedSkills extends Component {
         this.setState({data: data, requestLoading: false, refreshing: false});
       });
     }
+
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      this.refreshItem();
+    }
+
+  }
+
+  refreshItem() {
+    this.props.getActivities(2, this.props.auth.token);
   }
 
   renderPlaceholder() {

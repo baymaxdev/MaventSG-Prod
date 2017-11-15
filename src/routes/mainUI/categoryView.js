@@ -4,6 +4,9 @@ import { Container, Content } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import RenderItem from '../../components/categoryItem';
 import CarouselComponent from '../../components/carouselComponent';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as actions from '../../actions';
 
 const { width, height } = Dimensions.get('window');
 
@@ -40,6 +43,12 @@ class CategoryView extends Component {
       }
 
     componentDidMount() {
+        AsyncStorage.getItem('token', (token) => {
+            console.log('======================', token);
+            console.log('====================== props', this.props.auth.token);
+            if (token === null) {
+            }
+        });
         Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
         BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }
@@ -104,4 +113,13 @@ const styles = StyleSheet.create({
 
 });
 
-export default CategoryView;
+const mapStateToProps = (state) =>({
+    auth: state.auth,
+});
+  
+const mapDispatchToProps = (dispatch) =>({
+    getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
+    actions: bindActionCreators(actions, dispatch)
+});
+  
+export default connect(mapStateToProps, mapDispatchToProps)(CategoryView);

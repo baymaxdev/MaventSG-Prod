@@ -74,7 +74,6 @@ class MySkills extends Component {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
       this.refreshItem();
     } else if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
-      console.log(nextProps.activity.error);
       alert(nextProps.activity.error);
     }
   }

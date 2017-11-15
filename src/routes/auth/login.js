@@ -8,7 +8,8 @@ import {
   Dimensions,
   TouchableOpacity,
   Platform,
-  Modal
+  Modal,
+  AsyncStorage
 } from 'react-native';
 import { Location, Permissions } from 'expo';
 import { Actions } from 'react-native-router-flux';
@@ -40,6 +41,7 @@ class Login extends Component {
   componentWillReceiveProps(nextProps) {
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn){
         this.props.getMyProfileInfo(nextProps.auth.token);
+        AsyncStorage.setItem('token', nextProps.auth.token);
         Actions.main();
       }
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){

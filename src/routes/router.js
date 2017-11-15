@@ -1,7 +1,7 @@
 import React from 'react';
 import { Scene, Router, Actions, Reducer } from 'react-native-router-flux';
 import { connect } from 'react-redux';
-import { Text, TouchableOpacity, Image, Platform, Button } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Platform, Button } from 'react-native';
 import { Icon } from 'native-base';
 
 import Login from './auth/login';
@@ -29,6 +29,7 @@ import AllReviewPage from './mainUI/allReviewPage';
 import ReviewPage from './mainUI/reviewPage';
 import TabIcon from '../components/tabIcon';
 import Chat from '../components/chatComponent';
+import Feedback from '../components/feedback';
 import BlankPage from './mainUI/BlankView';
 import reducerCreate from '../reducers/router_reducer'
 
@@ -53,9 +54,14 @@ const AcitivityIcon3 = (props) => {
 };
 
 const renderRightButton = () => {
-  return <TouchableOpacity onPress={(e) => Actions.ActivityPage()} style={{ padding: 10 }}>
-    <Icon name="md-mail" style={{ fontSize: 25, color: '#fff' }} />
-  </TouchableOpacity>
+  return <View style={{flexDirection: 'row'}}>
+    <TouchableOpacity onPress={(e) => Actions.feedback()} style={{ padding: 10 }}>
+      <Image source={require('../../assets/icons/feedback.png')} style={{width: 20, height: 20, marginTop: 2}}/>
+    </TouchableOpacity>
+    <TouchableOpacity onPress={(e) => Actions.ActivityPage()} style={{ padding: 10 }}>
+      <Icon name="md-mail" style={{ fontSize: 25, color: '#fff' }} />
+    </TouchableOpacity>
+  </View>
 }
 
 const renderLeftButton = () => {
@@ -97,9 +103,9 @@ class RouterComponent extends React.Component {
               title="M A V E N T" renderLeftButton={null} navigationBarStyle={{ backgroundColor: "#0B486B" }} indicatorStyle={{ backgroundColor: '#084E70' }} activeTintColor="#084E70" inactiveTintColor="#bbbbbb"
               animationEnabled showIcon={true} showLabel={true} default="categoryView" lazy={true} hideNavBar={Platform.OS === "android" ? false : true} >
 
-              <Scene key="categoryView" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 60, backgroundColor: "#0B486B" }} tabBarLabel="Home" component={CategoryView} icon={TabIcon1} title="M A V E N T" initial/>
-              <Scene key="discovery" {...this.props} navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 60, backgroundColor: "#0B486B" }} tabBarLabel="Discovery" component={Discovery} icon={TabIcon2} title="Discovery"/>
-              <Scene key="profile" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 60, backgroundColor: "#0B486B" }} tabBarLabel="Profile" component={Profile} icon={TabIcon3} title="M A V E N T" />
+              <Scene key="categoryView" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Home" component={CategoryView} icon={TabIcon1} title="M A V E N T" initial/>
+              <Scene key="discovery" {...this.props} navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Discovery" component={Discovery} icon={TabIcon2} title="Discovery"/>
+              <Scene key="profile" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Profile" component={Profile} icon={TabIcon3} title="M A V E N T" />
             </Scene>
             <Scene key="ActivityPage" back={Platform.OS === "android" ? false : true} title="Activity" gestureEnabled={false} tabs hideNavBar={false}
               showIcon={true} showLabel={false} tabBarPosition='top' tabBarStyle={{ backgroundColor: "#0B486B" }} tabStyle={{ padding: 0, paddingTop: 20 }}
@@ -115,6 +121,7 @@ class RouterComponent extends React.Component {
                 navigationBarStyle={{ height: 0 }} renderRightButton={null} title='' icon={AcitivityIcon3}
               />
             </Scene>
+            <Scene key="feedback" component={Feedback} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Feedback"/>
             <Scene key="skillList" component={SkillList} back={Platform.OS === "android" ? false : true} title="Be a Maven!" renderRightButton={null} rightButtonImage={null} />
             <Scene key="subCategory" component={SubCategory} back={Platform.OS === "android" ? false : true} title="Subcategory" />
             <Scene key="genericView" component={GenericView} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="GenericView" />
@@ -126,7 +133,7 @@ class RouterComponent extends React.Component {
             <Scene key="otherProfile" component={Profile} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Profile" />
             <Scene key="allReviewPage" component={AllReviewPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="All Reviews" />
             <Scene key="viewChats" component={MySkills} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Chats" />
-            <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} rightTitle='Submit' back={Platform.OS === "android" ? false : true} title="Leave Feedback" />
+            <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} rightTitle='Submit' back={Platform.OS === "android" ? false : true} title="Review" />
             <Scene key="blankView" component={BlankPage} back={Platform.OS === "android" ? false : true} title="ChatPage" />
           </Scene>
 

@@ -27,15 +27,12 @@ class Chat extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.activity);
     if (nextProps.maven != undefined && nextProps.activity.initChat !== true) {
       let maven = nextProps.maven.maven;
       var user = maven.userID;
       if (this.props.userID !== undefined) {
         user = this.props.userID;
       }
-
-      this.props.getActivities(this.props.userID!==undefined?0:1, this.props.auth.token);
 
       this.setState({maven: maven, user: user, requestLoading: false});
 
@@ -139,7 +136,6 @@ const mapStateToProps = (state) =>({
 
 const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
   initChat: (mavenId, token) => dispatch(actions.initChat(mavenId, token)),
   actions: bindActionCreators(actions, dispatch)
 });

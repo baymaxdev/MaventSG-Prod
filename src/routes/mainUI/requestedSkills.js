@@ -32,7 +32,7 @@ class RequestedSkills extends Component {
   }
   // This is to remove fb token for retry purposes
   componentWillMount() {
-    this.props.getActivities(1, this.props.auth.token);
+    this.refreshItem();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -54,10 +54,12 @@ class RequestedSkills extends Component {
 
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
       this.refreshItem();
-    } else if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
-      console.log(nextProps.activity.error);
-      alert(nextProps.activity.error);
     }
+    
+  }
+
+  refreshItem() {
+    this.props.getActivities(1, this.props.auth.token);
   }
 
   renderPlaceholder() {

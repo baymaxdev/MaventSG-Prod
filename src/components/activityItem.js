@@ -54,7 +54,7 @@ class ActivityItem extends Component {
     this.setState({modalVisible: true});
   }
 
-  showEditOfferModal() {
+  showEditOfferModal(provider) {
     this.setState({price: provider.price.toString(), serviceDate: provider.serviceDate});
     setTimeout(() => {
       this.setState({editOfferModalVisible: true});
@@ -73,7 +73,7 @@ class ActivityItem extends Component {
 
     switch (provider.status) {
       case 1:          // Offered
-        this.showEditOfferModal();
+        this.props.cancelOffer(provider._id, 0, this.props.auth.token);
         break;
       case 2:         // Accepted
         this.props.endJob(provider._id, this.props.auth.token);        
@@ -117,7 +117,7 @@ class ActivityItem extends Component {
 
     switch (provider.status) {
       case 1:          // Offered
-        this.props.cancelOffer(provider._id, 0, this.props.auth.token);
+        this.showEditOfferModal(provider);
         break;
       case 2:         // Accepted
         if (isMaven) {
@@ -127,7 +127,7 @@ class ActivityItem extends Component {
         }  
         break;
       case 3:         // Rejected
-        this.showEditOfferModal();
+        this.showEditOfferModal(provider);
         break;    
       default:
         break;
