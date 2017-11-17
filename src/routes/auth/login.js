@@ -1,3 +1,5 @@
+'use strict';
+
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -9,7 +11,8 @@ import {
   TouchableOpacity,
   Platform,
   Modal,
-  AsyncStorage
+  AsyncStorage,
+  NetInfo
 } from 'react-native';
 import { Location, Permissions } from 'expo';
 import { Actions } from 'react-native-router-flux';
@@ -18,30 +21,79 @@ import {connect} from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../../actions';
 import LoadingComponent from '../../components/loadingComponent';
+import Modal1 from 'react-native-modal';
+import Swiper from 'react-native-swiper';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 class Login extends Component {
   constructor(props) {
-     super(props);
-     this.state = {
+    super(props);
+    this.state = {
        showLoginModal: false,
        email:'demo3@gmail.com',
-       password:'password'
-        // email: 'howilliams8837@gmail.com',
-        // password: 'dddddd'
-     };
-   }
+       password:'password',
+       modalVisible: false,
+       tutorModalVisible: false
+    };
+  }
 
   componentWillMount() {
+    this.getFirstLoad();
+    this.getToken();
+  }
+
+  componentDidMount() {
     this.getLocationAsync();
+    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectivityChange);
+  }
+
+  async getToken() {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        if (token !== null) {
+            this.props.requestLoginWithToken(token);
+        }
+    } catch (error) {
+
+    }
+  }
+
+  async saveToken(token) {
+    try {
+        await AsyncStorage.setItem('token', token);
+    } catch (error) {
+        
+    }
+  }
+
+  async getFirstLoad() {
+    try {
+        const FirstLoad = await AsyncStorage.getItem('FirstLoad');
+        if (FirstLoad === null) {
+            this.setState({tutorModalVisible: true});
+            this.saveFirstLoad();
+        }
+    } catch (error) {
+
+    }
+  }
+
+  async saveFirstLoad() {
+    try {
+        await AsyncStorage.setItem('FirstLoad', 'No');
+    } catch (error) {
+        
+    }
   }
 
   componentWillReceiveProps(nextProps) {
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn){
         this.props.getMyProfileInfo(nextProps.auth.token);
-        AsyncStorage.setItem('token', nextProps.auth.token);
+        if (this.props.auth.autoLogin !== true) {
+            this.saveToken(nextProps.auth.token);
+        }
         Actions.main();
       }
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){
@@ -53,6 +105,15 @@ class Login extends Component {
         else{
             alert('Invalid User');
         }
+      }
+  }
+
+  handleConnectivityChange = (isConnected) => {
+      if (isConnected === false) {
+          this.setState({modalVisible: true});
+          setTimeout(() => {
+              this.setState({modalVisible: false});
+            }, 2000);
       }
   }
 
@@ -132,9 +193,7 @@ class Login extends Component {
                     <TouchableOpacity style={[styles.loginBtn,{borderWidth:1.5, borderColor:'#0B486B', padding:10, shadowRadius:1}]} onPress={(e)=>{Actions.signup()}}>
                         <Text style={{color:'#0B486B', fontWeight:'bold'}}>Sign up</Text>
                     </TouchableOpacity>
-                    <Modal animationType={'none'} onRequestClose={() => null}
-                        transparent={true}
-                        visible={this.state.showLoginModal}>
+                    <Modal1 isVisible={this.state.showLoginModal}>
                         <View style={styles.loginModal}>
                             <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
                                 <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>this.setState({showLoginModal:false})}>
@@ -177,7 +236,7 @@ class Login extends Component {
                             </TouchableOpacity>
                             </View>
                         </View>
-                    </Modal>
+                    </Modal1>
                 </Content>
             </Container>
             <Text style={{alignSelf:'center', padding:10}}>Beta v 1.0.0</Text>
@@ -185,6 +244,34 @@ class Login extends Component {
              this.props.auth.loginLoading &&
                 <LoadingComponent/>
             }
+            <Modal1
+                isVisible={this.state.modalVisible}
+                animationIn={'slideInLeft'}
+                animationOut={'slideOutRight'}
+                animationInTiming={500}
+                animationOutTiming={500}
+                >
+                <View style={styles.modalContent}>
+                    <Icon name='md-warning' style={{fontSize:40, paddingHorizontal: 8, color: 'red' }}/>
+                    <Text>No Network Connection</Text>
+                </View>
+            </Modal1>
+            <Modal visible={this.state.tutorModalVisible}>
+                <Swiper style={styles.wrapper} showsButtons={true} loop={false}>
+                    <View style={styles.tutorView}>
+                        <Text style={styles.tutorText}>Hello Swiper</Text>
+                    </View>
+                    <View style={styles.tutorView}>
+                        <Text style={styles.tutorText}>Beautiful</Text>
+                    </View>
+                    <View style={styles.tutorView}>
+                        <Text style={styles.tutorText}>And simple</Text>
+                        <TouchableOpacity style={[styles.loginBtn,{backgroundColor:'#0B486B', position: 'absolute', bottom: 50}]} onPress={(e) => this.setState({tutorModalVisible: false})}>
+                            <Text style={styles.btnText}>Continue</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Swiper>
+            </Modal>
         </View>
 
     );
@@ -212,12 +299,32 @@ const styles = StyleSheet.create({
     btnText:{color:'#fff', fontWeight:'bold'},
     loginModal: {
         flex:1,
-        padding: 20,
-        backgroundColor: 'rgba(0,0,0,0.8)',
         justifyContent: 'center',
         alignItems: 'center',
     },
-
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 40,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 4,
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+      },
+      wrapper: {
+        
+    },
+    tutorView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#9DD6EB',
+    },
+    tutorText: {
+        color: '#fff',
+        fontSize: 30,
+        fontWeight: 'bold',
+      }
 });
 
 const mapStateToProps = (state) =>({
@@ -225,6 +332,7 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
     requestLogin: (email, password) => dispatch(actions.requestLogin(email, password)),
+    requestLoginWithToken: (token) => dispatch(actions.requestLoginWithToken(token)),
     facebookLogin: () => dispatch(actions.facebookLogin()),
     setLocation: (location) => dispatch(actions.setLocation(location)),
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),

@@ -1,3 +1,5 @@
+'use strict';
+
 import React from 'react';
 import { Icon, Card } from 'native-base';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
@@ -21,10 +23,18 @@ class Otp extends React.Component {
      };
    }
 
+   async saveToken(token) {
+        try {
+            await AsyncStorage.setItem('token', token);
+        } catch (error) {
+            
+        }
+    }
+
    componentWillReceiveProps(nextProps) {
       if(this.props.auth.verifyLoading !== nextProps.auth.verifyLoading && !nextProps.auth.verifyLoading && nextProps.auth.verifyOtp){
         this.props.getMyProfileInfo(nextProps.auth.token);
-        AsyncStorage.setItem('token', nextProps.auth.token);
+        this.saveToken(nextProps.auth.token);
         Actions.main();
       }
       if(this.props.auth.verifyLoading !== nextProps.auth.verifyLoading && !nextProps.auth.verifyLoading && !nextProps.auth.verifyOtp){

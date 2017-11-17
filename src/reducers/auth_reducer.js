@@ -6,6 +6,7 @@ import {
   EMAIL_LOGIN_CHANGED,
   PASSWORD_LOGIN_CHANGED,
   REQUEST_LOGIN,
+  REQUEST_LOGIN_WITH_TOKEN,
   REQUESTED_LOGIN_SUCCEEDED,
   REQUESTED_LOGIN_ERROR,
 
@@ -67,6 +68,14 @@ export default function (state = INITIAL_STATE, action) {
           loggedIn: false,
       } 
 
+    case REQUEST_LOGIN_WITH_TOKEN:
+      return {
+          ...state,
+          loginLoading: false,
+          loggedIn: true,
+          autoLogin: true,
+          token: action.token
+      }
     
     case REQUESTED_LOGIN_SUCCEEDED:      
         return {                

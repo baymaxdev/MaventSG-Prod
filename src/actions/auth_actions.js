@@ -1,4 +1,3 @@
-import { AsyncStorage } from 'react-native';
 import { Facebook } from 'expo';
 import request from '../routes/services/getData';
 var RNUploader = require('NativeModules').RNUploader;
@@ -7,6 +6,7 @@ import {
   FACEBOOK_LOGIN_FAIL,
   FACEBOOK_FETCH_DETAILS,
   REQUEST_LOGIN,
+  REQUEST_LOGIN_WITH_TOKEN,
   REQUESTED_LOGIN_SUCCEEDED,
   REQUESTED_LOGIN_ERROR,
 
@@ -250,5 +250,12 @@ export const changePhoneNumber = (userId, phoneNumber) => {
     .catch(err => {
       dispatch({ type: CHANGE_PHONE_NUMBER_ERROR, error: err });  
     })  
+  }
+}
+
+export const requestLoginWithToken = (token) => {
+  return dispatch => {
+    dispatch({ type: REQUEST_LOGIN });
+    dispatch({ type: REQUEST_LOGIN_WITH_TOKEN, token: token });
   }
 }

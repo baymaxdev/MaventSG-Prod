@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Dimensions, AsyncStorage, Platform, Text, Image, BackHandler, ToastAndroid } from 'react-native';
+import { StyleSheet, View, Dimensions, Platform, Text, Image, BackHandler, ToastAndroid } from 'react-native';
 import { Container, Content } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import RenderItem from '../../components/categoryItem';
@@ -42,11 +42,7 @@ class CategoryView extends Component {
         }
       }
 
-    componentDidMount() {
-        AsyncStorage.getItem('token', (token) => {
-            if (token === null) {
-            }
-        });
+    componentDidMount() {   
         Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
         BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }

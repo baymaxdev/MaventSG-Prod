@@ -1,3 +1,5 @@
+'use strict';
+
 import React, { Component } from 'react';
 import {
     StyleSheet,
@@ -35,10 +37,18 @@ class resetPassword extends Component {
         this.state.email = this.props.email;
     }
 
+    async saveToken(token) {
+        try {
+            await AsyncStorage.setItem('token', token);
+        } catch (error) {
+            
+        }
+    }
+
     componentWillReceiveProps(nextProps) {
       if(nextProps.auth.resetPasswordSuccess){
         this.props.getMyProfileInfo(nextProps.auth.token);
-        AsyncStorage.setItem('token', nextProps.auth.token);
+        this.saveToken(nextProps.auth.token);
         Actions.main();
       }
       else
