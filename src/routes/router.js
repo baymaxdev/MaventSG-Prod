@@ -55,6 +55,14 @@ const AcitivityIcon3 = (props) => {
 
 const renderRightButton = () => {
   return <View style={{flexDirection: 'row'}}>
+    <TouchableOpacity onPress={(e) => Actions.ActivityPage()} style={{ padding: 10 }}>
+      <Icon name="md-mail" style={{ fontSize: 25, color: '#fff' }} />
+    </TouchableOpacity>
+  </View>
+}
+
+const renderMainUIRightButton = () => {
+  return <View style={{flexDirection: 'row'}}>
     <TouchableOpacity onPress={(e) => Actions.feedback()} style={{ padding: 10 }}>
       <Image source={require('../../assets/icons/feedback.png')} style={{width: 20, height: 20, marginTop: 2}}/>
     </TouchableOpacity>
@@ -103,7 +111,7 @@ class RouterComponent extends React.Component {
               title="M A V E N T" renderLeftButton={null} navigationBarStyle={{ backgroundColor: "#0B486B" }} indicatorStyle={{ backgroundColor: '#084E70' }} activeTintColor="#084E70" inactiveTintColor="#bbbbbb"
               animationEnabled showIcon={true} showLabel={true} default="categoryView" lazy={true} hideNavBar={Platform.OS === "android" ? false : true} >
 
-              <Scene key="categoryView" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Home" component={CategoryView} icon={TabIcon1} title="M A V E N T" initial/>
+              <Scene key="categoryView" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Home" component={CategoryView} icon={TabIcon1} title="M A V E N T" initial renderRightButton={renderMainUIRightButton}/>
               <Scene key="discovery" {...this.props} navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Discovery" component={Discovery} icon={TabIcon2} title="Discovery"/>
               <Scene key="profile" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Profile" component={Profile} icon={TabIcon3} title="M A V E N T" />
             </Scene>

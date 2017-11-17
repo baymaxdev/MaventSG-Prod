@@ -44,8 +44,6 @@ class CategoryView extends Component {
 
     componentDidMount() {
         AsyncStorage.getItem('token', (token) => {
-            console.log('======================', token);
-            console.log('====================== props', this.props.auth.token);
             if (token === null) {
             }
         });

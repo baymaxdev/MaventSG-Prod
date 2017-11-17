@@ -6,6 +6,7 @@ import { Actions } from 'react-native-router-flux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../actions';
 import StarRating from 'react-native-star-rating';
+import Modal from 'react-native-modal';
 
 const feelingText = ['Needs Help :(', 'Needs Improvement :(', 'OK!', 'Good Effort!', 'Excellent! :D']
 const improveText = ['Music or Sounds', 'Story', 'Length', 'Voice', 'Pace', 'Other'];
@@ -18,6 +19,7 @@ class Feedback extends Component {
     this.state = {
       rating: 0,
       message: '',
+      modalVisible: false,
     };
   }
 
@@ -39,7 +41,7 @@ class Feedback extends Component {
         <View style={{ marginTop: 15, justifyContent: 'center', alignItems: 'center', width: '90%', flexDirection: 'row', flexWrap: 'wrap' }} >
           {
             improveText.map((value, index) => {
-              return <TouchableOpacity style={[styles.improveText, {borderColor: improveTextColor[index]}]} onPress={() => {
+              return <TouchableOpacity key={index} style={[styles.improveText, {borderColor: improveTextColor[index]}]} onPress={() => {
                 var temp = this.state.message;
                 temp += value + ' ';
                 this.setState({message: temp});
@@ -66,9 +68,28 @@ class Feedback extends Component {
             underlineColorAndroid="transparent"
           />
         </View>
-        <TouchableOpacity style={styles.submitBtn} onPress={() => {}}>
+        <TouchableOpacity style={styles.submitBtn} onPress={() => {
+          this.props.feedback(this.state.rating, this.state.message, this.props.auth.token, () => {
+            this.setState({modalVisible: true});
+            setTimeout(() => {
+              this.setState({modalVisible: false});
+            }, 1000);
+          });
+        }}>
           <Text style={styles.btnText}>Submit</Text>
         </TouchableOpacity>
+        <Modal
+          isVisible={this.state.modalVisible}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -88,6 +109,15 @@ const styles = {
       height: 1
     }
   },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
 };
 
 const mapStateToProps = (state) =>({
@@ -95,8 +125,7 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-  initChat: (mavenId, token) => dispatch(actions.initChat(mavenId, token)),
+  feedback: (rating, message, token, next) => dispatch(actions.feedback(rating, message, token, next)),
   actions: bindActionCreators(actions, dispatch)
 });
 

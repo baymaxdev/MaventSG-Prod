@@ -34,6 +34,8 @@ import {
   REQUEST_UPDATE_PROFILE_IMAGE,
   UPDATE_PROFILE_IMAGE,
   UPDATE_PROFILE_IMAGE_ERROR,
+  GIVE_APP_FEEDBACK,
+  GIVE_APP_FEEDBACK_ERROR,
 } from './types';
 
 export const getMyProfileInfo = (token) => {
@@ -476,6 +478,48 @@ export const updateProfileImage = ( imageUrl, token ) => {
     })
     .catch(err => {
       dispatch({ type: UPDATE_PROFILE_IMAGE_ERROR, error: err });
+    })  
+  }
+}
+
+export const feedback = ( rating, message, token, next ) => {
+  let data = {
+    rating: rating,
+    message: message
+  };
+
+  var formBody = [];
+  for (var property in data) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(data[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+  }
+  formBody = formBody.join("&");
+  
+  let option = { 
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `JWT ${token}`,
+    },
+    body: formBody,
+  };
+
+  return dispatch => {
+    const url = `user/feedback`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: GIVE_APP_FEEDBACK });
+        next();
+      }
+      else {
+        dispatch({ type: GIVE_APP_FEEDBACK_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: GIVE_APP_FEEDBACK_ERROR, error: err });
     })  
   }
 }

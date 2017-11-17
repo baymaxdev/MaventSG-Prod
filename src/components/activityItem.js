@@ -54,15 +54,15 @@ class ActivityItem extends Component {
     this.setState({modalVisible: true});
   }
 
-  showEditOfferModal(provider) {
-    this.setState({price: provider.price.toString(), serviceDate: provider.serviceDate});
+  showEditOfferModal() {
+    this.setState({price: this.props.provider.price.toString(), serviceDate: this.props.provider.serviceDate});
     setTimeout(() => {
       this.setState({editOfferModalVisible: true});
     }, 500);
   }
 
   navigateToReview(type) {
-    Actions.reviewPage({actId: provider._id, type: type});
+    Actions.reviewPage({actId: this.props.provider._id, type: type});
   }
 
   onPressBtn1() {
@@ -117,7 +117,7 @@ class ActivityItem extends Component {
 
     switch (provider.status) {
       case 1:          // Offered
-        this.showEditOfferModal(provider);
+        this.showEditOfferModal();
         break;
       case 2:         // Accepted
         if (isMaven) {
@@ -127,7 +127,7 @@ class ActivityItem extends Component {
         }  
         break;
       case 3:         // Rejected
-        this.showEditOfferModal(provider);
+        this.showEditOfferModal();
         break;    
       default:
         break;
@@ -159,7 +159,7 @@ class ActivityItem extends Component {
         break;
       case 3:         // Rejected
         modalText = 'What do you want to do?';
-        btnText1 = 'Archived';
+        btnText1 = 'Archive';
         btnText2 = 'Edit Offer';
         boxText = 'Rejected';
         boxColor = '#DA3832';
@@ -323,54 +323,54 @@ class ActivityItem extends Component {
           </View>
         </Modal>
         <Modal isVisible={this.state.editOfferModalVisible}>
-        <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%'}}>
-          <Text style={{ fontSize: 16, fontWeight: '600' }}>Date</Text>
-          <View style={{ marginTop: 3, width: '100%', backgroundColor: 'white', borderRadius: 3, padding: 6 }}>
-            <DatePicker
-              style={{width: '100%'}}
-              date={this.state.serviceDate}
-              mode="date"
-              placeholder="Service Date"
-              format="DD/MM/YYYY"
-              minDate="02-01-1900"
-              confirmBtnText="Confirm"
-              cancelBtnText="Cancel"
-              onDateChange={(date) => { this.setState({ serviceDate: date }); }}
-              customStyles={{
-                  dateInput: {
-                      borderRadius:5, backgroundColor:'#fff'
-                  }
-              }}
-            />
-          </View>
-          <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 15 }}>Offer Price $</Text>
-          <View style={{ marginTop: 3, width: '100%', backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
-            <TextInput
-              placeholderTextColor="rgba(0,0,0,0.3)"
-              placeholder="Price"
-              returnKeyType='go'
-              keyboardType="numeric"
-              maxLength={6}
-              value={this.state.price}
-              onChangeText={(price) => this.setState({price})}
-              underlineColorAndroid='transparent'
-              style={{ height: 40, width: '100%', padding: 8, fontSize: 16, borderRadius: 3, borderWidth: 1, borderColor: 'grey' }}
-            />
-          </View>
-          <View style={{flexDirection: 'row'}}>
-              <TouchableOpacity style={styles.modalBtn} onPress={() => {
-                this.setState({editOfferModalVisible: false});
-                this.props.editOffer(provider._id, this.state.price, this.state.serviceDate, this.props.auth.token);
-              }}>
-                <Text style={styles.btnText}>Submit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtn} onPress={() => {
-                this.setState({editOfferModalVisible: false});
-              }}>
-                <Text style={styles.btnText}>Cancel</Text>
-              </TouchableOpacity>
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%'}}>
+            <Text style={{ fontSize: 16, fontWeight: '600' }}>Date</Text>
+            <View style={{ marginTop: 3, width: '100%', backgroundColor: 'white', borderRadius: 3, padding: 6 }}>
+              <DatePicker
+                style={{width: '100%'}}
+                date={this.state.serviceDate}
+                mode="date"
+                placeholder="Service Date"
+                format="DD/MM/YYYY"
+                minDate="02-01-1900"
+                confirmBtnText="Confirm"
+                cancelBtnText="Cancel"
+                onDateChange={(date) => { this.setState({ serviceDate: date }); }}
+                customStyles={{
+                    dateInput: {
+                        borderRadius:5, backgroundColor:'#fff'
+                    }
+                }}
+              />
             </View>
-        </View>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 15 }}>Offer Price $</Text>
+            <View style={{ marginTop: 3, width: '100%', backgroundColor: 'white', borderRadius: 3, alignItems: 'center', padding: 6 }}>
+              <TextInput
+                placeholderTextColor="rgba(0,0,0,0.3)"
+                placeholder="Price"
+                returnKeyType='go'
+                keyboardType="numeric"
+                maxLength={6}
+                value={this.state.price}
+                onChangeText={(price) => this.setState({price})}
+                underlineColorAndroid='transparent'
+                style={{ height: 40, width: '100%', padding: 8, fontSize: 16, borderRadius: 3, borderWidth: 1, borderColor: 'grey' }}
+              />
+            </View>
+            <View style={{flexDirection: 'row'}}>
+                <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                  this.setState({editOfferModalVisible: false});
+                  this.props.editOffer(provider._id, this.state.price, this.state.serviceDate, this.props.auth.token);
+                }}>
+                  <Text style={styles.btnText}>Submit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                  this.setState({editOfferModalVisible: false});
+                }}>
+                  <Text style={styles.btnText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+          </View>
         </Modal>
       </View>
     );
@@ -382,15 +382,6 @@ const styles = {
   container: {flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%'},
   btnContainer: {width: '100%', paddingVertical: 10, borderRadius: 5, justifyContent: 'center', alignItems: 'center'},
   btnText: {fontWeight: 'bold', fontSize: 15, color: '#fff'},
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 40,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 4,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-  },
   modalBtn:{
     flex:1, padding:10, marginBottom:10, marginTop: 30, marginHorizontal: 10, flexDirection:'row', alignItems:'center',
     justifyContent:'center', borderRadius:10, backgroundColor:'#0B486B',

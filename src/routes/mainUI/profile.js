@@ -166,10 +166,9 @@ class Profile extends Component {
           />
         }>
 
-          <View style={{ paddingHorizontal: 10 }} >
-            <Image source={require('../../../assets/images/CarouselView/Image1.jpg')} style={{ position:'absolute',flex:1, width: width}}>
-              <View style={{ backgroundColor:'rgba(11, 72, 107, 0.9)', width:'100%', height:'100%'}}/>
-            </Image>
+          <View style={{}} >
+            <Image source={require('../../../assets/images/CarouselView/Image1.jpg')} style={{ position:'absolute',flex:1, width: width}}/>
+            <View style={{ position: 'absolute', backgroundColor:'rgba(11, 72, 107, 0.9)', width:'100%', height:'100%'}}/>
             <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 15 }} disabled={!this.state.isMe} onPress={() => {
               this.ActionSheet.show();
             }}>

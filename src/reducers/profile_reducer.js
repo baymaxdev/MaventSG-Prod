@@ -33,6 +33,8 @@ import {
   REQUEST_UPDATE_PROFILE_IMAGE,
   UPDATE_PROFILE_IMAGE,
   UPDATE_PROFILE_IMAGE_ERROR,
+  GIVE_APP_FEEDBACK,
+  GIVE_APP_FEEDBACK_ERROR,
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -113,6 +115,10 @@ export default function (state = INITIAL_STATE, action) {
     case UPDATE_PROFILE_IMAGE:
       return { ...state };
     case UPDATE_PROFILE_IMAGE_ERROR:
+      return { ...state, error: action.error };
+    case GIVE_APP_FEEDBACK:
+      return { ...state };
+    case GIVE_APP_FEEDBACK_ERROR:
       return { ...state, error: action.error };
 
     default:

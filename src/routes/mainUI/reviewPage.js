@@ -64,7 +64,7 @@ class ReviewPage extends Component {
         <View style={{ marginTop: 20, justifyContent: 'center', alignItems: 'center', width: '90%', flexDirection: 'row', flexWrap: 'wrap' }} >
           {
             sampleText.map((value, index) => {
-              return <TouchableOpacity style={styles.sampleText} onPress={() => {
+              return <TouchableOpacity key={index} style={styles.sampleText} onPress={() => {
                 var temp = this.state.message;
                 temp += value + ' ';
                 this.setState({message: temp});

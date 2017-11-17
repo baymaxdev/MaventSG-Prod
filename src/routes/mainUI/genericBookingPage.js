@@ -86,7 +86,7 @@ class GenericBookingPage extends Component {
                       minDate="02-01-1900"
                       confirmBtnText="Confirm"
                       cancelBtnText="Cancel"
-                      onDateChange={(date) => { this.setState({ date }); console.log(date); }}
+                      onDateChange={(date) => { this.setState({ date }); }}
                       customStyles={{
                             dateInput: {
                                 borderRadius:5, backgroundColor:'#fff'

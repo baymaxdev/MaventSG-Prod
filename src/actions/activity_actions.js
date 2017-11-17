@@ -30,6 +30,8 @@ import {
   REVIEW_ACTIVITY_REQUEST,
   REVIEW_ACTIVITY,
   REVIEW_ACTIVITY_ERROR,
+  GET_MAVEN_ACTIVITIES,
+  GET_MAVEN_ACTIVITIES_ERROR,
 } from './types';
 
 export const getActivities = (mode, token) => {
@@ -194,12 +196,12 @@ export const editOffer = (actId, price, serviceDate, token) => {
     },
   };
   return dispatch => {
-    const url = `activity/editOffer?actId=${actId}&price=${price}&serviceDate=${serviceDate}`;
+    const url = `activity/editOffer?actID=${actId}&price=${price}&serviceDate=${serviceDate}`;
     dispatch({ type: EDIT_OFFER_REQUEST });
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: EDIT_OFFER, status: res.status });   
+        dispatch({ type: EDIT_OFFER, status: res.status });
       }
       else {
         dispatch({ type: EDIT_OFFER_ERROR, error: res.msg, status: res.status });
@@ -284,5 +286,29 @@ export const reviewActivity = (actId, type, rating, description, token, next) =>
     .catch(err => {
       dispatch({ type: REVIEW_ACTIVITY_ERROR, error: err });
     })  
+  }
+}
+
+export const getMavenActivities = (mavenId, token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `activity/get-maven-activities?mavenID=${mavenId}`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result });
+      }
+      else {
+        dispatch({ type: GET_MAVEN_ACTIVITIES_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: GET_MAVEN_ACTIVITIES_ERROR, error: err });
+    })
   }
 }
