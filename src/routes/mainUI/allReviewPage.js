@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl, FlatList } from 'react-native';
 import {ImagePicker} from 'expo';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -22,19 +22,47 @@ class AllReviewPage extends Component {
       requestLoading: true,
       refreshing: false,
       selectedIndex: 0,
+      mavenReviews: [],
+      consumerReviews: [],
     }
   }
 
   componentDidMount() {
-    
+    this.initialize();
+  }
+
+  initialize() {
+    if (this.props.userId) {
+      this.props.getProfileInfo(this.props.auth.token, this.props.userId);
+    } else {
+      this.props.getMyProfileInfo(this.props.auth.token);
+    }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.maven !== undefined) {
-      this.setState({ data: nextProps.maven.maven.reviews, requestLoading: false, refreshing: false });
+    var mavenReviews = [];
+    var consumerReviews = [];
+
+    if (this.props.userId) {
+      mavenReviews = nextProps.profile.user.mavenReviews;
+      consumerReviews = nextProps.profile.user.consumerReviews;
     } else {
-      this.setState({requestLoading: false, refreshing: false});
+      mavenReviews = this.props.profile.myInfo.mavenReviews;
+      consumerReviews = this.props.profile.myInfo.consumerReviews;
     }
+
+    for (var i = 0; i < mavenReviews.length; i++) {
+      mavenReviews[i].asWhat = 'As Maven';
+    }
+
+    for (i = 0; i < consumerReviews.length; i++) {
+      consumerReviews[i].asWhat = 'As User';
+    }
+
+    console.log('maven', mavenReviews);
+    console.log('consumer', consumerReviews);
+
+    this.setState({ mavenReviews: mavenReviews, consumerReviews: consumerReviews, requestLoading: false, refreshing: false });
   }
 
   getStringFromDate(date) {
@@ -103,7 +131,7 @@ class AllReviewPage extends Component {
 
   _renderTruncatedFooter = (handlePress) => {
     return (
-      <Text style={{color: '#f69021', fontSize: 16, marginTop: 5}} onPress={handlePress}>
+      <Text style={{color: '#f69021', marginTop: 5}} onPress={handlePress}>
         Show More
       </Text>
     );
@@ -111,7 +139,7 @@ class AllReviewPage extends Component {
 
   _renderRevealedFooter = (handlePress) => {
     return (
-      <Text style={{color: '#f69021', fontSize: 16, marginTop: 5}} onPress={handlePress}>
+      <Text style={{color: '#f69021', marginTop: 5}} onPress={handlePress}>
         Less
       </Text>
     );
@@ -121,29 +149,32 @@ class AllReviewPage extends Component {
   }
 
   renderItem(item, index) {
+    console.log(item);
     return (
-      <View style = {{ borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginBottom: 13}}>
-        <View style = {{flexDirection: "row", justifyContent: 'space-between', padding: 10}}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
-            <View style = {{paddingHorizontal: 10}} >
-              <Text style = {styles.nameText} >{item.userID.firstName + ' ' + item.userID.lastName}</Text>
-              <View style={{ height: 5 }}></View>
-              <Text style ={{ color: '#a4a4a4', fontSize: 14}} >{this.getStringFromDate(item.createdDate)}</Text>
-            </View>
-          </View>
-        </View>
-        <View style = {{ paddingBottom: 5, paddingHorizontal: 10}}>
-          {
-            item.text &&
+      <View style = {{padding: 10}}>
+        <View style={{flexDirection: 'row'}}>
+          <Image source = {item.reviewUserID.displayPicture?{uri: item.reviewUserID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 55, height: 55, borderRadius: 17 }}/>
+          <View style = {{ flexDirection: "column", paddingBottom: 5, paddingHorizontal: 10 }}>
             <ReadMore
-              numberOfLines={3}
+              numberOfLines={2}
               renderTruncatedFooter={this._renderTruncatedFooter}
               renderRevealedFooter={this._renderRevealedFooter}
               onReady={this._handleTextReady}>
-              <Text style ={{ color: '#ababab', fontSize: 15, paddingHorizontal: 10}}>{item.text}</Text>
+              <Text style = {{color: '#AF362D'}}>
+                {item.reviewUserID.firstName + ' ' + item.reviewUserID.lastName + ' '}
+                <Text style={{color: 'black'}}>
+                  {item.description}
+                </Text>
+              </Text>
             </ReadMore>
-          }
+            <View style={{ marginTop: 5, flexDirection: 'row', alignItems: 'center' }}>
+              <Icon name="ios-time-outline" style={{ color:'#a4a4a4', marginRight: 3, fontSize: 14 }}/>
+              <Text style ={{ color: '#a4a4a4', fontSize: 14, marginRight: 5}} >{this.getStringFromDate(item.createdDate)}</Text>
+              <Text>
+                {item.asWhat}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     );
@@ -169,6 +200,7 @@ class AllReviewPage extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
+    this.initialize();
   }
 
   handleIndexChange = (index) => {
@@ -177,7 +209,37 @@ class AllReviewPage extends Component {
     });
   }
 
+  renderSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 1,
+          width: '86%',
+          backgroundColor: '#CED0CE',
+          marginLeft: '14%'
+        }}
+      />
+    );
+  };
+
   render() {
+    var data = [];
+    if (this.state.selectedIndex === 0) {
+      data = this.state.mavenReviews.concat(this.state.consumerReviews);
+    } else if (this.state.selectedIndex === 1) {
+      data = this.state.mavenReviews;
+    } else {
+      data = this.state.consumerReviews;
+    }
+
+    if (data.length !== 0) {
+      data.sort(function(a, b) {
+        da = new Date(a.createdDate);
+        db = new Date(b.createdDate);
+        return db.getTime() - da.getTime();
+      });
+    }
+
     return (
       <View style={styles.container}>
         <View style={{paddingHorizontal: 50, paddingVertical: 10, justifyContent: 'center', alignItems: 'center'}}>
@@ -196,19 +258,19 @@ class AllReviewPage extends Component {
               this.state.requestLoading?this.renderPlaceholder():null
           }
           <Content padder style = {{backgroundColor: '#fff'}}
-          refreshControl={
+            refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
                 onRefresh={this._onRefresh.bind(this)}
-          />}>
-        {
-          this.state.data.map((item, index)=>{
-            return <View key={index}>
-              {this.renderItem(item, index)}
-              </View>
-          })
-        }
-        </Content>
+              />}>
+            <FlatList
+              data={data}
+              renderItem={ ({item, index}) => this.renderItem(item, index)}
+              keyExtractor={item => item._id}
+              ItemSeparatorComponent={this.renderSeparator}
+              >
+            </FlatList>
+          </Content>
         </Container>
       </View>
     );
@@ -227,6 +289,8 @@ const mapStateToProps = (state) =>({
   profile: state.profile,
 });
 const mapDispatchToProps = (dispatch) =>({
+  getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
+  getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

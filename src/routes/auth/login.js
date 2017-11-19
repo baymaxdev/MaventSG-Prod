@@ -14,7 +14,7 @@ import {
   AsyncStorage,
   NetInfo
 } from 'react-native';
-import { Location, Permissions } from 'expo';
+import { Location, Permissions, Font } from 'expo';
 import { Actions } from 'react-native-router-flux';
 import { Form, Item, Icon, Container, Content, Input } from 'native-base';
 import {connect} from 'react-redux';
@@ -35,11 +35,16 @@ class Login extends Component {
        email:'demo3@gmail.com',
        password:'password',
        modalVisible: false,
-       tutorModalVisible: false
+       tutorModalVisible: false,
+       loading: true,
     };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
+    await Font.loadAsync({
+        'Arial': require('../../../assets/fonts/arial.ttf'),
+    });
+    
     this.getFirstLoad();
     this.getToken();
   }
@@ -55,6 +60,7 @@ class Login extends Component {
         if (token !== null) {
             this.props.requestLoginWithToken(token);
         }
+        this.setState({loading: false});
     } catch (error) {
 
     }
@@ -169,6 +175,9 @@ class Login extends Component {
   }
   render() {
     return (
+        this.state.loading?
+        <View style={{flex: 1, backgroundColor: 'white'}}/>
+        :
         <View style={{flex: 1, justifyContent:'center' }}>
             <View style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
                 <Image source={require('../../../assets/images/CarouselView/Image2.jpg')} style={{ flex: 1, height: SCREEN_HEIGHT / 2 , width: SCREEN_WIDTH, opacity: 0.4 }} blurRadius={3} />
@@ -256,7 +265,10 @@ class Login extends Component {
                     <Text>No Network Connection</Text>
                 </View>
             </Modal1>
-            <Modal visible={this.state.tutorModalVisible}>
+            <Modal
+                visible={this.state.tutorModalVisible}
+                onRequestClose={() => {console.log("Modal has been closed.")}}
+                >
                 <Swiper style={styles.wrapper} showsButtons={true} loop={false}>
                     <View style={styles.tutorView}>
                         <Text style={styles.tutorText}>Hello Swiper</Text>

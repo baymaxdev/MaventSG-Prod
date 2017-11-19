@@ -88,8 +88,7 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-  getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
+  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),  
   actions: bindActionCreators(actions, dispatch)
 });
 

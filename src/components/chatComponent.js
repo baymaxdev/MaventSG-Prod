@@ -225,11 +225,11 @@ class Chat extends Component {
     switch (activity.status) {
       case 1:         // Offered
         if (isMaven) {
-          btnText1 = 'Cancel Offer';
-          btnText2 = 'Edit Offer';
-        } else {
           btnText1 = 'Reject';
           btnText2 = 'Accept';
+        } else {
+          btnText1 = 'Cancel Offer';
+          btnText2 = 'Edit Offer';
         }
         break;
       case 2:         // Accepted

@@ -14,6 +14,10 @@ const store = createStore(allReducers, middleware);
 console.disableYellowBox = true;
 
 export default class App extends React.Component {
+
+  componentWillMount() {
+  }
+
   render() {
     return (
       <Provider store= {store}>
