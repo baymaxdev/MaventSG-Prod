@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import StarRating from 'react-native-star-rating';
 
@@ -17,8 +17,9 @@ const SkillRowComponent = (props) => {
                 :null
               }
             </View>
-            {
-              props.data.data.map((item, index) => {
+            <FlatList
+              data={props.data.data}
+              renderItem={ ({item, index}) => {
                 if (item.category != 'entry') {
                   return <RateComponent key = {index} data = { item } onSuccessModal = { props.onSuccessModal } isMe = { props.isMe }/>
                 }
@@ -31,8 +32,11 @@ const SkillRowComponent = (props) => {
                     :null
                   )
                 }
-              })
-            }
+              }}
+              keyExtractor={item => item._id}
+              ItemSeparatorComponent={null}
+              >
+            </FlatList>
           </View>
 };
 const styles = StyleSheet.create({

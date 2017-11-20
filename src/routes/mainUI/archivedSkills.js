@@ -7,7 +7,8 @@ import {
   Dimensions,
   Text, TextInput,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  FlatList
 } from 'react-native';
 import { Container, Content, Icon } from 'native-base';
 import { connect } from 'react-redux';
@@ -105,12 +106,17 @@ class ArchivedSkills extends Component {
                 onRefresh={this._onRefresh.bind(this)}
               />
             }>
-            {
-              this.state.data.map((provider) => {
+            <FlatList
+              data={this.state.data}
+              renderItem={ ({item, index}) => {
                 return (
-                  <ActivityItem key={provider._id} provider={provider}/>
+                  <ActivityItem key={item._id} provider={item}/>
                 );
-              })}
+              }}
+              keyExtractor={item => item._id}
+              ItemSeparatorComponent={null}
+              >
+            </FlatList>
           </Content>
         </Container>
       }

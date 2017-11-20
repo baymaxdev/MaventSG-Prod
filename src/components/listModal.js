@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from 'native-base';
-import { StyleSheet, Text, View, Modal, ScrollView, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, Modal, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 
 export default class ListModal extends React.Component {
   constructor(props) {
@@ -11,28 +11,32 @@ export default class ListModal extends React.Component {
    }
    render() {
     return (
-     <Modal animationType={'none'} transparent={true} visible={this.state.showLoginModal} onRequestClose={() => null} >
-       <View style={styles.listModal}>
-         <View style={{backgroundColor:'#fff', borderRadius:10, width:'100%', padding:10}}>
-         <ScrollView style={{marginBottom:20}}>
-          <View style={styles.itemWrapper}>
-                 <Text style={{fontSize:18, fontWeight:'500'}} >{this.props.data[0].label}</Text>
+      <Modal animationType={'none'} transparent={true} visible={this.state.showLoginModal} onRequestClose={() => null} >
+        <View style={styles.listModal}>
+          <View style={{backgroundColor:'#fff', borderRadius:10, width:'100%', padding:10}}>
+            <ScrollView style={{marginBottom:20}}>
+              <View style={styles.itemWrapper}>
+                <Text style={{fontSize:18, fontWeight:'500'}} >{this.props.data[0].label}</Text>
+              </View>
+              <FlatList
+                data={this.props.data}
+                renderItem={ ({item, index}) => {
+                  if(index>0)
+                  return <TouchableOpacity key={index} style={styles.itemWrapper} onPress={(e)=>{this.props.handler(false,item.label, item.key) ;this.setState({showModal:false})}}>
+                    <Text style={{color:'#085be0', fontSize:18}} >{item.label}</Text>
+                  </TouchableOpacity>
+                }}
+                keyExtractor={item => item._id}
+                ItemSeparatorComponent={null}
+                >
+              </FlatList>
+            </ScrollView>
           </View>
-           {
-             this.props.data.map((item, index)=>{
-               if(index>0)
-               return <TouchableOpacity key={index} style={styles.itemWrapper} onPress={(e)=>{this.props.handler(false,item.label, item.key) ;this.setState({showModal:false})}}>
-                 <Text style={{color:'#085be0', fontSize:18}} >{item.label}</Text>
-               </TouchableOpacity>
-             })
-           }
-          </ScrollView>
+            <TouchableOpacity style={{ backgroundColor:'#fff', padding:10, marginTop:10,width:'100%', borderRadius:10}} onPress={(e)=>{this.props.handler(false,'') ;this.setState({showModal:false})}}>
+              <Text style={{textAlign:'center', fontSize:18}}>Cancel</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={{ backgroundColor:'#fff', padding:10, marginTop:10,width:'100%', borderRadius:10}} onPress={(e)=>{this.props.handler(false,'') ;this.setState({showModal:false})}}>
-            <Text style={{textAlign:'center', fontSize:18}}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-    </Modal>
+      </Modal>
     )}
 };
 

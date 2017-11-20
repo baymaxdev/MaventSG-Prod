@@ -107,13 +107,13 @@ class RouterComponent extends React.Component {
           </Scene>
 
           <Scene key='home' {...this.props} >
-            <Scene key="main" {...this.props} panHandlers={null} gestureEnabled={false} swipeEnabled={false} tabs activeBackgroundColor='#fff' tabBarStyle={{ backgroundColor: '#fff', paddingVertical: 3 }}
+            <Scene key="main" {...this.props} panHandlers={null} gestureEnabled={false} swipeEnabled={false} tabs activeBackgroundColor='#fff' tabBarStyle={{ backgroundColor: '#fff', paddingVertical: 3 }} tabBarPosition='bottom'
               title="M A V E N T" renderLeftButton={null} navigationBarStyle={{ backgroundColor: "#0B486B" }} indicatorStyle={{ backgroundColor: '#084E70' }} activeTintColor="#084E70" inactiveTintColor="#bbbbbb"
-              animationEnabled showIcon={true} showLabel={true} default="categoryView" lazy={true} hideNavBar={Platform.OS === "android" ? false : true} >
+              animationEnabled showIcon={true} showLabel={true} default="categoryView" lazy={true} hideNavBar={true}>
 
-              <Scene key="categoryView" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Home" component={CategoryView} icon={TabIcon1} title="M A V E N T" initial renderRightButton={renderMainUIRightButton}/>
-              <Scene key="discovery" {...this.props} navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Discovery" component={Discovery} icon={TabIcon2} title="Discovery"/>
-              <Scene key="profile" navigationBarStyle={{ height: Platform.OS === "android" ? 0 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Profile" component={Profile} icon={TabIcon3} title="M A V E N T" />
+              <Scene key="categoryView" navigationBarStyle={{ height: Platform.OS === "android" ? 60 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Home" component={CategoryView} icon={TabIcon1} title="M A V E N T" initial renderRightButton={renderMainUIRightButton}/>
+              <Scene key="discovery" {...this.props} navigationBarStyle={{ height: Platform.OS === "android" ? 60 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Discovery" component={Discovery} icon={TabIcon2} title="Discovery"/>
+              <Scene key="profile" navigationBarStyle={{ height: Platform.OS === "android" ? 60 : 44, backgroundColor: "#0B486B" }} tabBarLabel="Profile" component={Profile} icon={TabIcon3} title="Profile" />
             </Scene>
             <Scene key="ActivityPage" back={Platform.OS === "android" ? false : true} title="Activity" gestureEnabled={false} tabs hideNavBar={false}
               showIcon={true} showLabel={false} tabBarPosition='top' tabBarStyle={{ backgroundColor: "#0B486B" }} tabStyle={{ padding: 0, paddingTop: 20 }}

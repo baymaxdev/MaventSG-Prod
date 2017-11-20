@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { TouchableOpacity, Image, View, Text } from 'react-native';
+import { TouchableOpacity, Image, View, Text, TextInput } from 'react-native';
 import { Icon } from 'native-base';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -60,10 +60,11 @@ class Chat extends Component {
             }
           }
         } else {
-          activity = ma[0];
+          if (ma.length > 1) {
+            activity = ma[0];
+          }
         }
         this.setState({ activity });
-        //this.setState({activity: nextProps.activity.mavenActivities});
       }
 
       this.setState({maven: maven, user: user, requestLoading: false});
@@ -220,61 +221,63 @@ class Chat extends Component {
     let activity = this.state.activity;
     let isMaven = this.props.userID !== undefined?true:false;
     var btnText1 = btnText2 = '', boxDisabled = false;
-
-    switch (activity.status) {
-      case 1:         // Offered
-        if (isMaven) {
-          btnText1 = 'Reject';
-          btnText2 = 'Accept';
-        } else {
+    
+    if (activity.status !== undefined) {
+      switch (activity.status) {
+        case 1:         // Offered
+          if (isMaven) {
+            btnText1 = 'Reject';
+            btnText2 = 'Accept';
+          } else {
+            btnText1 = 'Cancel Offer';
+            btnText2 = 'Edit Offer';
+          }
+          break;
+        case 2:         // Accepted
           btnText1 = 'Cancel Offer';
-          btnText2 = 'Edit Offer';
-        }
-        break;
-      case 2:         // Accepted
-        btnText1 = 'Cancel Offer';
-        btnText2 = 'Completed?';
-        break;
-      case 3:         // Rejected
-        if (isMaven) {
-          btnText1 = 'You rejected the Offer~';
-          boxDisabled = true;
-        } else {
-          btnText1 = 'Archive';
-          btnText2 = 'Edit Offer';
-        }
-        break;
-      case 4:         // Cancelled
-        btnText1 = 'Job Cancelled';
-        break;
-      case 5:         // Completed
-        btnText1 = 'Please leave a Review~';
-        break;
-      case 6:         // CReviewed
-        if (isMaven) {
+          btnText2 = 'Completed?';
+          break;
+        case 3:         // Rejected
+          if (isMaven) {
+            btnText1 = 'You rejected the Offer~';
+            boxDisabled = true;
+          } else {
+            btnText1 = 'Archive';
+            btnText2 = 'Edit Offer';
+          }
+          break;
+        case 4:         // Cancelled
+          btnText1 = 'Job Cancelled';
+          break;
+        case 5:         // Completed
           btnText1 = 'Please leave a Review~';
-        } else {
-          btnText1 = 'Review received';
+          break;
+        case 6:         // CReviewed
+          if (isMaven) {
+            btnText1 = 'Please leave a Review~';
+          } else {
+            btnText1 = 'Review received';
+            boxDisabled = true;
+          }
+          break;
+        case 7:         // MReviewed
+          if (!isMaven) {
+            btnText1 = 'Please leave a Review~';
+          } else {
+            btnText1 = 'Review received';
+            boxDisabled = true;
+          }
+          break;
+        case 8:         // Both Reviewed
+          btnText1 = 'Archive?';
+          break;
+        case 9:         // Archived
+          btnText1 = 'Archived';
           boxDisabled = true;
-        }
-        break;
-      case 7:         // MReviewed
-        if (!isMaven) {
-          btnText1 = 'Please leave a Review~';
-        } else {
-          btnText1 = 'Review received';
-          boxDisabled = true;
-        }
-        break;
-      case 8:         // Both Reviewed
-        btnText1 = 'Archive?';
-        break;
-      case 9:         // Archived
-        btnText1 = 'Archived';
-        boxDisabled = true;
-        break;
-      default:
-        break;
+          break;
+        default:
+          break;
+      }
     }
 
     return (

@@ -253,10 +253,6 @@ class TopicPage extends Component {
             <Text style = {{ color: '#a4a4a4', paddingLeft: 5}}>{item.commentsCount}</Text>
           </View>
         </View>
-        <GalleryComponent picUrl={[this.state.galleryPicUrl]} modalVisible={this.state.galleryVisible} initialPage={0}
-          onClose={() => {
-            this.setState({galleryVisible: false})
-          }}/>
       </View>
     );
   }
@@ -360,117 +356,121 @@ class TopicPage extends Component {
 
     return (
       <View style={{flex: 1, backgroundColor:'#fff', flexDirection: 'column'}}>
-      <Container>
-        <Modal transparent={true} visible={this.state.modalVisible} onRequestClose={() => null} >
-          {
-            this.state.modalID === 1 &&
-            <TouchableOpacity style={styles.navModal} onPressOut={() => {this.setModalVisible(false)}}>
-              <View style={styles.innerNavModal}>
-                <TouchableOpacity onPress={() => {this.onSortByRecent()}}>
-                  <Text style={{color: '#fff', fontSize: 20}}>Recent</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => {this.onSortByMostHearts()}}>
-                  <Text style={{color: '#fff', marginTop: 5, fontSize: 20}}>Most Hearts</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          }
-          {
-            this.state.modalID === 3 &&
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.postModal}>
-                <View style={{ marginBottom:50,  width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
-                  <TextInput multiline={true} placeholder = "What's on your mind today? Share a lobang today!"
-                    onChangeText={(text) => this.setState({postText: text})}
-                    style = {{ width: '100%', padding: 5, fontSize:15, height:70, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
-                  <TouchableOpacity onPress = {(e) => this.onUploadImage()}  style = {{ marginTop: 10, height:150, width: '100%', borderWidth: 1, borderColor: '#515151', borderRadius: 3, justifyContent: 'center', alignItems: 'center' }}>
-                    {
-                      this.state.picUrl ?
-                      <Image source = {{uri: this.state.picUrl}} style = {{ width: '100%',  height: '100%' }} />
-                      :
-                      <Text style = {{ color: '#515151', fontSize: 17 }} >Click here to post image</Text>
-                    }
+        <Container>
+          <Modal transparent={true} visible={this.state.modalVisible} onRequestClose={() => null} >
+            {
+              this.state.modalID === 1 &&
+              <TouchableOpacity style={styles.navModal} onPressOut={() => {this.setModalVisible(false)}}>
+                <View style={styles.innerNavModal}>
+                  <TouchableOpacity onPress={() => {this.onSortByRecent()}}>
+                    <Text style={{color: '#fff', fontSize: 20}}>Recent</Text>
                   </TouchableOpacity>
-                  <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
-                    <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
-                      <Text style = {styles.PostBtnText}>Post</Text>
+                  <TouchableOpacity onPress={() => {this.onSortByMostHearts()}}>
+                    <Text style={{color: '#fff', marginTop: 5, fontSize: 20}}>Most Hearts</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            }
+            {
+              this.state.modalID === 3 &&
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.postModal}>
+                  <View style={{ marginBottom:50,  width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
+                    <TextInput multiline={true} placeholder = "What's on your mind today? Share a lobang today!"
+                      onChangeText={(text) => this.setState({postText: text})}
+                      style = {{ width: '100%', padding: 5, fontSize:15, height:70, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
+                    <TouchableOpacity onPress = {(e) => this.onUploadImage()}  style = {{ marginTop: 10, height:150, width: '100%', borderWidth: 1, borderColor: '#515151', borderRadius: 3, justifyContent: 'center', alignItems: 'center' }}>
+                      {
+                        this.state.picUrl ?
+                        <Image source = {{uri: this.state.picUrl}} style = {{ width: '100%',  height: '100%' }} />
+                        :
+                        <Text style = {{ color: '#515151', fontSize: 17 }} >Click here to post image</Text>
+                      }
                     </TouchableOpacity>
-                    <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
-                      <Text style = {styles.PostBtnText}>Cancel</Text>
-                    </TouchableOpacity>
+                    <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
+                      <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
+                        <Text style = {styles.PostBtnText}>Post</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
+                        <Text style = {styles.PostBtnText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
-          }
-          {
-            this.state.modalID === 4 &&
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.postModal}>
-                <View style={{ width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
-                  <TextInput multiline={true} placeholder = "Write a description..."
-                    onChangeText={(text) => this.setState({postText: text})}
-                    style = {{ width: '100%', padding: 5, fontSize:15, height:150, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
-                  <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
-                    <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
-                      <Text style = {styles.PostBtnText}>Post</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
-                      <Text style = {styles.PostBtnText}>Cancel</Text>
-                    </TouchableOpacity>
+              </TouchableWithoutFeedback>
+            }
+            {
+              this.state.modalID === 4 &&
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.postModal}>
+                  <View style={{ width: '90%', padding: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center'}}>
+                    <TextInput multiline={true} placeholder = "Write a description..."
+                      onChangeText={(text) => this.setState({postText: text})}
+                      style = {{ width: '100%', padding: 5, fontSize:15, height:150, borderWidth: 1, borderColor: '#515151', borderRadius: 3 }}/>
+                    <View style = {{ flexDirection: 'row', width: '100%', paddingTop: 20, justifyContent: 'space-around'}}>
+                      <TouchableOpacity onPress = {(e) => this.onPost()} style = {styles.postBtn} >
+                        <Text style = {styles.PostBtnText}>Post</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress = {(e) => this.onCancel()} style = {styles.postBtn} >
+                        <Text style = {styles.PostBtnText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
-          }
+              </TouchableWithoutFeedback>
+            }
 
-        </Modal>
-        {
-            this.state.requestLoading?this.renderPlaceholder():null
-        }
-        <Content padder={false} style = {{backgroundColor: '#fff'}}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh.bind(this)}
-            />
-          }>
-          <FlatList
-            data={this.state.data}
-            renderItem={ ({item, index}) => this.renderItem(item, index)}
-            keyExtractor={item => item._id}
-            ItemSeparatorComponent={null}
-            >
-          </FlatList>
-       </Content>
-       { this.state.postModal &&
-          <View style={styles.plusModal}>
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center',
-              marginBottom: 5, paddingBottom: 10, paddingRight: 5 }}>
-                <Text style={styles.textStyle}>Post Image</Text>
-                <TouchableOpacity onPress = {(e) => this.onclickCamera()} >
-                  <Image source = {require('../../../assets/icons/camera.png')} style={{ height: 30, width: 30}} />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.alignIcons}>
-                <Text style={styles.textStyle}>Post Some Text</Text>
-                <TouchableOpacity onPress = {(e) => this.onclickText()}>
-                  <Image source = {require('../../../assets/icons/chat.png')} style={{ height: 30, width: 30}} />
-                </TouchableOpacity>
-              </View>
-          </View>
+          </Modal>
+          {
+              this.state.requestLoading?this.renderPlaceholder():null
           }
-       <TouchableOpacity onPress={(e) => this.onClickAdd()} style={{position: 'absolute', bottom: 30, right: 30}}>
-          <Animated.Image source = {require('../../../assets/icons/plus.png')} style={{ transform: [{rotate: spin}], height: 50, width: 50}} />
-       </TouchableOpacity>
-       <ActionSheet
-            ref={o => this.ActionSheet = o}
-            title={null}
-            options={['Cancel', 'Choose from Library', 'Take a picture']}
-            cancelButtonIndex={0}
-            onPress={this.handlePress}
-        />
-      </Container>
+          <Content padder={false} style = {{backgroundColor: '#fff'}}
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh.bind(this)}
+              />
+            }>
+            <FlatList
+              data={this.state.data}
+              renderItem={ ({item, index}) => this.renderItem(item, index)}
+              keyExtractor={item => item.topicID}
+              ItemSeparatorComponent={null}
+              >
+            </FlatList>
+        </Content>
+        { this.state.postModal &&
+            <View style={styles.plusModal}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center',
+                marginBottom: 5, paddingBottom: 10, paddingRight: 5 }}>
+                  <Text style={styles.textStyle}>Post Image</Text>
+                  <TouchableOpacity onPress = {(e) => this.onclickCamera()} >
+                    <Image source = {require('../../../assets/icons/camera.png')} style={{ height: 30, width: 30}} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.alignIcons}>
+                  <Text style={styles.textStyle}>Post Some Text</Text>
+                  <TouchableOpacity onPress = {(e) => this.onclickText()}>
+                    <Image source = {require('../../../assets/icons/chat.png')} style={{ height: 30, width: 30}} />
+                  </TouchableOpacity>
+                </View>
+            </View>
+            }
+        <TouchableOpacity onPress={(e) => this.onClickAdd()} style={{position: 'absolute', bottom: 30, right: 30}}>
+            <Animated.Image source = {require('../../../assets/icons/plus.png')} style={{ transform: [{rotate: spin}], height: 50, width: 50}} />
+        </TouchableOpacity>
+        <ActionSheet
+              ref={o => this.ActionSheet = o}
+              title={null}
+              options={['Cancel', 'Choose from Library', 'Take a picture']}
+              cancelButtonIndex={0}
+              onPress={this.handlePress}
+          />
+        </Container>
+        <GalleryComponent picUrl={[this.state.galleryPicUrl]} modalVisible={this.state.galleryVisible} initialPage={0}
+          onClose={() => {
+            this.setState({galleryVisible: false})
+        }}/>
       </View>
     );
   }

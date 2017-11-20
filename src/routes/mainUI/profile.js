@@ -15,6 +15,14 @@ import { ImagePicker } from 'expo';
 
 const { width, height } = Dimensions.get('window');
 
+const renderRightButton = () => {
+  return <View style={{flexDirection: 'row'}}>
+    <TouchableOpacity onPress={(e) => Actions.ActivityPage()} style={{ padding: 10 }}>
+      <Icon name="md-mail" style={{ fontSize: 25, color: '#fff' }} />
+    </TouchableOpacity>
+  </View>
+}
+
 class Profile extends Component {
   constructor(props) {
     super(props);
@@ -48,7 +56,9 @@ class Profile extends Component {
     };
     //this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
   }
+
   componentWillMount() {
+    Actions.refresh({renderRightButton: renderRightButton});
     // this.fetchdetails();
   }
 

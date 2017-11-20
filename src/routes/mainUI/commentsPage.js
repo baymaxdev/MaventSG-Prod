@@ -11,7 +11,8 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  FlatList
 } from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -186,7 +187,7 @@ class CommentsPage extends Component {
 
   render() {
     return (
-      <KeyboardAwareScrollView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} scrollEnabled={false} keyboardShouldPersistTaps={true}>
+      <KeyboardAwareScrollView behavior = 'padding' style ={{ flex: 1}} contentContainerStyle = {{flex: 1}} scrollEnabled={false} keyboardShouldPersistTaps="always">
         <Container style = {{ backgroundColor: '#fff' }}>
           <Content refreshControl={
             <RefreshControl
@@ -220,11 +221,17 @@ class CommentsPage extends Component {
                 ?
                 this.renderPlaceholder()
                 :
-                this.state.comments.map((item, index)=>{
-                  return <View key={index}>
-                    {this.renderItem(item, index)}
-                    </View>
-                })
+                <FlatList
+                  data={this.state.comments}
+                  renderItem={ ({item, index}) => {
+                    return <View key={index}>
+                            {this.renderItem(item, index)}
+                          </View>
+                  }}
+                  keyExtractor={item => item._id}
+                  ItemSeparatorComponent={null}
+                  >
+                </FlatList>
               }
             </ScrollView>
           </Content>

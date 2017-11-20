@@ -1,6 +1,6 @@
 import React from 'react';
 import Expo from 'expo';
-import { View, TouchableHighlight, ActivityIndicator, Text, Image, Dimensions, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
+import { View, TouchableHighlight, ActivityIndicator, Text, Image, Dimensions, StyleSheet, TouchableOpacity, Animated, Easing, Platform, FlatList } from 'react-native';
 import { MapView, Constants, Location, Permissions } from 'expo';
 
 import { Container, Content, Icon } from 'native-base';
@@ -23,6 +23,14 @@ var secs = 0;
 var myLocation = {};
 // var radius = 100;
 var firstLoading = 0;
+
+const renderRightButton = () => {
+    return <View style={{flexDirection: 'row'}}>
+      <TouchableOpacity onPress={(e) => Actions.ActivityPage()} style={{ padding: 10 }}>
+        <Icon name="md-mail" style={{ fontSize: 25, color: '#fff' }} />
+      </TouchableOpacity>
+    </View>
+}
 
 class Discovery extends React.Component {
     constructor(props) {
@@ -50,6 +58,7 @@ class Discovery extends React.Component {
     }
 
     componentWillMount() {
+        Actions.refresh({renderRightButton: renderRightButton});
         this.getLocationAsync();
     }
 
@@ -280,11 +289,15 @@ class Discovery extends React.Component {
                             this.state.requestLoading?this.renderPlaceholder():null
                         }
                         <Content>
-                            {
-                                filteredLists.map((item, index) => {
-                                    return <ItemRow key={index} data={item} profileData={this.props.profile}/>
-                                })
-                            }
+                            <FlatList
+                                data={filteredLists}
+                                renderItem={ ({item, index}) => {
+                                    return <ItemRow data={item} profileData={this.props.profile}/>
+                                }}
+                                keyExtractor={item => item.mavenID}
+                                ItemSeparatorComponent={null}
+                                >
+                            </FlatList>
                         </Content>
                     </Container>
                 </View>

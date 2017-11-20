@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from 'native-base';
-import { StyleSheet, Text, View, Animated, Picker, Dimensions, TouchableHighlight, Platform } from 'react-native';
+import { StyleSheet, Text, View, Animated, Picker, Dimensions, TouchableHighlight, Platform, FlatList } from 'react-native';
 
 var deviceHeight = Dimensions.get('window').height;
 var PickerItem = Picker.Item; 
@@ -53,13 +53,19 @@ export default class PickerModal extends React.Component {
                 <Picker itemStyle={{ justifyContent:'center', height:150, color:'#027afe'}}
                     selectedValue={this.state.value}
                     onValueChange={(value) => { this.onChange(value) }}>
-                    {this.props.data.map((value, index) => (
-                        <PickerItem
-                            key={index}
-                            value={index}
-                            label={value}
-                        />
-                    ))}
+                    <FlatList
+                        data={this.props.data}
+                        renderItem={ ({item, index}) => {
+                            <PickerItem
+                                key={index}
+                                value={index}
+                                label={value}
+                            />
+                        }}
+                        keyExtractor={item => item._id}
+                        ItemSeparatorComponent={null}
+                        >
+                    </FlatList>
                 </Picker>
             </Animated.View>
         )

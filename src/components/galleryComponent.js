@@ -24,13 +24,14 @@ export default class GalleryComponent extends React.Component {
       }
     }
 
+    console.log(this.props.picUrl);
     return (
       <View>
         <Modal
           animationType={"none"}
           transparent={true}
           visible={this.props.modalVisible}
-          onRequestClose={() => {alert("Modal has been closed.")}}>
+          onRequestClose={() => {this.onClose()}}>
             <TouchableWithoutFeedback  onPress={() => {this.onClose()}}>
               <View style={{width: SCREEN_WIDTH, height: (SCREEN_HEIGHT - SCREEN_WIDTH) / 2, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{color: '#fff', fontSize: 16}}>Tap here to go back</Text>

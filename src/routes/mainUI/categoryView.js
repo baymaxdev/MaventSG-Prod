@@ -11,27 +11,27 @@ import * as actions from '../../actions';
 const { width, height } = Dimensions.get('window');
 
 const imageDetails = [
-        {
-          name: 'Get a Service',
-          id: 'service',
-          image: require('../../../assets/images/ListView/Get_a_service.jpg')
-        },
-        {
-          name: 'Learn a Skill',
-          id: 'learn',
-          image: require('../../../assets/images/ListView/Learn_a_skill.jpeg')
-        },
-        {
-          name: 'Provide a Service',
-          id: 'provide',
-          image: require('../../../assets/images/ListView/Provide_service.jpg')
-        },
-        {
-          name: 'Teach a Skill',
-          id: 'teach',
-          image: require('../../../assets/images/ListView/teach_skill.jpeg')
-        },
-  ];
+    {
+        name: 'Get a Service',
+        id: 'service',
+        image: require('../../../assets/images/ListView/Get_a_service.jpg')
+    },
+    {
+        name: 'Learn a Skill',
+        id: 'learn',
+        image: require('../../../assets/images/ListView/Learn_a_skill.jpeg')
+    },
+    {
+        name: 'Provide a Service',
+        id: 'provide',
+        image: require('../../../assets/images/ListView/Provide_service.jpg')
+    },
+    {
+        name: 'Teach a Skill',
+        id: 'teach',
+        image: require('../../../assets/images/ListView/teach_skill.jpeg')
+    },
+];
 
 var backButtonPressedOnce = false;
 class CategoryView extends Component {
@@ -43,7 +43,7 @@ class CategoryView extends Component {
       }
 
     componentDidMount() {   
-        Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
+        //Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
         BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }
 
@@ -73,11 +73,9 @@ class CategoryView extends Component {
         return (
             <View style={{flex:1}}>
                 <CarouselComponent/>
-                {/* <Container>
-                    <Content style={{width:width}}> */}
-                        <View style={{flex:1}}>
-                       {imageDetails.map((item,index)=>{
-                           if(index % 2 ==0){
+                    <View style={{flex:1}}>
+                       {imageDetails.map((item, index)=>{
+                           if(index % 2 == 0){
                             return <View key={index} style={{  flex:1, flexDirection:'row', paddingTop:3, justifyContent:'space-around', alignItems:'flex-start'}}>
                                 <RenderItem data={imageDetails[index]} />
                                 {
@@ -87,11 +85,7 @@ class CategoryView extends Component {
                             </View>
                            }
                         })}
-                        </View>
-                    {/* </Content>
-                </Container> */}
-
-
+                    </View>
             </View>
 
         );
