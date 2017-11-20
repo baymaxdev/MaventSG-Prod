@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl, Keyboard, FlatList } from 'react-native';
 import {ImagePicker} from 'expo';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -43,7 +43,7 @@ class TopicPage extends Component {
     this.setState({modalVisible: visible, modalID: modalID})
   }
 
-  componentDidMount() {
+  componentWillMount() {
     Actions.refresh({rightButtonImage: require('../../../assets/icons/more.png'), rightButtonIconStyle: { width: 20, height:20}, onRight: ()=>{this.setModalVisible(true, 1)}})
   }
 
@@ -429,16 +429,19 @@ class TopicPage extends Component {
             this.state.requestLoading?this.renderPlaceholder():null
         }
         <Content padder={false} style = {{backgroundColor: '#fff'}}
-        refreshControl={
+          refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
               onRefresh={this._onRefresh.bind(this)}
-        />}>
-       {
-         this.state.data.map((item, index)=>{
-           return this.renderItem(item, index)
-         })
-       }
+            />
+          }>
+          <FlatList
+            data={this.state.data}
+            renderItem={ ({item, index}) => this.renderItem(item, index)}
+            keyExtractor={item => item._id}
+            ItemSeparatorComponent={null}
+            >
+          </FlatList>
        </Content>
        { this.state.postModal &&
           <View style={styles.plusModal}>

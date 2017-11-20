@@ -59,9 +59,6 @@ class AllReviewPage extends Component {
       consumerReviews[i].asWhat = 'As User';
     }
 
-    console.log('maven', mavenReviews);
-    console.log('consumer', consumerReviews);
-
     this.setState({ mavenReviews: mavenReviews, consumerReviews: consumerReviews, requestLoading: false, refreshing: false });
   }
 
@@ -149,7 +146,6 @@ class AllReviewPage extends Component {
   }
 
   renderItem(item, index) {
-    console.log(item);
     return (
       <View style = {{padding: 10}}>
         <View style={{flexDirection: 'row'}}>

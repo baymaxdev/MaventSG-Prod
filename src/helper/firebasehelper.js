@@ -1,13 +1,13 @@
 
 import * as firebase from "firebase";
 
-var firebaseConfig = {
-  apiKey: "AIzaSyCcexnaTt2VfTvrZeqlNvtX5RTb4zy_2Ss",
-  authDomain: "maven-f51d7.firebaseapp.com",
-  databaseURL: "https://maven-f51d7.firebaseio.com",
-  projectId: "maven-f51d7",
-  storageBucket: "maven-f51d7.appspot.com",
-  messagingSenderId: "488636641011"
+var config = {
+    apiKey: "AIzaSyAvySMQHEbrfjTIsirs0U2XEublh-oOKko",
+    authDomain: "maventsg.firebaseapp.com",
+    databaseURL: "https://maventsg.firebaseio.com",
+    projectId: "maventsg",
+    storageBucket: "maventsg.appspot.com",
+    messagingSenderId: "682641010963"
 };
 
 class Firebase {

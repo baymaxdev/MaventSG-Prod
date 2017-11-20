@@ -63,7 +63,6 @@ class Chat extends Component {
           activity = ma[0];
         }
         this.setState({ activity });
-        console.log(activity);
         //this.setState({activity: nextProps.activity.mavenActivities});
       }
 
