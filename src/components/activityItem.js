@@ -55,14 +55,11 @@ class ActivityItem extends Component {
   }
 
   showEditOfferModal() {
-    this.setState({price: this.props.provider.price.toString(), serviceDate: this.props.provider.serviceDate});
-    setTimeout(() => {
-      this.setState({editOfferModalVisible: true});
-    }, 500);
+    this.setState({editOfferModalVisible: true, price: this.props.provider.price.toString(), serviceDate: this.props.provider.serviceDate});
   }
 
   navigateToReview(type) {
-    Actions.reviewPage({actId: this.props.provider._id, type: type});
+    Actions.push('reviewPage', {actId: this.props.provider._id, type: type});
   }
 
   onPressBtn1() {
@@ -76,7 +73,7 @@ class ActivityItem extends Component {
         this.props.cancelOffer(provider._id, 0, this.props.auth.token);
         break;
       case 2:         // Accepted
-        this.props.endJob(provider._id, this.props.auth.token);        
+        this.props.endJob(provider._id, this.props.auth.token);
         break;
       case 3:         // Rejected
         this.props.archiveActivity(provider._id, this.props.auth.token);
@@ -117,7 +114,9 @@ class ActivityItem extends Component {
 
     switch (provider.status) {
       case 1:          // Offered
-        this.showEditOfferModal();
+        setTimeout(() => {
+          this.showEditOfferModal();
+        }, 500);
         break;
       case 2:         // Accepted
         if (isMaven) {
@@ -127,7 +126,9 @@ class ActivityItem extends Component {
         }  
         break;
       case 3:         // Rejected
-        this.showEditOfferModal();
+        setTimeout(() => {
+          this.showEditOfferModal();
+        }, 500);
         break;    
       default:
         break;
@@ -243,8 +244,8 @@ class ActivityItem extends Component {
           }
           </View>
           <View style={{ flex: 2, justifyContent:'center', paddingHorizontal:5 }}>
-            <Text style={{ fontSize:16, color:'#515151', fontWeight:'400', height:18 }} numberOfLines={1} ellipsizeMode='tail'>{provider.mavenID.title}</Text>
-            <Text style={{ color:'#145775', height:16, fontSize:13, fontWeight:'400' }}>{categoryName[provider.mavenID.category]}</Text>
+            <Text style={{ fontSize:16, color:'#515151', fontWeight:'400', height:20 }} numberOfLines={1} ellipsizeMode='tail'>{provider.mavenID.title}</Text>
+            <Text style={{ color:'#145775', height:18, fontSize:13, fontWeight:'400', paddingBottom: -2 }}>{categoryName[provider.mavenID.category]}</Text>
             <Text style={ styles.text }>{name}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:3}}>
               <StarRating
@@ -313,8 +314,7 @@ class ActivityItem extends Component {
                 <Text style={styles.btnText}>{btnText1}</Text>
               </TouchableOpacity>
               {
-                !((provider.status === 6 && isMaven) || 
-                (provider.status === 7 && !isMaven)) && 
+                btnText2 !== '' && 
                 <TouchableOpacity style={styles.modalBtn} onPress={this.onPressBtn2.bind(this)}>
                   <Text style={styles.btnText}>{btnText2}</Text>
                 </TouchableOpacity>

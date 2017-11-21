@@ -23,8 +23,7 @@ export default class GalleryComponent extends React.Component {
         images.push({source: {uri: this.props.picUrl[i]}});
       }
     }
-
-    console.log(this.props.picUrl);
+    
     return (
       <View>
         <Modal

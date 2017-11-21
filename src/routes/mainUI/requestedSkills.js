@@ -7,7 +7,8 @@ import {
   Dimensions,
   Text, TextInput,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  FlatList
 } from 'react-native';
 import { Container, Content, Icon } from 'native-base';
 import { connect } from 'react-redux';
@@ -17,6 +18,7 @@ import { Actions } from 'react-native-router-flux';
 import ActivityItem from '../../components/activityItem';
 import Firebase from '../../helper/firebasehelper';
 import Placeholder from 'rn-placeholder';
+import Modal from 'react-native-modal';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -28,6 +30,7 @@ class RequestedSkills extends Component {
       data: [],
       requestLoading: true,
       refreshing: false,
+      successModalVisible: false,
     };
   }
   // This is to remove fb token for retry purposes
@@ -36,8 +39,24 @@ class RequestedSkills extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.activity.requestedSkills !== undefined) {
-      let data = nextProps.activity.requestedSkills;
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      if (Actions.currentScene === '_RequestedSkills') {
+        this.refreshItem();
+        setTimeout(() => {
+          this.setState({successModalVisible: true}, () => {
+            setTimeout(() => {
+              this.setState({successModalVisible: false});
+            }, 1000);
+          });
+        }, 500);
+      }
+    }
+    
+  }
+
+  refreshItem() {
+    this.props.getActivities(1, this.props.auth.token, (activities) => {
+      let data = activities;
       var temp = [];
       for (var i = 0; i < data.length; i++) {
         temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
@@ -50,16 +69,7 @@ class RequestedSkills extends Component {
         }
         this.setState({data: data, requestLoading: false, refreshing: false});
       });
-    }
-
-    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
-      this.refreshItem();
-    }
-    
-  }
-
-  refreshItem() {
-    this.props.getActivities(1, this.props.auth.token);
+    });
   }
 
   renderPlaceholder() {
@@ -82,7 +92,7 @@ class RequestedSkills extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getActivities(1, this.props.auth.token);
+    this.refreshItem();
   }
 
   render() {
@@ -110,15 +120,32 @@ class RequestedSkills extends Component {
                 onRefresh={this._onRefresh.bind(this)}
               />
             }>
-              {
-                this.state.data.map((provider) => {
+              <FlatList
+                data={this.state.data}
+                renderItem={ ({item, index}) => {
                   return (
-                    <ActivityItem key={provider._id} provider={provider}/>
+                    <ActivityItem key={item._id} provider={item}/>
                   );
-                })}
+                }}
+                keyExtractor={item => item._id}
+                ItemSeparatorComponent={null}
+                >
+              </FlatList>
             </Content>
           </Container>
         }
+        <Modal
+          isVisible={this.state.successModalVisible}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -131,6 +158,15 @@ const styles = {
   emptyText: {
     width: '70%', fontSize: 18, marginTop: 30, color: '#7F7F7F', textAlign: 'center'
   },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
 };
 
 const mapStateToProps = (state) =>({
@@ -138,7 +174,7 @@ const mapStateToProps = (state) =>({
   activity: state.activity,
 });
 const mapDispatchToProps = (dispatch) =>({
-  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
+  getActivities: (mode, token, next) => dispatch(actions.getActivities(mode, token, next)),
   actions: bindActionCreators(actions, dispatch)
 });
 

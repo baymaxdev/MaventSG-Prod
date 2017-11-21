@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, Modal, TextInput, Animated, RefreshControl, Keyboard, Button } from 'react-native';
+import { View, Text, StyleSheet, Platform, Dimensions, Image, TouchableOpacity, TouchableWithoutFeedback, TextInput, Animated, RefreshControl, Keyboard, Button } from 'react-native';
 import {ImagePicker} from 'expo';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -7,6 +7,7 @@ import * as actions from '../../actions';
 import {Actions} from 'react-native-router-flux';
 import {Container, Content, Icon, Form} from 'native-base';
 import StarRating from 'react-native-star-rating';
+import Modal from 'react-native-modal';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -18,16 +19,25 @@ class ReviewPage extends Component {
     this.state = {
       rating: 0,
       message: '',
+      successModalVisible: false,
     };
   }
   // This is to remove fb token for retry purposes
   componentDidMount() {
-    Actions.refresh({onRight: this.onSubmit});
+    Actions.refresh({onRight: this.onSubmit.bind(this)});
   }
 
   onSubmit() {
     this.props.reviewActivity(this.props.actId, this.props.type, this.state.rating, this.state.message, this.props.auth.token, () => {
-      Actions.pop();
+      this.setState({successModalVisible: true}, () => {
+        setTimeout(() => {
+          this.setState({successModalVisible: true}, () => {
+            setTimeout(() => {
+              this.setState({successModalVisible: false});
+            }, 1000);
+          });
+        }, 500);
+      });
     });
   }
 
@@ -74,6 +84,18 @@ class ReviewPage extends Component {
             })
           }
         </View>
+        <Modal
+          isVisible={this.state.successModalVisible}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -81,6 +103,15 @@ class ReviewPage extends Component {
 
 const styles = {
   sampleText: {justifyContent: 'center', alignItems: 'center', marginTop:10, marginHorizontal:5, paddingHorizontal: 15, paddingVertical: 5, borderRadius: 5, borderWidth: 1, borderColor: '#9799A0'},
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
 };
 
 const mapStateToProps = (state) =>({

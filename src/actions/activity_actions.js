@@ -34,7 +34,7 @@ import {
   GET_MAVEN_ACTIVITIES_ERROR,
 } from './types';
 
-export const getActivities = (mode, token) => {
+export const getActivities = (mode, token, next) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -46,6 +46,7 @@ export const getActivities = (mode, token) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
+        next(res.result);
         if (mode === 0) {
           dispatch({ type: GET_ACTIVITIES_MY_SKILLS, activities: res.result });
         } else if (mode === 1) {

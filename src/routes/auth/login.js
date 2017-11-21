@@ -58,7 +58,7 @@ class Login extends Component {
     try {
         const token = await AsyncStorage.getItem('token');
         if (token !== null) {
-            this.props.requestLoginWithToken(token);
+            // this.props.requestLoginWithToken(token);
         }
         this.setState({loading: false});
     } catch (error) {
@@ -267,7 +267,7 @@ class Login extends Component {
             </Modal1>
             <Modal
                 visible={this.state.tutorModalVisible}
-                onRequestClose={() => {console.log("Modal has been closed.")}}
+                onRequestClose={() => {this.setState({tutorModalVisible: false})}}
                 >
                 <Swiper style={styles.wrapper} showsButtons={true} loop={false}>
                     <View style={styles.tutorView}>

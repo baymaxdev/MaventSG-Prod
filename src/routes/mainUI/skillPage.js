@@ -13,6 +13,7 @@ import {
   Keyboard,
   Dimensions,
   RefreshControl,
+  FlatList
 } from 'react-native';
 import { Icon, Form, Item, Input } from 'native-base';
 import { Actions } from 'react-native-router-flux';
@@ -378,11 +379,15 @@ class SkillPage extends Component {
                 </View>
               </View>
             </View>
-            {
-              this.state.reviewData.map((item, index)=>{
-                return <ReviewComponent key={index} data={item}/>
-              })
-            }
+            <FlatList
+              data={this.state.reviewData}
+              renderItem={ ({item, index}) => {
+                return <ReviewComponent data={item}/>
+              }}
+              keyExtractor={item => item._id}
+              ItemSeparatorComponent={null}
+              >
+            </FlatList>
             {
               !this.props.isMe?
               <TouchableOpacity style={{ justifyContent:'center', alignItems:'center', paddingVertical:15 }} onPress={() => {
@@ -405,11 +410,7 @@ class SkillPage extends Component {
               <Text style={styles.btnText}>{this.state.chats.length}</Text>
             </View>
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-              if (this.props.from === 'chats') {
-                Actions.pop();
-              } else {
-                Actions.viewChats({isViewChats: true, maven: this.state.maven});
-              }
+              Actions.viewChats({isViewChats: true, maven: this.state.maven, from: 'skillpage'});
             }} >
               <Text style={styles.btnText}>View Chats</Text>
             </TouchableOpacity>
@@ -422,12 +423,8 @@ class SkillPage extends Component {
               <Text style={styles.btnText}>SKILL REQUEST</Text>
             </TouchableOpacity>
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-              if (this.props.from === 'chat') {
-                Actions.pop();
-              } else {
-                this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
-                Actions.chatPage({title: this.props.title});
-              }
+              this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
+              Actions.chatPage({title: this.props.title, from: 'skillpage'});
             }} >
               <Text style={styles.btnText}>CHAT</Text>
             </TouchableOpacity>

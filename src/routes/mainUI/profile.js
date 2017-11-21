@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Platform, Text, Image, TouchableOpacity, Dimensions ,ListView, RefreshControl } from 'react-native';
+import { StyleSheet, View, Platform, Text, Image, TouchableOpacity, Dimensions ,ListView, RefreshControl, FlatList } from 'react-native';
 import { Container, Content, Icon, Form, Item, Input } from 'native-base';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -52,9 +52,7 @@ class Profile extends Component {
            modalVisible: null,
            aboutMe: '',
            isMe: this.props.userId?false:true
-			//listViewData: Array(20).fill('').map((_,i)=>`item #${i}`)
     };
-    //this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
   }
 
   componentWillMount() {
@@ -230,11 +228,15 @@ class Profile extends Component {
                 </View>
                 <Text style={{ fontSize: 13, color:"#b5b5b5" }}>{user.about}</Text>
               </View>
-             {
-                    mavenList.map((item, index) => {
-                      return <SkillRowComponent key={index} data={item} onSuccessModal={this.onSuccessModal.bind(this)} isMe={this.state.isMe}/>
-                    })
-              }
+              <FlatList
+                data={mavenList}
+                renderItem={ ({item, index}) => {
+                  return <SkillRowComponent data={item} onSuccessModal={this.onSuccessModal.bind(this)} isMe={this.state.isMe}/>
+                }}
+                keyExtractor={item => item.mainCategory}
+                ItemSeparatorComponent={null}
+                >
+              </FlatList>
               <View>
                 <View style={{ paddingBottom: 10 }}>
                   <View style={{ padding: 10, flexDirection:'row', alignItems:'center', justifyContent:'space-between' }}>
@@ -249,11 +251,15 @@ class Profile extends Component {
                     </TouchableOpacity>
                   </View>
                   <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                    {
-                      this.state.reviewData.slice(0, 4).map((item, index)=>{
+                    <FlatList
+                      data={this.state.reviewData.slice(0, 4)}
+                      renderItem={ ({item, index}) => {
                         return <ReviewComponent key={index} data={item}/>
-                      })
-                    }
+                      }}
+                      keyExtractor={item => item._id}
+                      ItemSeparatorComponent={null}
+                      >
+                    </FlatList>
                   </View>
                 </View>
               </View>

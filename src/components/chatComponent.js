@@ -9,7 +9,7 @@ import { GiftedChat } from 'react-native-gifted-chat'; // 0.2.5
 import LoadingComponent from '../components/loadingComponent';
 import Firebase from '../helper/firebasehelper';
 import Modal from 'react-native-modal';
-import DatePicker from 'react-native-datepicker'
+import DatePicker from 'react-native-datepicker';
 
 var isFirstLoad = true;
 var isMavenActivities = true;
@@ -21,6 +21,7 @@ class Chat extends Component {
     activity: {},
     modalVisible: false,
     editOfferModalVisible: false,
+    successModalVisible: false,
     serviceDate: '',
     price: '',
   };
@@ -32,6 +33,7 @@ class Chat extends Component {
   }
 
   componentDidMount() {
+    console.log(Actions.currentScene);
     if (this.props.bookingMessage) {
       Firebase.pushMessage(this.props.bookingMessage);
       Firebase.setLastMessage(this.props.bookingMessage.maven, this.props.bookingMessage.sender, this.props.bookingMessage.text);
@@ -39,6 +41,19 @@ class Chat extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      this.props.getMavenActivities(this.state.maven._id, this.props.auth.token);
+      if (Actions.currentScene === 'chatPage') {
+        setTimeout(() => {
+          this.setState({successModalVisible: true}, () => {
+            setTimeout(() => {
+              this.setState({successModalVisible: false});
+            }, 1000);
+          });
+        }, 500);
+      }
+    }
+
     if (nextProps.maven != undefined && nextProps.activity.initChat !== true) {
       let maven = nextProps.maven.maven;
       var user = maven.userID;
@@ -60,7 +75,7 @@ class Chat extends Component {
             }
           }
         } else {
-          if (ma.length > 1) {
+          if (ma.length > 0) {
             activity = ma[0];
           }
         }
@@ -131,8 +146,8 @@ class Chat extends Component {
     Actions.reviewPage({actId: this.state.activity._id, type: type});
   }
 
-  onPressModalBtn1() {
-    this.props.archiveActivity(activity._id, this.props.auth.token);
+  onPressModalBtn1(actId) {
+    this.props.archiveActivity(actId, this.props.auth.token);
     this.setState({modalVisible: false});
   }
 
@@ -203,14 +218,14 @@ class Chat extends Component {
         if (isMaven) {
           this.props.acceptOffer(activity._id, this.props.auth.token);
         } else {
-          this.showEditOfferModal();
+          this.showEditOfferModal(activity);
         }
         break;
       case 2:         // Accepted
         this.props.endJob(activity._id, this.props.auth.token);
         break;
       case 3:         // Rejected
-        this.showEditOfferModal();
+        this.showEditOfferModal(activity);
         break;    
       default:
         break;
@@ -286,15 +301,19 @@ class Chat extends Component {
       :
       <View style={{flex: 1}}>
         <TouchableOpacity onPress={() => {
-          this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
-          let from = isMaven?'':'chat';
-          Actions.skillPage({ title: this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName, isMe: isMaven, from: from });
+          Actions.pop();
+          if (this.props.from === 'booking') {
+            Actions.pop();
+          } else if (this.props.from !== 'skillpage') {
+            this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
+            Actions.skillPage({ title: this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName, isMe: isMaven });
+          }
         }}>
           <View style={{flexDirection: 'row', height: 70, alignItems: 'center'}}>
             <Image source={{uri: this.state.maven.userID.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
             <View style={{flex: 1, justifyContent: 'center'}}>
               <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName}</Text>
-              <Text style={{flex: 1, fontSize: 16}}>{this.state.maven.title}</Text>
+              <Text style={{flex: 1, fontSize: 16}} numberOfLines={1} ellipsizeMode='tail'>{this.state.maven.title}</Text>
             </View>
             <Icon name="ios-arrow-forward" style={{ fontSize: 25, color: '#90939B', marginHorizontal: 10}} />
           </View>
@@ -339,10 +358,10 @@ class Chat extends Component {
             </TouchableOpacity>
             <Text style={{fontSize: 20}}>Archive?</Text>
             <View style={{flexDirection: 'row'}}>
-              <TouchableOpacity style={styles.modalBtn} onPress={this.onPressModalBtn1.bind(this)}>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn1(activity._id)}}>
                 <Text style={styles.btnText}>Yes</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtn} onPress={this.onPressModalBtn2.bind(this)}>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn2()}}>
                 <Text style={styles.btnText}>No</Text>
               </TouchableOpacity>
             </View>
@@ -398,6 +417,18 @@ class Chat extends Component {
               </View>
           </View>
         </Modal>
+        <Modal
+          isVisible={this.state.successModalVisible}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -415,6 +446,15 @@ const styles = {
       width: 0,
       height: 1
     }
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
   },
 };
 

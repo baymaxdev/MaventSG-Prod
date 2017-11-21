@@ -7,7 +7,8 @@ import {
   Dimensions,
   Text, TextInput,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  FlatList
 } from 'react-native';
 import { Container, Content, Icon } from 'native-base';
 import { connect } from 'react-redux';
@@ -17,6 +18,7 @@ import { Actions } from 'react-native-router-flux';
 import ActivityItem from '../../components/activityItem';
 import Firebase from '../../helper/firebasehelper';
 import Placeholder from 'rn-placeholder';
+import Modal from 'react-native-modal';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -29,17 +31,41 @@ class MySkills extends Component {
       requestLoading: true,
       refreshing: false,
       isMavenUser: false,
+      successModalVisible: false,
     };
   }
   // This is to remove fb token for retry purposes
   componentWillMount() {
-    this.props.getActivities(0, this.props.auth.token);
+    this.refreshItem();
     this.props.checkId(this.props.auth.token);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.activity.mySkills !== undefined) {
-      let dataTemp = nextProps.activity.mySkills;
+    if (nextProps.profile.postalCode) {
+      this.setState({isMavenUser: true});
+    } else {
+      this.setState({isMavenUser: false});
+    }
+
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      if (Actions.currentScene === '_MySkills') {
+        this.refreshItem();
+        setTimeout(() => {
+          this.setState({successModalVisible: true}, () => {
+            setTimeout(() => {
+              this.setState({successModalVisible: false});
+            }, 1000);
+          });
+        }, 500);
+      }
+    } else if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
+      alert(nextProps.activity.error);
+    }
+  }
+
+  refreshItem() {
+    this.props.getActivities(0, this.props.auth.token, (activities) => {
+      let dataTemp = activities;
       var data = [];
       var temp = [];
       if (this.props.isViewChats === true) {
@@ -63,19 +89,7 @@ class MySkills extends Component {
         }
         this.setState({data: data, requestLoading: false, refreshing: false});
       });
-    }
-
-    if (nextProps.profile.postalCode) {
-      this.setState({isMavenUser: true});
-    } else {
-      this.setState({isMavenUser: false});
-    }
-
-    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
-      this.refreshItem();
-    } else if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
-      alert(nextProps.activity.error);
-    }
+    });
   }
 
   renderPlaceholder() {
@@ -98,11 +112,7 @@ class MySkills extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getActivities(0, this.props.auth.token);
-  }
-
-  refreshItem() {
-    this.props.getActivities(0, this.props.auth.token);
+    this.refreshItem();
   }
 
   render() {
@@ -111,8 +121,11 @@ class MySkills extends Component {
       {
         this.props.isViewChats &&
         <TouchableOpacity onPress={() => {
-          this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
-          Actions.skillPage({ title: this.props.maven.userID.firstName + ' ' + this.props.maven.userID.lastName, isMe: true, from: 'chats' });
+          Actions.pop();
+          if (this.props.from !== 'skillpage') {
+            this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
+            Actions.skillPage({ title: this.props.maven.userID.firstName + ' ' + this.props.maven.userID.lastName, isMe: true, from: 'chats' });
+          }
         }}>
           <View style={{flexDirection: 'row', height: 70, alignItems: 'center', backgroundColor: '#E9E9EE'}}>
             <Image source={{uri: this.props.maven.userID.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
@@ -145,12 +158,17 @@ class MySkills extends Component {
                 onRefresh={this._onRefresh.bind(this)}
               />
             }>
-              {
-                this.state.data.map((provider) => {
+              <FlatList
+                data={this.state.data}
+                renderItem={ ({item, index}) => {
                   return (
-                    <ActivityItem key={provider._id} provider={provider}/>
+                    <ActivityItem key={item._id} provider={item}/>
                   );
-                })}
+                }}
+                keyExtractor={item => item._id}
+                ItemSeparatorComponent={null}
+                >
+              </FlatList>
             </Content>
           </Container>
         :
@@ -164,6 +182,18 @@ class MySkills extends Component {
           </TouchableOpacity>
         </View>
       }
+        <Modal
+          isVisible={this.state.successModalVisible}
+          animationIn={'slideInLeft'}
+          animationOut={'slideOutRight'}
+          animationInTiming={500}
+          animationOutTiming={500}
+          >
+          <View style={styles.modalContent}>
+            <Icon name='md-checkmark-circle' style={{fontSize:40, paddingHorizontal: 8, color: 'green' }}/>
+            <Text>Success!</Text>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -176,6 +206,15 @@ const styles = {
   emptyText: {
     width: '70%', fontSize: 20, marginTop: 30, color: '#7F7F7F', textAlign: 'center'
   },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 40,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
 };
 
 const mapStateToProps = (state) =>({
@@ -184,7 +223,7 @@ const mapStateToProps = (state) =>({
   activity: state.activity,
 });
 const mapDispatchToProps = (dispatch) =>({
-  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
+  getActivities: (mode, token, next) => dispatch(actions.getActivities(mode, token, next)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   checkId: (token) => dispatch(actions.checkId(token)),
   actions: bindActionCreators(actions, dispatch)

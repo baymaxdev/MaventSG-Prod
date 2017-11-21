@@ -33,12 +33,20 @@ class ArchivedSkills extends Component {
   }
   // This is to remove fb token for retry purposes
   componentDidMount() {
-    this.props.getActivities(2, this.props.auth.token);
+    this.refreshItem();
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.activity.archivedSkills !== undefined) {
-      let data = nextProps.activity.archivedSkills;
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      if (Actions.currentScene === '_Archived') {
+        this.refreshItem();
+      }
+    }
+  }
+
+  refreshItem() {
+    this.props.getActivities(2, this.props.auth.token, (activities) => {
+      let data = activities;
       var temp = [];
       for (var i = 0; i < data.length; i++) {
         temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
@@ -51,16 +59,7 @@ class ArchivedSkills extends Component {
         }
         this.setState({data: data, requestLoading: false, refreshing: false});
       });
-    }
-
-    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
-      this.refreshItem();
-    }
-
-  }
-
-  refreshItem() {
-    this.props.getActivities(2, this.props.auth.token);
+    });
   }
 
   renderPlaceholder() {
@@ -83,7 +82,7 @@ class ArchivedSkills extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getActivities(2, this.props.auth.token);
+    this.renderItem();
   }
 
   render() {
@@ -140,7 +139,7 @@ const mapStateToProps = (state) =>({
   activity: state.activity,
 });
 const mapDispatchToProps = (dispatch) =>({
-  getActivities: (mode, token) => dispatch(actions.getActivities(mode, token)),
+  getActivities: (mode, token, next) => dispatch(actions.getActivities(mode, token, next)),
   actions: bindActionCreators(actions, dispatch)
 });
 

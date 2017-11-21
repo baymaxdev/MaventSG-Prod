@@ -41,7 +41,7 @@ class GenericBookingPage extends Component {
       m.text = 'I would like to make you an offer of $' + this.state.price + ', for your advertised service on ' + this.state.date + '. \nAdditional information: ' + this.state.message;
       m.createdAt = new Date().toISOString();
       this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
-      Actions.chatPage({title: this.props.title, bookingMessage: m});
+      Actions.chatPage({title: this.props.title, bookingMessage: m, from: 'booking'});
     } else if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
       alert(nextProps.activity.error);
       Actions.pop();
