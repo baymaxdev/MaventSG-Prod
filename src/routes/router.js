@@ -135,7 +135,7 @@ class RouterComponent extends React.Component {
             <Scene key="genericView" component={GenericView} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="GenericView" />
             <Scene key="genericBooking" component={GenericBooking} back={Platform.OS === "android" ? false : true} title="GenericBookingPage" />
             <Scene key="skillPage" component={SkillPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Skill" />
-            <Scene key="chatPage" component={Chat} back={Platform.OS === "android" ? false : true} title="ChatPage" />
+            <Scene key="chatPage" component={Chat} back={Platform.OS === "android" ? false : true} title="ChatPage" renderRightButton={null} rightButtonImage={null}/>
             <Scene key="topicPage" component={TopicPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="topicPage" />
             <Scene key="commentsPage" component={CommentsPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Comments" />
             <Scene key="otherProfile" component={Profile} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Profile" />

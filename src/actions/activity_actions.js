@@ -76,8 +76,8 @@ export const initChat = (mavenId, token, next) => {
     const url = `activity/init-chat?mavenID=${mavenId}`;
     request(url, option)
     .then(res => {
-      console.log('initchat', res);
       if (res.status === 200) {
+        next(res.activityID);
         dispatch({ type: INIT_CHAT });
       }
       else {
@@ -102,7 +102,6 @@ export const createOffer = (mavenId, price, serviceDate, token) => {
     dispatch({ type: CREATE_OFFER_REQUEST });
     request(url, option)
     .then(res => {
-      console.log(res);
       if (res.status === 200) {
         dispatch({ type: CREATE_OFFER, status: res.status });   
       }

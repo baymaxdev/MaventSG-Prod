@@ -233,7 +233,7 @@ class ActivityItem extends Component {
           isMaven?
           Actions.chatPage({ title: name, userID: provider.userID, status: provider.status })
           :
-          Actions.chatPage({ title: name, status: provider.status })
+          Actions.chatPage({ title: name, status: provider.status, from: 'activity' })
         }}>
           <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
           {

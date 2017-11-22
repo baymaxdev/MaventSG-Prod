@@ -27,6 +27,19 @@ class Chat extends Component {
     price: '',
   };
 
+  renderChatRightButton = () => {
+    return <View style={{flexDirection: 'row'}}>
+      <TouchableOpacity onPress={(e) => {
+        Actions.pop();
+        if (this.props.from !== 'activity') {
+          Actions.ActivityPage();
+        }
+        }} style={{ padding: 10 }}>
+        <Icon name="md-mail" style={{ fontSize: 25, color: '#fff' }} />
+      </TouchableOpacity>
+    </View>
+  }
+
   componentWillMount() {
     isFirstLoad = false;
     isMavenActivities = true;
@@ -34,10 +47,7 @@ class Chat extends Component {
   }
 
   componentDidMount() {
-    if (this.props.bookingMessage) {
-      Firebase.pushMessage(this.props.bookingMessage);
-      Firebase.setLastMessage(this.props.bookingMessage.maven, this.props.bookingMessage.sender, this.props.bookingMessage.text);
-    }
+    Actions.refresh({right: this.renderChatRightButton});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -69,24 +79,34 @@ class Chat extends Component {
         });
       } else {
         let ma = nextProps.activity.mavenActivities;
-        if (this.props.userID !== undefined ) {
-          for (var i = 0; i < ma.length; i ++) {
-            if (ma[i].userID._id === this.props.userID._id) {
-              activity = ma[i];
-              break;
+        if (ma !== undefined) {
+          if (this.props.userID !== undefined ) {
+            for (var i = 0; i < ma.length; i ++) {
+              if (ma[i].userID._id === this.props.userID._id) {
+                activity = ma[i];
+                break;
+              }
+            }
+          } else {
+            if (ma.length > 0) {
+              activity = ma[0];
             }
           }
-        } else {
-          if (ma.length > 0) {
-            activity = ma[0];
-          }
+          this.setState({ activity });
         }
-        this.setState({ activity });
       }
 
       this.setState({maven: maven, user: user, requestLoading: false});
 
       if (isFirstLoad) {
+
+        if (this.props.bookingMessage) {
+          var bm = this.props.bookingMessage;
+          bm.activity = activity._id;
+          Firebase.pushMessage(bm);
+          Firebase.setLastMessage(bm.maven, bm.sender, bm.activity, bm.text);
+        }
+
         Firebase.getMessages((snapshot) => {
           var m = {};
           let val = snapshot.val();
@@ -121,8 +141,20 @@ class Chat extends Component {
   onSend(messages = []) {
     if (this.props.status !== 9) {
       if (this.state.messages.length === 0) {
-        this.props.initChat(this.state.maven._id, this.props.auth.token, () => {
-  
+        this.props.initChat(this.state.maven._id, this.props.auth.token, (actId) => {
+          var m = {};
+          m.sender = this.props.profile.myInfo.userId;
+          m.receiver = this.state.user._id;
+          m.maven = this.state.maven._id;
+          m.activity = actId;
+          m.text = messages[0].text;
+          m.createdAt = messages[0].createdAt.toISOString();
+          Firebase.pushMessage(m);
+          if (this.props.userID !== undefined) {
+            Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
+          } else {
+            Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
+          }
         });
       } else {
         var m = {};
@@ -132,7 +164,6 @@ class Chat extends Component {
         m.activity = this.state.activity._id;
         m.text = messages[0].text;
         m.createdAt = messages[0].createdAt.toISOString();
-        console.log(m);
         Firebase.pushMessage(m);
         if (this.props.userID !== undefined) {
           Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
