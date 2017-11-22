@@ -33,7 +33,9 @@ class ReviewPage extends Component {
         setTimeout(() => {
           this.setState({successModalVisible: true}, () => {
             setTimeout(() => {
-              this.setState({successModalVisible: false});
+              this.setState({successModalVisible: false}, () => {
+                Actions.pop();
+              });
             }, 1000);
           });
         }, 500);

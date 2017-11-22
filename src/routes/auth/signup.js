@@ -59,7 +59,7 @@ class Signup extends Component {
             Actions.replace('OTP', { phoneState: "1" });
         }
         if (this.props.auth.signupLoading !== nextProps.auth.signupLoading && !nextProps.auth.signupLoading && !nextProps.auth.signedUp) {
-            alert(nextProps.auth.signupMsg);
+            alert(nextProps.auth.error);
         }
     }
 
@@ -132,19 +132,9 @@ class Signup extends Component {
 
     //validate phone number
     onChanged(text) {
-        let newText = '';
+        var newText = '';
         let numbers = '0123456789';
-
-        for (var i = 0; i < text.length; i++) {
-            if (numbers.indexOf(text[i]) > -1) {
-                newText = newText + text[i];
-            }
-            else {
-                // your call back function
-                alert("please enter numbers only");
-            }
-            this.setState({ phoneNumber: newText });
-        }
+        this.setState({phoneNumber: text});
     }
     render() {
         if (this.props.auth.status === 404) {
