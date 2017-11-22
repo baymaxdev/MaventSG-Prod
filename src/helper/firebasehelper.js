@@ -42,8 +42,8 @@ class Firebase {
       firebase.database().ref('/messages').push(message, callback);
     }
 
-    static setLastMessage(maven, user, text, callback) {
-      firebase.database().ref('/lastMessages/' + maven + '-' + user).set({text: text});
+    static setLastMessage(maven, user, activity, text, callback) {
+      firebase.database().ref('/lastMessages/' + maven + '-' + user + '-' + activity).set({text: text});
     }
 
     static getLastMessages(data, callback) {

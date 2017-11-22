@@ -65,7 +65,7 @@ export const getActivities = (mode, token, next) => {
   }
 }
 
-export const initChat = (mavenId, token) => {
+export const initChat = (mavenId, token, next) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -76,6 +76,7 @@ export const initChat = (mavenId, token) => {
     const url = `activity/init-chat?mavenID=${mavenId}`;
     request(url, option)
     .then(res => {
+      console.log('initchat', res);
       if (res.status === 200) {
         dispatch({ type: INIT_CHAT });
       }
@@ -101,6 +102,7 @@ export const createOffer = (mavenId, price, serviceDate, token) => {
     dispatch({ type: CREATE_OFFER_REQUEST });
     request(url, option)
     .then(res => {
+      console.log(res);
       if (res.status === 200) {
         dispatch({ type: CREATE_OFFER, status: res.status });   
       }
@@ -290,7 +292,7 @@ export const reviewActivity = (actId, type, rating, description, token, next) =>
   }
 }
 
-export const getMavenActivities = (mavenId, token) => {
+export const getMavenActivities = (mavenId, token, next) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -302,6 +304,7 @@ export const getMavenActivities = (mavenId, token) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
+        next();
         dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result });
       }
       else {

@@ -59,7 +59,7 @@ class RequestedSkills extends Component {
       let data = activities;
       var temp = [];
       for (var i = 0; i < data.length; i++) {
-        temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
+        temp.push(data[i].mavenID._id + '-' + data[i].userID._id + '-' + data[i]._id);
       }
 
       Firebase.initialize();
@@ -102,17 +102,6 @@ class RequestedSkills extends Component {
           this.state.requestLoading?this.renderPlaceholder():null
         }
         {
-          this.state.data.length === 0?
-          <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
-            <Image style={styles.emptyImage} source={require('../../../assets/icons/req_skill.png')}/>
-            <Text style={styles.emptyText}>You have not requested any job from our mavens!</Text>
-            <TouchableOpacity onPress={() => {
-              Actions.popTo('_categoryView');
-            }}>
-              <Text style={{color: '#479EE2', fontSize: 22, marginTop: 20}}>Start hiring now!</Text>
-            </TouchableOpacity>
-          </View>
-          :
           <Container>
             <Content refreshControl={
               <RefreshControl
@@ -120,6 +109,18 @@ class RequestedSkills extends Component {
                 onRefresh={this._onRefresh.bind(this)}
               />
             }>
+            {
+              this.state.data.length === 0?
+              <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
+                <Image style={styles.emptyImage} source={require('../../../assets/icons/req_skill.png')}/>
+                <Text style={styles.emptyText}>You have not requested any job from our mavens!</Text>
+                <TouchableOpacity onPress={() => {
+                  Actions.popTo('_categoryView');
+                }}>
+                  <Text style={{color: '#479EE2', fontSize: 22, marginTop: 20}}>Start hiring now!</Text>
+                </TouchableOpacity>
+              </View>
+              :
               <FlatList
                 data={this.state.data}
                 renderItem={ ({item, index}) => {
@@ -131,6 +132,7 @@ class RequestedSkills extends Component {
                 ItemSeparatorComponent={null}
                 >
               </FlatList>
+            }
             </Content>
           </Container>
         }

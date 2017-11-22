@@ -10,8 +10,9 @@ import LoadingComponent from '../components/loadingComponent';
 import Firebase from '../helper/firebasehelper';
 import Modal from 'react-native-modal';
 import DatePicker from 'react-native-datepicker';
+import StarRating from 'react-native-star-rating';
 
-var isFirstLoad = true;
+var isFirstLoad = false;
 var isMavenActivities = true;
 
 class Chat extends Component {
@@ -27,13 +28,12 @@ class Chat extends Component {
   };
 
   componentWillMount() {
-    isFirstLoad = true;
+    isFirstLoad = false;
     isMavenActivities = true;
     Firebase.initialize();
   }
 
   componentDidMount() {
-    console.log(Actions.currentScene);
     if (this.props.bookingMessage) {
       Firebase.pushMessage(this.props.bookingMessage);
       Firebase.setLastMessage(this.props.bookingMessage.maven, this.props.bookingMessage.sender, this.props.bookingMessage.text);
@@ -57,16 +57,18 @@ class Chat extends Component {
     if (nextProps.maven != undefined && nextProps.activity.initChat !== true) {
       let maven = nextProps.maven.maven;
       var user = maven.userID;
+      var activity = {};
       if (this.props.userID !== undefined) {
         user = this.props.userID;
       }
 
       if (isMavenActivities) {
         isMavenActivities = false;
-        this.props.getMavenActivities(maven._id, this.props.auth.token);
+        this.props.getMavenActivities(maven._id, this.props.auth.token, () => {
+          isFirstLoad = true;
+        });
       } else {
         let ma = nextProps.activity.mavenActivities;
-        var activity = {};
         if (this.props.userID !== undefined ) {
           for (var i = 0; i < ma.length; i ++) {
             if (ma[i].userID._id === this.props.userID._id) {
@@ -88,7 +90,7 @@ class Chat extends Component {
         Firebase.getMessages((snapshot) => {
           var m = {};
           let val = snapshot.val();
-          if (val.maven === maven._id && 
+          if (val.maven === maven._id && val.activity === activity._id && 
             ((val.sender === this.props.profile.myInfo.userId && val.receiver === user._id) || (val.sender === user._id && val.receiver === this.props.profile.myInfo.userId))) {
             m._id = snapshot.key;
             m.text = val.text;
@@ -117,20 +119,27 @@ class Chat extends Component {
   }
 
   onSend(messages = []) {
-    var m = {};
-    m.sender = this.props.profile.myInfo.userId;
-    m.receiver = this.state.user._id;
-    m.maven = this.state.maven._id;
-    m.text = messages[0].text;
-    m.createdAt = messages[0].createdAt.toISOString();
-    Firebase.pushMessage(m);
-    if (this.props.userID !== undefined) {
-      Firebase.setLastMessage(m.maven, m.receiver, m.text);
-    } else {
-      Firebase.setLastMessage(m.maven, m.sender, m.text);
-    }
-    if (this.state.messages.length === 0) {
-      this.props.initChat(this.state.maven._id, this.props.auth.token);
+    if (this.props.status !== 9) {
+      if (this.state.messages.length === 0) {
+        this.props.initChat(this.state.maven._id, this.props.auth.token, () => {
+  
+        });
+      } else {
+        var m = {};
+        m.sender = this.props.profile.myInfo.userId;
+        m.receiver = this.state.user._id;
+        m.maven = this.state.maven._id;
+        m.activity = this.state.activity._id;
+        m.text = messages[0].text;
+        m.createdAt = messages[0].createdAt.toISOString();
+        console.log(m);
+        Firebase.pushMessage(m);
+        if (this.props.userID !== undefined) {
+          Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
+        } else {
+          Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
+        }
+      }
     }
   }
 
@@ -269,9 +278,9 @@ class Chat extends Component {
           break;
         case 6:         // CReviewed
           if (isMaven) {
-            btnText1 = 'Please leave a Review~';
-          } else {
             btnText1 = 'Review received';
+          } else {
+            btnText1 = 'Please leave a Review~';
             boxDisabled = true;
           }
           break;
@@ -302,18 +311,37 @@ class Chat extends Component {
       <View style={{flex: 1}}>
         <TouchableOpacity onPress={() => {
           Actions.pop();
-          if (this.props.from === 'booking') {
-            Actions.pop();
-          } else if (this.props.from !== 'skillpage') {
-            this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
-            Actions.skillPage({ title: this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName, isMe: isMaven });
+          if (isMaven) {
+            Actions.otherProfile({title: this.props.title, userId: this.state.user._id});
+          } else {
+            if (this.props.from === 'booking') {
+              Actions.pop();
+            } else if (this.props.from !== 'skillpage') {
+              this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
+              Actions.skillPage({ title: this.state.user.firstName + ' ' + this.state.user.lastName, isMe: isMaven });
+            }
           }
         }}>
           <View style={{flexDirection: 'row', height: 70, alignItems: 'center'}}>
-            <Image source={{uri: this.state.maven.userID.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
+            <Image source={{uri: this.state.user.displayPicture}} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
             <View style={{flex: 1, justifyContent: 'center'}}>
-              <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.state.maven.userID.firstName + ' ' + this.state.maven.userID.lastName}</Text>
-              <Text style={{flex: 1, fontSize: 16}} numberOfLines={1} ellipsizeMode='tail'>{this.state.maven.title}</Text>
+              <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.state.user.firstName + ' ' + this.state.user.lastName}</Text>
+              {
+                isMaven?
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:10}}>
+                  <StarRating
+                    disabled
+                    maxStars={5}
+                    rating={this.state.user.consumerRating}
+                    starSize={14}
+                    starColor="#FFA838"
+                    starStyle={{paddingHorizontal:1}}
+                  />
+                  <Text style={{ color:'#b5b5b5'}}>({this.state.user.consumerRating})</Text>
+                </View>
+                :
+                <Text style={{flex: 1, fontSize: 16}} numberOfLines={1} ellipsizeMode='tail'>{this.state.maven.title}</Text>
+              }
             </View>
             <Icon name="ios-arrow-forward" style={{ fontSize: 25, color: '#90939B', marginHorizontal: 10}} />
           </View>
@@ -467,8 +495,8 @@ const mapStateToProps = (state) =>({
 
 const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-  initChat: (mavenId, token) => dispatch(actions.initChat(mavenId, token)),
-  getMavenActivities: (mavenId, token) => dispatch(actions.getMavenActivities(mavenId, token)),
+  initChat: (mavenId, token, next) => dispatch(actions.initChat(mavenId, token, next)),
+  getMavenActivities: (mavenId, token, next) => dispatch(actions.getMavenActivities(mavenId, token, next)),
   acceptOffer: (actId, token) => dispatch(actions.acceptOffer(actId, token)),
   rejectOffer: (actId, token) => dispatch(actions.rejectOffer(actId, token)),
   cancelOffer: (actId, type, token) => dispatch(actions.cancelOffer(actId, type, token)),

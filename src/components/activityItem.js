@@ -231,9 +231,9 @@ class ActivityItem extends Component {
         <TouchableOpacity key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }} onPress={() => {
           this.props.getMavenDetails(provider.mavenID._id, this.props.profile.location, this.props.auth.token);
           isMaven?
-          Actions.chatPage({ title: name, userID: provider.userID })
+          Actions.chatPage({ title: name, userID: provider.userID, status: provider.status })
           :
-          Actions.chatPage({ title: name })
+          Actions.chatPage({ title: name, status: provider.status })
         }}>
           <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
           {
@@ -251,12 +251,12 @@ class ActivityItem extends Component {
               <StarRating
                 disabled
                 maxStars={5}
-                rating={4.5}
+                rating={provider.mavenID.rating}
                 starSize={14}
                 starColor="#FFA838"
                 starStyle={{paddingHorizontal:1}}
               />
-              <Text style={{ color:'#b5b5b5'}}>({4})</Text>
+              <Text style={{ color:'#b5b5b5'}}>({provider.mavenID.rating})</Text>
             </View>
             <Text style={{ fontSize: 15 }} numberOfLines={1} ellipsizeMode='tail'>{provider.lastMessage}</Text>
             {

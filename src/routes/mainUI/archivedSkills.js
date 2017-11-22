@@ -49,7 +49,7 @@ class ArchivedSkills extends Component {
       let data = activities;
       var temp = [];
       for (var i = 0; i < data.length; i++) {
-        temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
+        temp.push(data[i].mavenID._id + '-' + data[i].userID._id + '-' + data[i]._id);
       }
 
       Firebase.initialize();
@@ -92,12 +92,6 @@ class ArchivedSkills extends Component {
         this.state.requestLoading?this.renderPlaceholder():null
       }
       {
-        this.state.data.length === 0?
-        <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
-          <Image style={styles.emptyImage} source={require('../../../assets/icons/archived.png')}/>
-          <Text style={styles.emptyText}>You have not archive anything yet~</Text>
-        </View>
-        :
         <Container>
           <Content refreshControl={
               <RefreshControl
@@ -105,17 +99,25 @@ class ArchivedSkills extends Component {
                 onRefresh={this._onRefresh.bind(this)}
               />
             }>
-            <FlatList
-              data={this.state.data}
-              renderItem={ ({item, index}) => {
-                return (
-                  <ActivityItem key={item._id} provider={item}/>
-                );
-              }}
-              keyExtractor={item => item._id}
-              ItemSeparatorComponent={null}
-              >
-            </FlatList>
+            {
+              this.state.data.length === 0?
+              <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
+                <Image style={styles.emptyImage} source={require('../../../assets/icons/archived.png')}/>
+                <Text style={styles.emptyText}>You have not archive anything yet~</Text>
+              </View>
+              :
+              <FlatList
+                data={this.state.data}
+                renderItem={ ({item, index}) => {
+                  return (
+                    <ActivityItem key={item._id} provider={item}/>
+                  );
+                }}
+                keyExtractor={item => item._id}
+                ItemSeparatorComponent={null}
+                >
+              </FlatList>
+            }
           </Content>
         </Container>
       }

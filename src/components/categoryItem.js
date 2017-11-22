@@ -131,7 +131,7 @@ class RenderItem extends React.Component {
             this.props.getTopicCount(1, this.props.auth.token);
           else 
             this.props.getTopicCount(0, this.props.auth.token);
-          Actions.subCategory({data:data, title:this.props.data.name});
+          Actions.subCategory({data:data, title:this.props.data.name, kind: id});
         }else{
           Actions.skillList({ category: id === 'provide'?'Provide a Service':'Teach a Skill'});
         }

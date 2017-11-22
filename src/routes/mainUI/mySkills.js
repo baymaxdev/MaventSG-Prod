@@ -79,7 +79,7 @@ class MySkills extends Component {
       }
 
       for (var i = 0; i < data.length; i++) {
-        temp.push(data[i].mavenID._id + '-' + data[i].userID._id);
+        temp.push(data[i].mavenID._id + '-' + data[i].userID._id + '-' + data[i]._id);
       }
 
       Firebase.initialize();
@@ -145,12 +145,6 @@ class MySkills extends Component {
       }
       {
         this.state.isMavenUser?
-          this.state.data.length === 0?
-          <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
-            <Image style={styles.emptyImage} source={require('../../../assets/icons/coffee.png')}/>
-            <Text style={styles.emptyText}>Relax~ Have a coffee while your requests are coming in!</Text>
-          </View>
-          :
           <Container>
             <Content refreshControl={
               <RefreshControl
@@ -158,6 +152,13 @@ class MySkills extends Component {
                 onRefresh={this._onRefresh.bind(this)}
               />
             }>
+            {
+              this.state.data.length === 0?
+              <View style={{height: SCREEN_HEIGHT, backgroundColor: '#fff', alignItems: 'center'}}>
+                <Image style={styles.emptyImage} source={require('../../../assets/icons/coffee.png')}/>
+                <Text style={styles.emptyText}>Relax~ Have a coffee while your requests are coming in!</Text>
+              </View>
+              :
               <FlatList
                 data={this.state.data}
                 renderItem={ ({item, index}) => {
@@ -169,6 +170,7 @@ class MySkills extends Component {
                 ItemSeparatorComponent={null}
                 >
               </FlatList>
+            }
             </Content>
           </Container>
         :

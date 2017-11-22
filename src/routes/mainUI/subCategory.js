@@ -17,23 +17,54 @@ import * as actions from '../../actions';
 import  {createFilter} from 'react-search-input';
 import Search from 'react-native-search-box';
 
-const SCREEN_WIDTH = Dimensions
-  .get('window')
-  .width;
 const {width, height} = Dimensions.get('window');
 const HORIZONTAL_PADDING = 8;
+
+const predefined = {
+  'service': {
+    'key': ['cooking_service', 'information_service', 'improvement', 'cleaning', 'beauty', 'photography', 'art_service', 'care', 'pet', 'others_service'],
+    'name': [
+      ['cooking', 'cooking baking', 'baking'], 
+      ['information', 'technology', 'information technology'], 
+      ['home', 'improvement', 'home improvement'], 
+      ['cleaning'], 
+      ['beauty'], 
+      ['photography', 'photograph', 'photo'], 
+      ['art', 'design', 'design'], 
+      ['home care', 'care'], 
+      ['pet related', 'pet'], 
+      ['others']
+    ]
+  },
+  'learn': {
+    'key': ['school', 'art_skill', 'information_skill', 'sports', 'music', 'cooking_skill', 'others_skill'],
+    'name': [
+      ['school', 'subjects', 'school subjects'], 
+      ['art', 'design', 'design'], 
+      ['information', 'technology', 'information technology'], 
+      ['sports', 'fitness', 'sport fitness'], 
+      ['music'], 
+      ['cooking', 'baking', 'cooking baking'], 
+      ['others']
+    ]
+  }
+};
+
+var key = [];
+var name = [];
 
 class SubCategory extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchTerm: '',
       topicCounts: [],
       refreshing: false,
     }
   }
 
   componentDidMount() {
+    key = predefined[this.props.kind].key;
+    name = predefined[this.props.kind].name;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -51,11 +82,24 @@ class SubCategory extends Component {
   }
 
   onSearch = (text) => {
-    this.setState({ searchTerm: text });
+    var nextKey = '';
+    for (var i = 0; i < name.length; i++) {
+      if (name[i].includes(text.toLowerCase())) {
+        nextKey = key[i];
+      }
+    }
+
+    if (nextKey !== '') {
+      this.props.getCatList(nextKey, this.props.profile.location, this.props.auth.token);
+      Actions.genericView({data: {id: nextKey}, title: text});
+    } else {
+      this.props.getCatList(nextKey, this.props.profile.location, this.props.auth.token, text);
+      Actions.genericView({data: {id: nextKey}, title: text});
+    }
   }
 
   onChangeText = (text) => {
-    this.setState({ searchTerm: text });
+
   }
 
   renderItem(data) {
@@ -94,14 +138,14 @@ class SubCategory extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    if (this.state.topicCounts.length === 10)
+    if (this.props.kind === 'service')
       this.props.getTopicCount(1, this.props.auth.token);
     else
       this.props.getTopicCount(0, this.props.auth.token);
   }
 
   render() {
-    const filteredLists = this.props.data.filter(createFilter(this.state.searchTerm, ['name']))
+    const filteredLists = this.props.data;
     return (
       <View style={styles.container}>
         <Search
@@ -175,7 +219,7 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   setLocation: (location) => dispatch(actions.setLocation(location)),
-  getCatList: (category, location, token) => dispatch(actions.getCatList(category, location, token)),
+  getCatList: (category, location, token, query) => dispatch(actions.getCatList(category, location, token, query)),
   getTopicCount: (mainCategory, token) => dispatch(actions.getTopicCount(mainCategory, token)),
   getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
   actions: bindActionCreators(actions, dispatch)
