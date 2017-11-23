@@ -313,9 +313,9 @@ class Chat extends Component {
           break;
         case 6:         // CReviewed
           if (isMaven) {
-            btnText1 = 'Review received';
-          } else {
             btnText1 = 'Please leave a Review~';
+          } else {
+            btnText1 = 'Review received';
             boxDisabled = true;
           }
           break;
