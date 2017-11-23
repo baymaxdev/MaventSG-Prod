@@ -257,7 +257,7 @@ class ActivityItem extends Component {
                 starColor="#FFA838"
                 starStyle={{paddingHorizontal:1}}
               />
-              <Text style={{ color:'#b5b5b5'}}>({rating})</Text>
+              <Text style={{color:'#b5b5b5'}}>({Math.round(rating * 10) / 10})</Text>
             </View>
             <Text style={{ fontSize: 15 }} numberOfLines={1} ellipsizeMode='tail'>{provider.lastMessage}</Text>
             {

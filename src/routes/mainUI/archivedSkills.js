@@ -82,7 +82,7 @@ class ArchivedSkills extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.renderItem();
+    this.refreshItem();
   }
 
   render() {

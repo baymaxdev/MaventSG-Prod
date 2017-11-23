@@ -28,19 +28,8 @@ class ReviewPage extends Component {
   }
 
   onSubmit() {
-    this.props.reviewActivity(this.props.actId, this.props.type, this.state.rating, this.state.message, this.props.auth.token, () => {
-      this.setState({successModalVisible: true}, () => {
-        setTimeout(() => {
-          this.setState({successModalVisible: true}, () => {
-            setTimeout(() => {
-              this.setState({successModalVisible: false}, () => {
-                Actions.pop();
-              });
-            }, 1000);
-          });
-        }, 500);
-      });
-    });
+    this.props.reviewActivity(this.props.actId, this.props.type, this.state.rating, this.state.message, this.props.auth.token, () => {});
+    Actions.pop();
   }
 
   render() {

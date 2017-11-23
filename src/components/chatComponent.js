@@ -12,8 +12,9 @@ import Modal from 'react-native-modal';
 import DatePicker from 'react-native-datepicker';
 import StarRating from 'react-native-star-rating';
 
-var isFirstLoad = false;
+var isFirstLoad = true;
 var isMavenActivities = true;
+var isBookingMessage = true;
 
 class Chat extends Component {
   state = {
@@ -25,6 +26,7 @@ class Chat extends Component {
     successModalVisible: false,
     serviceDate: '',
     price: '',
+    rating: 0,
   };
 
   renderChatRightButton = () => {
@@ -41,8 +43,9 @@ class Chat extends Component {
   }
 
   componentWillMount() {
-    isFirstLoad = false;
+    isFirstLoad = true;
     isMavenActivities = true;
+    isBookingMessage = true;
     Firebase.initialize();
   }
 
@@ -64,75 +67,92 @@ class Chat extends Component {
       }
     }
 
+    if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
+      alert(nextProps.activity.error);
+    }
+
+    console.log("1111");
     if (nextProps.maven != undefined) {
-      let maven = nextProps.maven.maven;
+      console.log("2222");
+      var maven = nextProps.maven.maven;
       var user = maven.userID;
       var activity = {};
       if (this.props.userID !== undefined) {
         user = this.props.userID;
       }
+      var rating = this.props.userID?user.consumerRating:maven.rating;
 
       if (isMavenActivities) {
+        console.log('3333');
         isMavenActivities = false;
-        this.props.getMavenActivities(maven._id, this.props.auth.token, () => {
-          isFirstLoad = true;
-        });
+        this.props.getMavenActivities(maven._id, this.props.auth.token);
       } else {
-        let ma = nextProps.activity.mavenActivities;
+        console.log('4444');
+        var ma = nextProps.activity.mavenActivities;
+        console.log('ma', ma);
         if (ma !== undefined) {
           if (this.props.userID !== undefined ) {
             for (var i = 0; i < ma.length; i ++) {
-              if (ma[i].userID._id === this.props.userID._id) {
+              if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
                 activity = ma[i];
                 break;
               }
             }
           } else {
-            if (ma.length > 0) {
-              activity = ma[0];
+            for (var i = 0; i < ma.length; i ++) {
+              if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
+                activity = ma[i];
+                break;
+              }
             }
           }
           this.setState({ activity });
         }
       }
 
-      this.setState({maven: maven, user: user, requestLoading: false});
+      this.setState({maven: maven, user: user, rating: rating, requestLoading: false});
 
-      if (isFirstLoad) {
-
-        if (this.props.bookingMessage) {
+      if (isMavenActivities === false) {
+        console.log('5555');
+        console.log(activity._id);
+        if (activity._id !== undefined && this.props.bookingMessage && isBookingMessage === true) {
+          isBookingMessage = false;
           var bm = this.props.bookingMessage;
           bm.activity = activity._id;
+          console.log('bm', bm);
           Firebase.pushMessage(bm);
           Firebase.setLastMessage(bm.maven, bm.sender, bm.activity, bm.text);
         }
 
-        if (activity._id !== undefined) {
+        if (activity._id !== undefined && isFirstLoad === true) {
+          console.log('6666');
           isFirstLoad = false;
           Firebase.getMessages((snapshot) => {
             var m = {};
             let val = snapshot.val();
             if (val.maven === maven._id && val.activity === activity._id && 
               ((val.sender === this.props.profile.myInfo.userId && val.receiver === user._id) || (val.sender === user._id && val.receiver === this.props.profile.myInfo.userId))) {
-              m._id = snapshot.key;
-              m.text = val.text;
-              m.createdAt = new Date(val.createdAt);
-              if (val.sender === this.props.profile.myInfo.userId) {
-                var u = {};
-                u._id = val.sender;
-                u.name = this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName;
-                u.avatar = this.props.profile.myInfo.displayPicture;
-                m.user = u;
-              } else if (val.sender === user._id) {
-                var u = {};
-                u._id = val.sender;
-                u.name = user.firstName + ' ' + user.lastName;
-                u.avatar = user.displayPicture;
-                m.user = u;
-              }
-              this.setState((previousState) => ({
-                messages: GiftedChat.append(previousState.messages, m),
-              }));
+                if (this.props.from === 'activity' || activity.status !== 9) {
+                  m._id = snapshot.key;
+                  m.text = val.text;
+                  m.createdAt = new Date(val.createdAt);
+                  if (val.sender === this.props.profile.myInfo.userId) {
+                    var u = {};
+                    u._id = val.sender;
+                    u.name = this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName;
+                    u.avatar = this.props.profile.myInfo.displayPicture;
+                    m.user = u;
+                  } else if (val.sender === user._id) {
+                    var u = {};
+                    u._id = val.sender;
+                    u.name = user.firstName + ' ' + user.lastName;
+                    u.avatar = user.displayPicture;
+                    m.user = u;
+                  }
+                  this.setState((previousState) => ({
+                    messages: GiftedChat.append(previousState.messages, m),
+                  }));
+                }
             }
           });
         }
@@ -141,10 +161,9 @@ class Chat extends Component {
   }
 
   onSend(messages = []) {
-    if (this.props.status !== 9) {
+    if (this.state.activity.status !== 9) {
       if (this.state.messages.length === 0) {
         isMavenActivities = true;
-        isFirstLoad = true;
         this.props.initChat(this.state.maven._id, this.props.auth.token, (actId) => {
           var m = {};
           m.sender = this.props.profile.myInfo.userId;
@@ -187,7 +206,7 @@ class Chat extends Component {
   }
 
   navigateToReview(type) {
-    Actions.reviewPage({actId: this.state.activity._id, type: type});
+    Actions.push('reviewPage', {actId: this.state.activity._id, type: type});
   }
 
   onPressModalBtn1(actId) {
@@ -281,7 +300,7 @@ class Chat extends Component {
     let isMaven = this.props.userID !== undefined?true:false;
     var btnText1 = btnText2 = '', boxDisabled = false;
     
-    if (activity.status !== undefined) {
+    if (activity.status !== undefined && (this.props.from === 'activity' || activity.status !== 9)) {
       switch (activity.status) {
         case 1:         // Offered
           if (isMaven) {
@@ -357,21 +376,21 @@ class Chat extends Component {
             }
           }
         }}>
-          <View style={{flexDirection: 'row', height: 70, alignItems: 'center'}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Image source={this.state.user.displayPicture?{uri: this.state.user.displayPicture}:require('../../assets/images/avatar.png')} style={{width: 50, height: 50, marginHorizontal: 10, borderRadius: 18, borderWidth: 2, borderColor: 'white'}}/>
             <View style={{flex: 1, justifyContent: 'center'}}>
-              <Text style={{flex: 1, fontSize: 20, marginTop: 10}}>{this.state.user.firstName + ' ' + this.state.user.lastName}</Text>
+              <Text style={{fontSize: 20, marginTop: 5}}>{this.state.user.firstName + ' ' + this.state.user.lastName}</Text>
               {
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:10}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical:5, marginBottom: 5}}>
                   <StarRating
                     disabled
                     maxStars={5}
-                    rating={this.props.rating}
+                    rating={this.state.rating}
                     starSize={14}
                     starColor="#FFA838"
                     starStyle={{paddingHorizontal:1}}
                   />
-                  <Text style={{ color:'#b5b5b5'}}>({this.props.rating})</Text>
+                  <Text style={{color:'#b5b5b5'}}>({Math.round(this.state.rating * 10) / 10})</Text>
                 </View>
               }
             </View>

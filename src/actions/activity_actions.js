@@ -303,8 +303,8 @@ export const getMavenActivities = (mavenId, token, next) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        next();
         dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result });
+        next(res.result);
       }
       else {
         dispatch({ type: GET_MAVEN_ACTIVITIES_ERROR, error: res.msg });
