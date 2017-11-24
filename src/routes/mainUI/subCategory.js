@@ -52,6 +52,7 @@ const predefined = {
 
 var key = [];
 var name = [];
+var mainCategory = 0;
 
 class SubCategory extends Component {
   constructor(props) {
@@ -65,6 +66,7 @@ class SubCategory extends Component {
   componentDidMount() {
     key = predefined[this.props.kind].key;
     name = predefined[this.props.kind].name;
+    mainCategory = this.props.kind==='service'?1:0;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -72,7 +74,7 @@ class SubCategory extends Component {
   }
 
   navigate = (data) => {
-    this.props.getCatList(data.id, this.props.profile.location, this.props.auth.token);
+    this.props.getCatList(data.id, mainCategory, this.props.profile.location, this.props.auth.token);
     Actions.genericView({data: data, title: data.name});
   }
 
@@ -90,10 +92,10 @@ class SubCategory extends Component {
     }
 
     if (nextKey !== '') {
-      this.props.getCatList(nextKey, this.props.profile.location, this.props.auth.token);
+      this.props.getCatList(nextKey, mainCategory, this.props.profile.location, this.props.auth.token);
       Actions.genericView({data: {id: nextKey}, title: text});
     } else {
-      this.props.getCatList(nextKey, this.props.profile.location, this.props.auth.token, text);
+      this.props.getCatList(nextKey, mainCategory, this.props.profile.location, this.props.auth.token, text);
       Actions.genericView({data: {id: nextKey}, title: text});
     }
   }
@@ -138,10 +140,7 @@ class SubCategory extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    if (this.props.kind === 'service')
-      this.props.getTopicCount(1, this.props.auth.token);
-    else
-      this.props.getTopicCount(0, this.props.auth.token);
+    this.props.getTopicCount(mainCategory, this.props.auth.token);
   }
 
   render() {
@@ -219,7 +218,7 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   setLocation: (location) => dispatch(actions.setLocation(location)),
-  getCatList: (category, location, token, query) => dispatch(actions.getCatList(category, location, token, query)),
+  getCatList: (category, mainCategory, location, token, query) => dispatch(actions.getCatList(category, mainCategory, location, token, query)),
   getTopicCount: (mainCategory, token) => dispatch(actions.getTopicCount(mainCategory, token)),
   getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
   actions: bindActionCreators(actions, dispatch)

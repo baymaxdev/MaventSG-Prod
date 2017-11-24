@@ -28,6 +28,7 @@ import LoadingComponent from '../../components/loadingComponent';
 import ActionSheet from 'react-native-actionsheet';
 import Modal from 'react-native-modal';
 import GalleryComponent from '../../components/galleryComponent';
+import ImageResizer from 'react-native-image-resizer';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -130,24 +131,6 @@ class SkillPage extends Component {
 
   }
 
-  // _openCameraRoll = () => {
-  //   ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]})
-  //   .then((image) => {
-  //     if (!image.cancelled) {
-  //       ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80)
-  //       .then((res) => {
-  //         let pictures = this.state.picUrl;
-  //         pictures[this.state.picNumber] = res.uri;
-  //         this.setState({picUrl: pictures, requestLoading: true});
-  //         this.props.addMavenImage(this.state.maven.maven._id, res.uri, this.props.auth.token);
-  //       }).catch((err) => {
-  //       });
-  //     }
-  //   }).catch((err) => {
-
-  //   });
-  // }
-
   _openCameraRoll = async () => {
     let image = await ImagePicker.launchImageLibraryAsync({allowsEditing:true, aspect:[4,3]});
     this.addPhoto(image);
@@ -158,12 +141,15 @@ class SkillPage extends Component {
     this.addPhoto(image);
   }
 
-  addPhoto (image) {
+  async addPhoto (image) {
     if (!image.cancelled) {
+      let res = await ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80);
+      console.log(res);
+      console.log(res.uri);
       let pictures = this.state.picUrl;
-      pictures[this.state.picNumber] = image.uri;
+      pictures[this.state.picNumber] = res.uri;
       this.setState({picUrl: pictures, requestLoading: true});
-      this.props.addMavenImage(this.state.maven._id, image.uri, this.props.auth.token);
+      this.props.addMavenImage(this.state.maven._id, res.uri, this.props.auth.token);
     }
   }
 

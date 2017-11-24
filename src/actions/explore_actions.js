@@ -30,7 +30,7 @@ export const getNearbyList = (location, myLocation,token) => {
   }
 }
 
-export const getCatList = (category, location, token, query) => {
+export const getCatList = (category, mainCategory, location, token, query) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -38,9 +38,10 @@ export const getCatList = (category, location, token, query) => {
     },
   };
   return dispatch => {
-    const url = `maven/getCatListing?category=${category}&latitude=${location.latitude}&longitude=${location.longitude}&filter=0&rating=&availableToday=&page=1&scroll_id=&query=${query?query:null}`;
+    const url = `maven/getCatListing?category=${category}&mainCategory=${mainCategory}&latitude=${location.latitude}&longitude=${location.longitude}&filter=0&rating=&availableToday=&page=1&scroll_id=&query=${query?query:''}`;
     request(url, option)
     .then(res => {
+      console.log(res);
       if (res.status === 200) {
         dispatch({ type: GET_CAT_LIST, list: res.result });   
       }

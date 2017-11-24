@@ -37,6 +37,7 @@ const availability = ['Today', 'Other days'];
 
 var name = [];
 var key = [];
+var mainCategory = 0;
 
 class GenericView extends Component {
   constructor(props) {
@@ -60,9 +61,11 @@ class GenericView extends Component {
     if (serviceKey.includes(this.props.data.id)) {
       name = serviceName;
       key = serviceKey;
+      mainCategory = 1;
     } else if (skillKey.includes(this.props.data.id)) {
       name = skillName;
       key = skillKey;
+      mainCategory = 0;
     }
     this.setState({categoryId: this.props.data.id});
   }
@@ -147,7 +150,7 @@ class GenericView extends Component {
 
   onChangeCategory = (index, value) => {
     this.setState({requestLoading: true, categoryId: key[index]});
-    this.props.getCatList(key[index], this.props.profile.location, this.props.auth.token);
+    this.props.getCatList(key[index], mainCategory, this.props.profile.location, this.props.auth.token);
     Actions.refresh({title: value});
   }
 
@@ -175,7 +178,7 @@ class GenericView extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getCatList(this.state.categoryId, this.props.profile.location, this.props.auth.token);
+    this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.props.auth.token);
   }
 
   renderDropdownRow(rowData, rowID, highlited) {
@@ -395,7 +398,7 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getCatList: (category, location, token) => dispatch(actions.getCatList(category, location, token)),
+  getCatList: (category, mainCategory, location, token) => dispatch(actions.getCatList(category, mainCategory, location, token)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   //getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
   actions: bindActionCreators(actions, dispatch)

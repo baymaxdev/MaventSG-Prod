@@ -1,4 +1,4 @@
-const serverUrl = 'http://52.221.233.101:3000/';
+const serverUrl = 'http://54.179.160.81:3000/';
 export default function request(apiName, option){
     let myRequest = new Request(serverUrl + apiName, option);
     return new Promise((resolve, reject) => {

@@ -7,6 +7,7 @@ import CarouselComponent from '../../components/carouselComponent';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../../actions';
+import { Permissions, Notifications } from 'expo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,6 +35,8 @@ const imageDetails = [
 ];
 
 var backButtonPressedOnce = false;
+var isFirstLoad = true;
+
 class CategoryView extends Component {
 
     constructor(props) {
@@ -42,8 +45,36 @@ class CategoryView extends Component {
         }
       }
 
-    componentDidMount() {   
-        //Actions.refresh({rightButtonImage:require('../../../assets//icons/mailoutline.png')})
+    async registerForPushNotificationsAsync() {
+        const { status: existingStatus } = await Permissions.getAsync(
+          Permissions.NOTIFICATIONS
+        );
+        let finalStatus = existingStatus;
+      
+        // only ask if permissions have not already been determined, because
+        // iOS won't necessarily prompt the user a second time.
+        if (existingStatus !== 'granted') {
+          // Android remote notification permissions are granted during the app
+          // install, so this will only ask on iOS
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          finalStatus = status;
+        }
+      
+        // Stop here if the user did not grant permissions
+        if (finalStatus !== 'granted') {
+          return;
+        }
+      
+        // Get the token that uniquely identifies this device
+        let token = await Notifications.getExpoPushTokenAsync();
+        this.props.savePushToken(token, this.props.auth.token);
+    }
+
+    componentDidMount() {
+        if (isFirstLoad) {
+            isFirstLoad = false;
+            this.registerForPushNotificationsAsync();
+        }
         BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }
 
@@ -107,6 +138,7 @@ const mapStateToProps = (state) =>({
   
 const mapDispatchToProps = (dispatch) =>({
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
+    savePushToken: (pushToken, token) => dispatch(actions.savePushToken(pushToken, token)),
     actions: bindActionCreators(actions, dispatch)
 });
   
