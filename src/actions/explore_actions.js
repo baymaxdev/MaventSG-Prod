@@ -30,7 +30,7 @@ export const getNearbyList = (location, myLocation,token) => {
   }
 }
 
-export const getCatList = (category, mainCategory, location, token, query) => {
+export const getCatList = (category, mainCategory, location, page, scrollId, query, token) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -38,12 +38,11 @@ export const getCatList = (category, mainCategory, location, token, query) => {
     },
   };
   return dispatch => {
-    const url = `maven/getCatListing?category=${category}&mainCategory=${mainCategory}&latitude=${location.latitude}&longitude=${location.longitude}&filter=0&rating=&availableToday=&page=1&scroll_id=&query=${query?query:''}`;
+    const url = `maven/getCatListing?category=${category}&mainCategory=${mainCategory}&latitude=${location.latitude}&longitude=${location.longitude}&filter=0&rating=&availableToday=&page=${page}&scroll_id=${scrollId}&query=${query}`;
     request(url, option)
     .then(res => {
-      console.log(res);
       if (res.status === 200) {
-        dispatch({ type: GET_CAT_LIST, list: res.result });   
+        dispatch({ type: GET_CAT_LIST, list: res.result, scrollId: res.scroll_id, total: res.total });   
       }
       else dispatch({ type: GET_CAT_LIST_ERROR, error: res.msg });
     })

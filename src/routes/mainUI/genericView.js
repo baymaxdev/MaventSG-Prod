@@ -11,7 +11,9 @@ import {
   TouchableOpacity,
   TextInput,
   RefreshControl,
+  ScrollView
 } from 'react-native';
+import {List} from 'react-native-elements';
 import {Icon, Container, Content, Card} from 'native-base';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -54,24 +56,36 @@ class GenericView extends Component {
       min: '',
       max: '',
       sortBy: 0,
+      page: 1,
+      scrollId: '',
+      loading: false,
+      total: 0,
+      title: '',
+      firstLoad: true,
     };
   }
 
   componentDidMount() {
-    if (serviceKey.includes(this.props.data.id)) {
+    if (serviceKey.includes(this.props.categoryId)) {
       name = serviceName;
       key = serviceKey;
       mainCategory = 1;
-    } else if (skillKey.includes(this.props.data.id)) {
+    } else if (skillKey.includes(this.props.categoryId)) {
       name = skillName;
       key = skillKey;
       mainCategory = 0;
     }
-    this.setState({categoryId: this.props.data.id});
+    this.setState({categoryId: this.props.categoryId, title: this.props.title}, () => {
+      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.state.page, this.state.scrollId, this.props.query, this.props.auth.token);
+    });
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({requestLoading: false, refreshing: false, data: nextProps.catList});
+    if (this.state.firstLoad === true) {
+      this.setState({requestLoading: false, refreshing: false, loading: false, firstLoad: false, data: [...this.state.data, ...nextProps.catList], scrollId: nextProps.scrollId, total: nextProps.totalList}, () => {
+        Actions.refresh({title: this.state.title})
+      });
+    }
   }
 
   handleRefresh = () => {
@@ -79,7 +93,15 @@ class GenericView extends Component {
   };
 
   handleLoadMore = () => {
-    console.log('end');
+    if (this.state.total > 10) {
+      this.setState({
+        page: this.state.page + 1,
+        loading: true,
+        firstLoad: true,
+      }, () => {
+        this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.state.page, this.state.scrollId, this.props.query, this.props.auth.token);
+      });
+    }
   };
 
   renderSeparator = () => {
@@ -112,7 +134,7 @@ class GenericView extends Component {
  };
 
   renderFooter = () => {
-    if (!this.state.requestLoading) return null;
+    if (!this.state.loading) return null;
 
     return (
       <View
@@ -124,8 +146,6 @@ class GenericView extends Component {
       >
         <ActivityIndicator
           animating = {true}
-          style = {styles.activityIndicator}
-          color = '#0000ff'
           size = 'large'
         />
       </View>
@@ -149,9 +169,9 @@ class GenericView extends Component {
   }
 
   onChangeCategory = (index, value) => {
-    this.setState({requestLoading: true, categoryId: key[index]});
-    this.props.getCatList(key[index], mainCategory, this.props.profile.location, this.props.auth.token, this.props.query);
-    Actions.refresh({title: value});
+    this.setState({requestLoading: true, firstLoad: true, categoryId: key[index], page: 1, scrollId: '', total: 0, data: [], title: name[index]}, () => {
+      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, 1, '', this.props.query, this.props.auth.token);
+    });
   }
 
   onChangeAvailability = (index, value) => {
@@ -176,9 +196,10 @@ class GenericView extends Component {
     return ret;
   }
 
-  _onRefresh() {
-    this.setState({refreshing: true});
-    this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.props.auth.token, this.props.query);
+  _onRefresh = () => {
+    this.setState({requestLoading: true, refreshing: true, firstLoad: true, page: 1, scrollId: '', data: [], total: 0}, () => {
+      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, 1, '', this.props.query, this.props.auth.token);
+    });
   }
 
   renderDropdownRow(rowData, rowID, highlited) {
@@ -270,29 +291,30 @@ class GenericView extends Component {
             </View>
           </View>
         </View>
-          <Container>
           {
               this.state.requestLoading?this.renderPlaceholder():null
           }
-          <Content
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.refreshing}
-                onRefresh={this._onRefresh.bind(this)}
-              />
-            }
-            >
           {
             this.state.data.length === 0?
-            <View style={{height: 0.91 * SCREEN_HEIGHT - 64, justifyContent: 'center', alignItems:'center', paddingBottom: 100}}>
-              <TouchableOpacity style={{justifyContent: 'center', alignItems:'center'}} onPress={() => {
-                  Actions.skillList({ category: name === serviceName?'Provide a Service':'Teach a Skill', subCategory: this.props.title, categoryId: this.state.categoryId });
-              }}>
-              <Image source={require('../../../assets/icons/first.png')} />
-              <View style={{ height: 10 }}></View>
-                <Text style={{fontSize: 18, color: '#7F7F7F'}}>No Maven here yet. Tap here to be the first!</Text>
-              </TouchableOpacity>
-            </View>:
+            <ScrollView style={{flex: 1}}
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._onRefresh.bind(this)}
+                />
+              }
+            >
+              <View style={{height: 0.91 * SCREEN_HEIGHT - 64, justifyContent: 'center', alignItems:'center', paddingBottom: 100}}>
+                <TouchableOpacity style={{justifyContent: 'center', alignItems:'center'}} onPress={() => {
+                    Actions.skillList({ category: name === serviceName?'Provide a Service':'Teach a Skill', subCategory: this.props.title, categoryId: this.state.categoryId });
+                }}>
+                <Image source={require('../../../assets/icons/first.png')} />
+                <View style={{ height: 10 }}></View>
+                  <Text style={{fontSize: 18, color: '#7F7F7F'}}>No Maven here yet. Tap here to be the first!</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>:
+            <List style={{borderTopWidth: 0, borderBottomWidth: 0, flex: 1}}>
             <FlatList
               data={filteredLists}
               renderItem={({ item, index }) => (
@@ -352,12 +374,13 @@ class GenericView extends Component {
               ItemSeparatorComponent={this.renderSeparator}
               ListHeaderComponent={this.renderHeader}
               ListFooterComponent={this.renderFooter}
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh}
               onEndReached={this.handleLoadMore}
-              onEndReachedThreshold={0.9}
+              onEndReachedThreshold={0}
             />
+            </List>
           }
-          </Content>
-        </Container>
         <FilterComponent modalVisible={this.state.modalVisible} sortBy={this.state.sortBy} min={this.state.min} max={this.state.max}
           onApply={(res) => {
             this.setState({modalVisible: false, sortBy: res.sortBy, min: res.min, max: res.max});
@@ -395,11 +418,13 @@ const mapStateToProps = (state) =>({
   auth: state.auth,
   profile: state.profile,
   catList: state.explore.catList,
+  scrollId: state.explore.scrollId,
+  totalList: state.explore.totalList,
   explore: state.explore
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getCatList: (category, mainCategory, location, token, query) => dispatch(actions.getCatList(category, mainCategory, location, token, query)),
+  getCatList: (category, mainCategory, location, page, scrollId, query, token) => dispatch(actions.getCatList(category, mainCategory, location, page, scrollId, query, token)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   //getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
   actions: bindActionCreators(actions, dispatch)

@@ -74,8 +74,7 @@ class SubCategory extends Component {
   }
 
   navigate = (data) => {
-    this.props.getCatList(data.id, mainCategory, this.props.profile.location, this.props.auth.token);
-    Actions.genericView({data: data, title: data.name});
+    Actions.genericView({categoryId: data.id, title: data.name, query: ''});
   }
 
   goTopic = (data) => {
@@ -92,11 +91,9 @@ class SubCategory extends Component {
     }
 
     if (nextKey !== '') {
-      this.props.getCatList(nextKey, mainCategory, this.props.profile.location, this.props.auth.token);
-      Actions.genericView({data: {id: nextKey}, title: text});
+      Actions.genericView({categoryId: nextKey, title: text, query: ''});
     } else {
-      this.props.getCatList(nextKey, mainCategory, this.props.profile.location, this.props.auth.token, text);
-      Actions.genericView({data: {id: nextKey}, title: text, query: text});
+      Actions.genericView({categoryId: nextKey, title: text, query: text});
     }
   }
 
@@ -218,7 +215,6 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   setLocation: (location) => dispatch(actions.setLocation(location)),
-  getCatList: (category, mainCategory, location, token, query) => dispatch(actions.getCatList(category, mainCategory, location, token, query)),
   getTopicCount: (mainCategory, token) => dispatch(actions.getTopicCount(mainCategory, token)),
   getTopics: (category, token) => dispatch(actions.getTopics(category, token)),
   actions: bindActionCreators(actions, dispatch)

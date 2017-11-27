@@ -8,7 +8,7 @@ import {Actions} from 'react-native-router-flux';
 import {Container, Content, Icon, Form} from 'native-base';
 import Placeholder from 'rn-placeholder';
 import ReadMore from '@expo/react-native-read-more-text';
-import SegmentedControlTab from 'react-native-segmented-control-tab'
+import SegmentedControlTab from 'react-native-segmented-control-tab';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const {width, height} = Dimensions.get('window');

@@ -1,6 +1,7 @@
 import {
   GET_NEARBY_LIST,
   GET_NEARBY_LIST_ERROR,
+  GET_CAT_LIST_REQUEST,
   GET_CAT_LIST,
   GET_CAT_LIST_ERROR,
   GET_MAVEN_DETAILS,
@@ -22,7 +23,7 @@ export default function (state = INITIAL_STATE, action) {
     case GET_NEARBY_LIST_ERROR:
       return { ...state, error: action.error };
     case GET_CAT_LIST:
-      return { ...state, catList: action.list};
+      return { ...state, catList: action.list, scrollId: action.scrollId, totalList: action.total};
     case GET_CAT_LIST_ERROR:
       return { ...state, error: action.error};
     case GET_MAVEN_DETAILS:
