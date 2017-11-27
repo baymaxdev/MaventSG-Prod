@@ -18,7 +18,6 @@ export const savePushToken = (pushToken, token) => {
     formBody.push(encodedKey + "=" + encodedValue);
   }
   formBody = formBody.join("&");
-  
   let option = { 
     method: 'POST',
     headers: {
@@ -54,7 +53,7 @@ export const sendPushNotification = ( ids, message, data, token ) => {
   var formBody = [];
   for (var property in temp) {
     var encodedKey = encodeURIComponent(property);
-    var encodedValue = encodeURIComponent(temp[property]);
+    var encodedValue = encodeURIComponent(property==='message'?temp[property]:JSON.stringify(temp[property]));
     formBody.push(encodedKey + "=" + encodedValue);
   }
   formBody = formBody.join("&");

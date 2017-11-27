@@ -143,13 +143,11 @@ class SkillPage extends Component {
 
   async addPhoto (image) {
     if (!image.cancelled) {
-      let res = await ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80);
-      console.log(res);
-      console.log(res.uri);
+      // let res = await ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80);
       let pictures = this.state.picUrl;
-      pictures[this.state.picNumber] = res.uri;
+      pictures[this.state.picNumber] = image.uri;
       this.setState({picUrl: pictures, requestLoading: true});
-      this.props.addMavenImage(this.state.maven._id, res.uri, this.props.auth.token);
+      this.props.addMavenImage(this.state.maven._id, image.uri, this.props.auth.token);
     }
   }
 

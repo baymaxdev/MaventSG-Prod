@@ -96,7 +96,7 @@ class SubCategory extends Component {
       Actions.genericView({data: {id: nextKey}, title: text});
     } else {
       this.props.getCatList(nextKey, mainCategory, this.props.profile.location, this.props.auth.token, text);
-      Actions.genericView({data: {id: nextKey}, title: text});
+      Actions.genericView({data: {id: nextKey}, title: text, query: text});
     }
   }
 

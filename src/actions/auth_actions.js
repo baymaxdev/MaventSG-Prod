@@ -30,7 +30,7 @@ import {
   CHANGE_PHONE_NUMBER_ERROR,
 } from './types';
 
-export const requestSignup = (userData, token) => {
+export const requestSignup = (userData, from) => {
   let email = userData.email;
   let password = userData.password;
   let firstName = userData.firstName;
@@ -47,11 +47,15 @@ export const requestSignup = (userData, token) => {
   formData.append('dob', dob);
   formData.append('gender', gender);
   formData.append('phoneNumber', "65" + phoneNumber);
-  if(photo){
-    let filename = photo.split('/').pop();
-    let match = /\.(\w+)$/.exec(filename);
-    let type = match ? match[1] : '';
-    formData.append('photo', { uri: photo, name: `photo.${type}`, type: `image/${type}`});
+  if (photo) {
+    if (from === 'fb') {
+      formData.append('photo', { uri: photo, name: 'photo.jpg', type: 'image/jpg'});
+    } else {
+      let filename = photo.split('/').pop();
+      let match = /\.(\w+)$/.exec(filename);
+      let type = match ? match[1] : '';
+      formData.append('photo', { uri: photo, name: `photo.${type}`, type: `image/${type}`});
+    }
   }
 
   let option = {
@@ -138,7 +142,7 @@ export const requestLogin = (email, password) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) dispatch({ type: REQUESTED_LOGIN_SUCCEEDED, token: res.token });
-      else dispatch({ type: REQUESTED_LOGIN_ERROR, status: res.status, userId: res.userID, error: res.msg });
+      else dispatch({ type: REQUESTED_LOGIN_ERROR, error: res.msg });
     })
     .catch(err => {
       dispatch({ type: REQUESTED_LOGIN_ERROR, error: err });
@@ -159,10 +163,10 @@ export const forgotPassword = (email) => {
     .then(res => {
       
       if (res.status === 200) dispatch({ type: FORGOTPASSWORD_SUBMIT_SUCCEEDED, status: res.status});
-      else dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR, status: res.status });
+      else dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR, error: res.msg });
     })
     .catch(err => {
-      dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR });
+      dispatch({ type: FORGOTPASSWORD_SUBMIT_ERROR, error: err });
     })
   }
 }
@@ -178,10 +182,10 @@ export const resetPasswordfunc = (email, password,otp) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) dispatch({ type: RESET_PASSWORD_SUCCEEDED, status: res.status, token: res.token });
-      else dispatch({ type: RESET_PASSWORD_ERROR, status: res.status });
+      else dispatch({ type: RESET_PASSWORD_ERROR, error: res.msg, status: res.status });
     })
     .catch(err => {
-      dispatch({ type: RESET_PASSWORD_ERROR });
+      dispatch({ type: RESET_PASSWORD_ERROR, error: err });
     })
   }
 }

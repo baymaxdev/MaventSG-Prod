@@ -79,7 +79,7 @@ class GenericView extends Component {
   };
 
   handleLoadMore = () => {
-
+    console.log('end');
   };
 
   renderSeparator = () => {
@@ -150,7 +150,7 @@ class GenericView extends Component {
 
   onChangeCategory = (index, value) => {
     this.setState({requestLoading: true, categoryId: key[index]});
-    this.props.getCatList(key[index], mainCategory, this.props.profile.location, this.props.auth.token);
+    this.props.getCatList(key[index], mainCategory, this.props.profile.location, this.props.auth.token, this.props.query);
     Actions.refresh({title: value});
   }
 
@@ -178,7 +178,7 @@ class GenericView extends Component {
 
   _onRefresh() {
     this.setState({refreshing: true});
-    this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.props.auth.token);
+    this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.props.auth.token, this.props.query);
   }
 
   renderDropdownRow(rowData, rowID, highlited) {
@@ -276,11 +276,12 @@ class GenericView extends Component {
           }
           <Content
             refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh.bind(this)}
-            />
-          }>
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh.bind(this)}
+              />
+            }
+            >
           {
             this.state.data.length === 0?
             <View style={{height: 0.91 * SCREEN_HEIGHT - 64, justifyContent: 'center', alignItems:'center', paddingBottom: 100}}>
@@ -398,7 +399,7 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getCatList: (category, mainCategory, location, token) => dispatch(actions.getCatList(category, mainCategory, location, token)),
+  getCatList: (category, mainCategory, location, token, query) => dispatch(actions.getCatList(category, mainCategory, location, token, query)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   //getProfileInfo: (token) => dispatch(actions.getProfileInfo(token)),
   actions: bindActionCreators(actions, dispatch)

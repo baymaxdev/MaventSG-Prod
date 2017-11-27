@@ -104,7 +104,7 @@ class Login extends Component {
       }
       if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){
         if (nextProps.auth.status === 404) {
-            Actions.signup();
+            Actions.signup({from: 'fb'});
         } else if(nextProps.auth.status === 401) {
             Actions.OTP({phoneState: "2", userId: nextProps.auth.userId});
         }
@@ -199,7 +199,7 @@ class Login extends Component {
                         <Text style={styles.btnText}>Continue with Facebook</Text>
                     </TouchableOpacity>
                     <Text style={{alignSelf:'center', paddingTop:20, paddingBottom:5, fontWeight:'bold'}}>OR</Text>
-                    <TouchableOpacity style={[styles.loginBtn,{borderWidth:1.5, borderColor:'#0B486B', padding:10, shadowRadius:1}]} onPress={(e)=>{Actions.signup()}}>
+                    <TouchableOpacity style={[styles.loginBtn,{borderWidth:1.5, borderColor:'#0B486B', padding:10, shadowRadius:1}]} onPress={(e)=>{Actions.signup({from: 'login'})}}>
                         <Text style={{color:'#0B486B', fontWeight:'bold'}}>Sign up</Text>
                     </TouchableOpacity>
                     <Modal1 isVisible={this.state.showLoginModal}>

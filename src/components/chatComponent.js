@@ -71,9 +71,7 @@ class Chat extends Component {
       alert(nextProps.activity.error);
     }
 
-    console.log("1111");
     if (nextProps.maven != undefined) {
-      console.log("2222");
       var maven = nextProps.maven.maven;
       var user = maven.userID;
       var activity = {};
@@ -83,13 +81,10 @@ class Chat extends Component {
       var rating = this.props.userID?user.consumerRating:maven.rating;
 
       if (isMavenActivities) {
-        console.log('3333');
         isMavenActivities = false;
         this.props.getMavenActivities(maven._id, this.props.auth.token);
       } else {
-        console.log('4444');
         var ma = nextProps.activity.mavenActivities;
-        console.log('ma', ma);
         if (ma !== undefined) {
           if (this.props.userID !== undefined ) {
             for (var i = 0; i < ma.length; i ++) {
@@ -113,19 +108,15 @@ class Chat extends Component {
       this.setState({maven: maven, user: user, rating: rating, requestLoading: false});
 
       if (isMavenActivities === false) {
-        console.log('5555');
-        console.log(activity._id);
         if (activity._id !== undefined && this.props.bookingMessage && isBookingMessage === true) {
           isBookingMessage = false;
           var bm = this.props.bookingMessage;
           bm.activity = activity._id;
-          console.log('bm', bm);
           Firebase.pushMessage(bm);
           Firebase.setLastMessage(bm.maven, bm.sender, bm.activity, bm.text);
         }
 
         if (activity._id !== undefined && isFirstLoad === true) {
-          console.log('6666');
           isFirstLoad = false;
           Firebase.getMessages((snapshot) => {
             var m = {};
@@ -173,6 +164,7 @@ class Chat extends Component {
           m.text = messages[0].text;
           m.createdAt = messages[0].createdAt.toISOString();
           Firebase.pushMessage(m);
+          this.props.sendPushNotification([m.receiver], 'New Message', {from: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
           if (this.props.userID !== undefined) {
             Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
           } else {
@@ -187,6 +179,7 @@ class Chat extends Component {
         m.activity = this.state.activity._id;
         m.text = messages[0].text;
         m.createdAt = messages[0].createdAt.toISOString();
+        this.props.sendPushNotification([m.receiver], 'New Message', {from: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         Firebase.pushMessage(m);
         if (this.props.userID !== undefined) {
           Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
@@ -554,6 +547,7 @@ const mapDispatchToProps = (dispatch) =>({
   editOffer: (actId, price, serviceDate, token) => dispatch(actions.editOffer(actId, price, serviceDate, token)),
   endJob: (actId, token) => dispatch(actions.endJob(actId, token)),
   archiveActivity: (actId, token) => dispatch(actions.archiveActivity(actId, token)),
+  sendPushNotification: (ids, message, data, token) => dispatch(actions.sendPushNotification(ids, message, data, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

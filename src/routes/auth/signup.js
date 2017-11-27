@@ -42,7 +42,7 @@ class Signup extends Component {
         if (Platform.OS === 'android') {
 
         }
-        if (this.props.auth.status === 404) {
+        if (this.props.from === 'fb') {
             const info = this.props.auth.fbInfo;
             this.setState({
                 email: info.email,
@@ -127,7 +127,7 @@ class Signup extends Component {
             alert("Please input correct email");
             return;
         }
-        this.props.requestSignup(data);
+        this.props.requestSignup(data, this.props.from);
     }
 
     //validate phone number
@@ -137,7 +137,7 @@ class Signup extends Component {
         this.setState({phoneNumber: text});
     }
     render() {
-        if (this.props.auth.status === 404) {
+        if (this.props.from === 'fb') {
             var isFB = true;
         } else {
             var isFB = false;
@@ -295,7 +295,7 @@ const mapStateToProps = (state) => ({
     auth: state.auth
 });
 const mapDispatchToProps = (dispatch) => ({
-    requestSignup: (userData) => dispatch(actions.requestSignup(userData)),
+    requestSignup: (userData, from) => dispatch(actions.requestSignup(userData, from)),
     actions: bindActionCreators(actions, dispatch)
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Signup)

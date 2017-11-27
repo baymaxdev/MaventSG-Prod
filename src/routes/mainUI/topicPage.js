@@ -16,12 +16,12 @@ import ActionSheet from 'react-native-actionsheet';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const {width, height} = Dimensions.get('window');
 const HORIZONTAL_PADDING = 8;
+var likeSelected = null;
 
 class TopicPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      reportList: [],
       data: [],
       modalVisible: false,
       modalID: 1,
@@ -35,7 +35,6 @@ class TopicPage extends Component {
       galleryVisible: false,
       picUrl: null,
       postText: '',
-      likeSelected: null,
     }
   }
 
@@ -48,28 +47,24 @@ class TopicPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.state.likeSelected !== null) {
-      let index = this.state.likeSelected;
-      let temp = this.state.data;
-      temp[index].liked = !temp[index].liked;
-      temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
-      this.setState({data: temp, likeSelected: null});
-      return;
+    if (likeSelected === null) {
+      var sortedData = this.props.topic.topics;
+      if (this.state.sortBy == 0) {
+        sortedData.sort(function(a, b) {
+          da = new Date(a.createdDate);
+          db = new Date(b.createdDate);
+          return db.getTime() - da.getTime();
+        });
+      } else {
+        sortedData.sort(function(a, b) {
+          return b.heart - a.heart;
+        });
+      }
+      for(var i = 0; i < sortedData.length; i++) {
+        sortedData[i].reportSelected = false;
+      }
+      this.setState({ data: sortedData, requestLoading: false, refreshing: false });
     }
-
-    var sortedData = nextProps.topic.topics;
-    if (this.state.sortBy == 0) {
-      sortedData.sort(function(a, b) {
-        da = new Date(a.createdDate);
-        db = new Date(b.createdDate);
-        return db.getTime() - da.getTime();
-      });
-    } else {
-      sortedData.sort(function(a, b) {
-        return b.heart - a.heart;
-      });
-    }
-    this.setState({ data: sortedData, requestLoading: false, refreshing: false });
   }
 
   navigateToComments = (data) => {
@@ -80,16 +75,20 @@ class TopicPage extends Component {
   }
 
   onclickReport = (index) => {
-    let list = this.state.reportList;
-    list[index] = !list[index];
-    this.setState({reportList: list});
+    var sortedData = this.state.data.slice();
+    sortedData[index].reportSelected = !sortedData[index].reportSelected;
+    this.setState({data: sortedData});
   }
 
   onclickLike = (index) => {
+    likeSelected = index;
     this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token, () => {
-
+      var sortedData = this.state.data.slice();
+      sortedData[index].liked = !sortedData[index].liked;
+      sortedData[index].heart = sortedData[index].liked ? sortedData[index].heart + 1 : sortedData[index].heart - 1;
+      this.setState({data: sortedData});
+      likeSelected = null;
     });
-    this.setState({likeSelected: index});
   }
 
   onClickAdd = () => {
@@ -213,7 +212,7 @@ class TopicPage extends Component {
             <Image source = {require('../../../assets/icons/arrow-down.png')} />
           </TouchableOpacity>
         </View>
-        { this.state.reportList[index] &&
+        { item.reportSelected === true &&
             <TouchableOpacity style={[styles.innerPostModal, {position: 'absolute', right: 10, top: 38, width: null}]}>
               <Icon name={'ios-alert-outline'} style={{fontSize: 17, color: 'white' }} />
               <Text style={{fontSize: 15, paddingLeft: 5, color: 'white'}}>Report Post</Text>
