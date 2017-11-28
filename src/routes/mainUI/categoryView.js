@@ -74,12 +74,39 @@ class CategoryView extends Component {
         if (isFirstLoad) {
             isFirstLoad = false;
             this.registerForPushNotificationsAsync();
+            this._notificationSubscription = Notifications.addListener(this._handleNotification);
         }
         BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }
 
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
+    }
+
+    _handleNotification = (notification) => {
+        console.log(notification);
+        if (notification.origin === 'selected') {
+            if (Actions.currentScene === 'chatPage') {
+                if (this.props.explore.maven.maven._id === notification.data.maven) {
+                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token);
+                } else {
+                    this.props.getMavenDetails(notification.data.maven, this.props.profile.location, this.props.auth.token);
+                    Actions.pop();
+                    Actions.chatPage({title: this.props.title, userID: notification.data.user});
+                }
+            } else {
+                this.props.getMavenDetails(notification.data.maven, this.props.profile.location, this.props.auth.token);
+                Actions.chatPage({title: this.props.title, userID: notification.data.user});
+            }
+        } else if (notification.origin === 'received') {
+            if (Actions.currentScene === 'chatPage') {
+                if (this.props.explore.maven.maven._id === notification.data.maven) {
+                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token);
+                }
+            } else {
+                this.props.refreshActivities();
+            }
+        }
     }
 
     onBackPress () {
@@ -134,11 +161,16 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) =>({
     auth: state.auth,
+    profile: state.profile,
+    explore: state.explore,
 });
   
 const mapDispatchToProps = (dispatch) =>({
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     savePushToken: (pushToken, token) => dispatch(actions.savePushToken(pushToken, token)),
+    getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+    getMavenActivities: (mavenId, token, next) => dispatch(actions.getMavenActivities(mavenId, token, next)),
+    refreshActivities: () => dispatch(actions.refreshActivities()),
     actions: bindActionCreators(actions, dispatch)
 });
   

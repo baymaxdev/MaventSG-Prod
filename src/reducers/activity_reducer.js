@@ -31,6 +31,8 @@ import {
   REVIEW_ACTIVITY_ERROR,
   GET_MAVEN_ACTIVITIES,
   GET_MAVEN_ACTIVITIES_ERROR,
+  REFRESH_ACTIVITIES,
+  REFRESH_ACTIVITIES_REQUEST,
 } from '../actions/types';
   
 const INITIAL_STATE = {
@@ -103,6 +105,10 @@ export default function (state = INITIAL_STATE, action) {
       return { ...state, mavenActivities: action.activities };
     case GET_MAVEN_ACTIVITIES_ERROR:
       return { ...state, error: action.error };
+    case REFRESH_ACTIVITIES_REQUEST:
+      return { ...state, activityLoading: true };
+    case REFRESH_ACTIVITIES:
+      return { ...state, activityLoading: false, activitySuccess: true };
     default:
       return state;
   }

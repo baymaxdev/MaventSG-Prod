@@ -32,6 +32,8 @@ import {
   REVIEW_ACTIVITY_ERROR,
   GET_MAVEN_ACTIVITIES,
   GET_MAVEN_ACTIVITIES_ERROR,
+  REFRESH_ACTIVITIES,
+  REFRESH_ACTIVITIES_REQUEST,
 } from './types';
 
 export const getActivities = (mode, token, next) => {
@@ -313,5 +315,12 @@ export const getMavenActivities = (mavenId, token, next) => {
     .catch(err => {
       dispatch({ type: GET_MAVEN_ACTIVITIES_ERROR, error: err });
     })
+  }
+}
+
+export const refreshActivities = () => {
+  return dispatch => {
+    dispatch({ type: REFRESH_ACTIVITIES_REQUEST });
+    dispatch({ type: REFRESH_ACTIVITIES });
   }
 }

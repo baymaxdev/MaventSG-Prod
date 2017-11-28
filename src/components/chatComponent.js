@@ -164,11 +164,14 @@ class Chat extends Component {
           m.text = messages[0].text;
           m.createdAt = messages[0].createdAt.toISOString();
           Firebase.pushMessage(m);
-          this.props.sendPushNotification([m.receiver], 'New Message', {from: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
           if (this.props.userID !== undefined) {
             Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
+            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven}, this.props.auth.token);
           } else {
             Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
+            var user = this.props.profile.myInfo;
+            user._id = user.userId;
+            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user}, this.props.auth.token);
           }
         });
       } else {
@@ -179,12 +182,15 @@ class Chat extends Component {
         m.activity = this.state.activity._id;
         m.text = messages[0].text;
         m.createdAt = messages[0].createdAt.toISOString();
-        this.props.sendPushNotification([m.receiver], 'New Message', {from: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         Firebase.pushMessage(m);
         if (this.props.userID !== undefined) {
           Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
+          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven}, this.props.auth.token);
         } else {
           Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
+          var user = this.props.profile.myInfo;
+          user._id = user.userId;
+          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user}, this.props.auth.token);
         }
       }
     }
@@ -199,11 +205,23 @@ class Chat extends Component {
   }
 
   navigateToReview(type) {
-    Actions.push('reviewPage', {actId: this.state.activity._id, type: type});
+    var user = undefined;
+    if (this.props.userID === undefined) {
+      user = this.props.profile.myInfo;
+      user._id = user.userId;
+    }
+    Actions.push('reviewPage', {actId: this.state.activity._id, type: type, mavenId: this.state.maven._id, userId: this.state.user._id, user: user});
   }
 
   onPressModalBtn1(actId) {
+    let isMaven = this.props.userID !== undefined?true:false;
+    var user = undefined;
+    if (isMaven === false) {
+      user = this.props.profile.myInfo;
+      user._id = user.userId;
+    }
     this.props.archiveActivity(actId, this.props.auth.token);
+    this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
     this.setState({modalVisible: false});
   }
 
@@ -214,20 +232,29 @@ class Chat extends Component {
   onPressBtn1() {
     let activity = this.state.activity;
     let isMaven = this.props.userID !== undefined?true:false;
+    var user = undefined;
+    if (isMaven === false) {
+      user = this.props.profile.myInfo;
+      user._id = user.userId;
+    }
 
     switch (activity.status) {
       case 1:          // Offered
         if (isMaven) {
           this.props.rejectOffer(activity._id, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' rejected your offer.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
         } else {
           this.props.cancelOffer(activity._id, 0, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id}, this.props.auth.token);
         }
         break;
       case 2:         // Accepted
         if (isMaven) {
           this.props.cancelOffer(activity._id, 1, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
         } else {
           this.props.cancelOffer(activity._id, 0, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id}, this.props.auth.token);
         }  
         break;
       case 3:         // Rejected
@@ -235,6 +262,7 @@ class Chat extends Component {
 
         } else {
           this.props.archiveActivity(activity._id, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id}, this.props.auth.token);
         }
         break;
       case 4:         // Cancelled
@@ -259,6 +287,7 @@ class Chat extends Component {
         break;
       case 8:         // Both Reviewed
         this.props.archiveActivity(activity._id, this.props.auth.token);
+        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
         break;
       default:
         break;
@@ -268,17 +297,24 @@ class Chat extends Component {
   onPressBtn2() {
     let activity = this.state.activity;
     let isMaven = this.props.userID !== undefined?true:false;
+    var user = undefined;
+    if (isMaven === false) {
+      user = this.props.profile.myInfo;
+      user._id = user.userId;
+    }
 
     switch (activity.status) {
       case 1:          // Offered
         if (isMaven) {
           this.props.acceptOffer(activity._id, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' accepted your offer.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
         } else {
           this.showEditOfferModal(activity);
         }
         break;
       case 2:         // Accepted
         this.props.endJob(activity._id, this.props.auth.token);
+        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
         break;
       case 3:         // Rejected
         this.showEditOfferModal(activity);
@@ -478,6 +514,12 @@ class Chat extends Component {
                 <TouchableOpacity style={styles.modalBtn} onPress={() => {
                   this.setState({editOfferModalVisible: false});
                   this.props.editOffer(activity._id, this.state.price, this.state.serviceDate, this.props.auth.token);
+                  var user = undefined;
+                  if (isMaven === false) {
+                    user = this.props.profile.myInfo;
+                    user._id = user.userId;
+                  }
+                  this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' edited offer.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
                 }}>
                   <Text style={styles.btnText}>Submit</Text>
                 </TouchableOpacity>

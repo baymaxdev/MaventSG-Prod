@@ -40,6 +40,9 @@ class GenericBookingPage extends Component {
       m.maven = this.props.maven._id;
       m.text = 'I would like to make you an offer of $' + this.state.price + ', for your advertised service on ' + this.state.date + '. \nAdditional information: ' + this.state.message;
       m.createdAt = new Date().toISOString();
+      var user = this.props.profile.myInfo;
+      user._id = user.userId;
+      this.props.sendPushNotification([m.receiver], 'New Offer from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user}, this.props.auth.token);
       this.props.getMavenDetails(this.props.maven._id, this.props.profile.location, this.props.auth.token);
       Actions.pop();
       Actions.chatPage({title: this.props.title, bookingMessage: m, from: 'booking'});
@@ -197,6 +200,7 @@ const mapDispatchToProps = (dispatch) =>({
   getProfileInfo: (token, userId) => dispatch(actions.getProfileInfo(token, userId)),
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   createOffer: (mavenId, price, serviceDate, token) => dispatch(actions.createOffer(mavenId, price, serviceDate, token)),
+  sendPushNotification: (ids, message, data, token) => dispatch(actions.sendPushNotification(ids, message, data, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

@@ -58,8 +58,8 @@ class ActivityItem extends Component {
     this.setState({editOfferModalVisible: true, price: this.props.provider.price.toString(), serviceDate: this.props.provider.serviceDate});
   }
 
-  navigateToReview(type) {
-    Actions.push('reviewPage', {actId: this.props.provider._id, type: type});
+  navigateToReview(type, userId, mavenId, user) {
+    Actions.push('reviewPage', {actId: this.props.provider._id, type: type, userId: userId, mavenId: mavenId, user: user});
   }
 
   onPressBtn1() {
@@ -67,39 +67,46 @@ class ActivityItem extends Component {
 
     let provider = this.props.provider;
     let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
+    let userId = isMaven?provider.userID._id:provider.mavenUserID._id;
+    let user = isMaven?undefined:provider.userID;
 
     switch (provider.status) {
       case 1:          // Offered
         this.props.cancelOffer(provider._id, 0, this.props.auth.token);
+        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
         break;
       case 2:         // Accepted
         this.props.endJob(provider._id, this.props.auth.token);
+        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
         break;
       case 3:         // Rejected
         this.props.archiveActivity(provider._id, this.props.auth.token);
+        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
         break;
       case 4:         // Cancelled
         this.props.archiveActivity(provider._id, this.props.auth.token);
+        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
         break;
       case 5:         // Completed
         if (isMaven) {
-          this.navigateToReview(1);
+          this.navigateToReview(1, userId, provider.mavenID._id, user);
         } else {
-          this.navigateToReview(0);
+          this.navigateToReview(0, userId, provider.mavenID._id, user);
         }
         break;
       case 6:         // CReviewed
         if (isMaven) {
-          this.navigateToReview(1);
+          this.navigateToReview(1, userId, provider.mavenID._id, user);
         }
         break;
       case 7:         // MReviewed
         if (!isMaven) {
-          this.navigateToReview(0);
+          this.navigateToReview(0, userId, provider.mavenID._id, user);
         }
         break;
       case 8:         // Both Reviewed
         this.props.archiveActivity(provider._id, this.props.auth.token);
+        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
         break;
       default:
         break;
@@ -111,6 +118,8 @@ class ActivityItem extends Component {
     
     let provider = this.props.provider;
     let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
+    let userId = isMaven?provider.userID._id:provider.mavenUserID._id;
+    let user = isMaven?undefined:provider.userID;
 
     switch (provider.status) {
       case 1:          // Offered
@@ -123,7 +132,8 @@ class ActivityItem extends Component {
           this.props.cancelOffer(provider._id, 1, this.props.auth.token);
         } else {
           this.props.cancelOffer(provider._id, 0, this.props.auth.token);
-        }  
+        }
+        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
         break;
       case 3:         // Rejected
         setTimeout(() => {
@@ -141,6 +151,8 @@ class ActivityItem extends Component {
     let name = isMaven?provider.userID.firstName + ' ' + provider.userID.lastName:provider.mavenUserID.firstName + ' ' + provider.mavenUserID.lastName;
     var modalText = btnText1 = btnText2 = boxText = boxColor = '', boxDisabled = false;
     let rating = isMaven?provider.userID.consumerRating:provider.mavenID.rating;
+    let userId = isMaven?provider.userID._id:provider.mavenUserID._id;
+    let user = isMaven?undefined:provider.userID;
 
     switch (provider.status) {
       case 1:         // Offered
@@ -232,9 +244,9 @@ class ActivityItem extends Component {
         <TouchableOpacity key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }} onPress={() => {
           this.props.getMavenDetails(provider.mavenID._id, this.props.profile.location, this.props.auth.token);
           isMaven?
-          Actions.chatPage({ title: name, userID: provider.userID, status: provider.status, rating: rating })
+          Actions.chatPage({ title: name, userID: provider.userID })
           :
-          Actions.chatPage({ title: name, status: provider.status, rating: rating, from: 'activity' })
+          Actions.chatPage({ title: name, from: 'activity' })
         }}>
           <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
           {
@@ -278,11 +290,13 @@ class ActivityItem extends Component {
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => {
                   this.props.acceptOffer(provider._id, this.props.auth.token);
+                  this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' accepted your offer.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
                 }}>
                   <Icon name="ios-checkmark-circle" style={{ color:'#00B356' }}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
                   this.props.rejectOffer(provider._id, this.props.auth.token);
+                  this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' rejected your offer.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
                 }}>
                   <Icon name="ios-close-circle" style={{ color:'#F52422' }}/>
                 </TouchableOpacity>
@@ -362,6 +376,7 @@ class ActivityItem extends Component {
                 <TouchableOpacity style={styles.modalBtn} onPress={() => {
                   this.setState({editOfferModalVisible: false});
                   this.props.editOffer(provider._id, this.state.price, this.state.serviceDate, this.props.auth.token);
+                  this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' edited offer.', {type: 'chat', maven: provider.mavenID._id, user: user}, this.props.auth.token);
                 }}>
                   <Text style={styles.btnText}>Submit</Text>
                 </TouchableOpacity>
@@ -409,6 +424,7 @@ const mapDispatchToProps = (dispatch) =>({
   editOffer: (actId, price, serviceDate, token) => dispatch(actions.editOffer(actId, price, serviceDate, token)),
   endJob: (actId, token) => dispatch(actions.endJob(actId, token)),
   archiveActivity: (actId, token) => dispatch(actions.archiveActivity(actId, token)),
+  sendPushNotification: (ids, message, data, token) => dispatch(actions.sendPushNotification(ids, message, data, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

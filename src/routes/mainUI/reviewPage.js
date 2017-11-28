@@ -29,6 +29,7 @@ class ReviewPage extends Component {
 
   onSubmit() {
     this.props.reviewActivity(this.props.actId, this.props.type, this.state.rating, this.state.message, this.props.auth.token, () => {});
+    this.props.sendPushNotification([this.props.userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' left review.', {type: 'chat', maven: this.props.mavenId, user: this.props.user}, this.props.auth.token);
     Actions.pop();
   }
 
@@ -107,10 +108,12 @@ const styles = {
 
 const mapStateToProps = (state) =>({
   auth: state.auth,
+  profile: state.profile,
   activity: state.activity,
 });
 const mapDispatchToProps = (dispatch) =>({
   reviewActivity: (actId, type, rating, description, token, next) => dispatch(actions.reviewActivity(actId, type, rating, description, token, next)),
+  sendPushNotification: (ids, message, data, token) => dispatch(actions.sendPushNotification(ids, message, data, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 
