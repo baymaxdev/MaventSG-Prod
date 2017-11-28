@@ -119,6 +119,7 @@ export const GET_TOPICS = 'GET_TOPICS';
 export const GET_TOPICS_ERROR = 'GET_TOPICS_ERROR';
 export const CREATE_TOPIC = 'CREATE_TOPIC';
 export const CREATE_TOPIC_ERROR = 'CREATE_TOPIC_ERROR';
+export const SET_LIKE_REQUEST = 'SET_LIKE_REQUEST';
 export const SET_LIKE = 'SET_LIKE';
 export const SET_LIKE_ERROR = 'SET_LIKE_ERROR';
 export const GET_COMMENTS = 'GET_COMMENTS';

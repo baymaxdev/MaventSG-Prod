@@ -26,7 +26,7 @@ export default class ListModal extends React.Component {
                     <Text style={{color:'#085be0', fontSize:18}} >{item.label}</Text>
                   </TouchableOpacity>
                 }}
-                keyExtractor={item => item._id}
+                keyExtractor={item => item.key}
                 ItemSeparatorComponent={null}
                 >
               </FlatList>

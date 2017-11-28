@@ -75,7 +75,13 @@ class Profile extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.isMe) {
       if(this.props.profile.myInfo !== nextProps.profile.myInfo && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.myInfo.mavenReviews, aboutMe: nextProps.profile.myInfo.about, displayPicture: nextProps.profile.myInfo.displayPicture});
+        var reviewData = nextProps.profile.myInfo.mavenReviews.concat(nextProps.profile.myInfo.consumerReviews);
+        reviewData.sort(function(a, b) {
+          da = new Date(a.createdDate);
+          db = new Date(b.createdDate);
+          return db.getTime() - da.getTime();
+        });
+        this.setState({requestLoading: false, refreshing: false, reviewData: reviewData, aboutMe: nextProps.profile.myInfo.about, displayPicture: nextProps.profile.myInfo.displayPicture});
         if(this.modalFlag) {
           this.setState({modalVisible: 2});
           setTimeout(() => {
@@ -84,16 +90,20 @@ class Profile extends Component {
           }, 1000);
         }
       }
-    } else {
-      if(this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading){
-        this.setState({requestLoading: false, refreshing: false, reviewData: nextProps.profile.user.mavenReviews, displayPicture: nextProps.profile.user.displayPicture});
-        if(this.modalFlag) {
-          this.setState({modalVisible: 2});
-          setTimeout(() => {
-            this.setState({modalVisible: null});
-            this.modalFlag = false;
-          }, 1000);
-        }
+    } else if (this.props.profile.user !== nextProps.profile.user && nextProps.profile.loading) {
+      var reviewData = nextProps.profile.user.mavenReviews.concat(nextProps.profile.user.consumerReviews);
+      reviewData.sort(function(a, b) {
+        da = new Date(a.createdDate);
+        db = new Date(b.createdDate);
+        return db.getTime() - da.getTime();
+      });
+      this.setState({requestLoading: false, refreshing: false, reviewData: reviewData, displayPicture: nextProps.profile.user.displayPicture});
+      if(this.modalFlag) {
+        this.setState({modalVisible: 2});
+        setTimeout(() => {
+          this.setState({modalVisible: null});
+          this.modalFlag = false;
+        }, 1000);
       }
     }
   }

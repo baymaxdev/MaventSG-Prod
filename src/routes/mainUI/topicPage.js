@@ -16,7 +16,6 @@ import ActionSheet from 'react-native-actionsheet';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const {width, height} = Dimensions.get('window');
 const HORIZONTAL_PADDING = 8;
-var likeSelected = null;
 
 class TopicPage extends Component {
   constructor(props) {
@@ -47,31 +46,33 @@ class TopicPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (likeSelected === null) {
-      var sortedData = this.props.topic.topics;
-      if (this.state.sortBy == 0) {
-        sortedData.sort(function(a, b) {
-          da = new Date(a.createdDate);
-          db = new Date(b.createdDate);
-          return db.getTime() - da.getTime();
-        });
-      } else {
-        sortedData.sort(function(a, b) {
-          return b.heart - a.heart;
-        });
-      }
-      for(var i = 0; i < sortedData.length; i++) {
-        sortedData[i].reportSelected = false;
-      }
-      this.setState({ data: sortedData, requestLoading: false, refreshing: false });
+    if (nextProps.topic.likeLoading !== this.props.topic.likeLoading && !nextProps.topic.likeLoading && nextProps.topic.likeSuccess) {
+      this.setState({data: []}, () => {
+        this.props.getTopics(this.props.category, this.props.auth.token);
+        return;
+      });
     }
+
+    var sortedData = nextProps.topic.topics;
+    if (this.state.sortBy == 0) {
+      sortedData.sort(function(a, b) {
+        da = new Date(a.createdDate);
+        db = new Date(b.createdDate);
+        return db.getTime() - da.getTime();
+      });
+    } else {
+      sortedData.sort(function(a, b) {
+        return b.heart - a.heart;
+      });
+    }
+    for(var i = 0; i < sortedData.length; i++) {
+      sortedData[i].reportSelected = false;
+    }
+    this.setState({ data: sortedData, requestLoading: false, refreshing: false });
   }
 
   navigateToComments = (data) => {
-    Actions.commentsPage({data: data, onBack: () => {
-      this.props.getTopics(this.props.category, this.props.auth.token);
-      Actions.pop();
-    }});
+    Actions.commentsPage({data: data});
   }
 
   onclickReport = (index) => {
@@ -81,13 +82,11 @@ class TopicPage extends Component {
   }
 
   onclickLike = (index) => {
-    likeSelected = index;
     this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token, () => {
       var sortedData = this.state.data.slice();
       sortedData[index].liked = !sortedData[index].liked;
       sortedData[index].heart = sortedData[index].liked ? sortedData[index].heart + 1 : sortedData[index].heart - 1;
       this.setState({data: sortedData});
-      likeSelected = null;
     });
   }
 

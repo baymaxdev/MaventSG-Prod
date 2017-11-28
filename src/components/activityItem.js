@@ -244,7 +244,7 @@ class ActivityItem extends Component {
         <TouchableOpacity key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }} onPress={() => {
           this.props.getMavenDetails(provider.mavenID._id, this.props.profile.location, this.props.auth.token);
           isMaven?
-          Actions.chatPage({ title: name, userID: provider.userID })
+          Actions.chatPage({ title: name, userID: provider.userID, from: 'activity' })
           :
           Actions.chatPage({ title: name, from: 'activity' })
         }}>

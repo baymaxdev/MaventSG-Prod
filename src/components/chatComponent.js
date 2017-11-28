@@ -88,16 +88,30 @@ class Chat extends Component {
         if (ma !== undefined) {
           if (this.props.userID !== undefined ) {
             for (var i = 0; i < ma.length; i ++) {
-              if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
-                activity = ma[i];
-                break;
+              if (this.props.from === 'activity') {
+                if (ma[i].userID._id === this.props.userID._id) {
+                  activity = ma[i];
+                  break;
+                }
+              } else {
+                if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
+                  activity = ma[i];
+                  break;
+                }
               }
             }
           } else {
             for (var i = 0; i < ma.length; i ++) {
-              if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
-                activity = ma[i];
-                break;
+              if (this.props.from === 'activity') {
+                if (ma[i].userID._id === this.props.profile.myInfo.userId) {
+                  activity = ma[i];
+                  break;
+                }
+              } else {
+                if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
+                  activity = ma[i];
+                  break;
+                }
               }
             }
           }
@@ -328,6 +342,10 @@ class Chat extends Component {
     let activity = this.state.activity;
     let isMaven = this.props.userID !== undefined?true:false;
     var btnText1 = btnText2 = '', boxDisabled = false;
+    var chatEditable = true;
+    if (activity.status === 9) {
+      chatEditable = false;
+    }
     
     if (activity.status !== undefined && (this.props.from === 'activity' || activity.status !== 9)) {
       switch (activity.status) {
@@ -454,6 +472,7 @@ class Chat extends Component {
             // _id: this.props.profile.myInfo.userID,
             _id: this.props.profile.myInfo.userId
           }}
+          textInputProps={{editable: chatEditable}}
         />
         <Modal
           isVisible={this.state.modalVisible}

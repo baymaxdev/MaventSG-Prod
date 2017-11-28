@@ -6,6 +6,7 @@ import {
   GET_TOPICS_ERROR,
   CREATE_TOPIC,
   CREATE_TOPIC_ERROR,
+  SET_LIKE_REQUEST,
   SET_LIKE,
   SET_LIKE_ERROR,
   GET_COMMENTS,
@@ -106,6 +107,7 @@ export const setLike = (id, type, token, next) => {
     },
   };
   return dispatch => {
+    dispatch({ type: SET_LIKE_REQUEST });
     const url = `topic/like?type=${type}&id=${id}`;
     request(url, option)
     .then(res => {

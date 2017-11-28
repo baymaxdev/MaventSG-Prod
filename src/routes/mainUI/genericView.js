@@ -62,6 +62,7 @@ class GenericView extends Component {
       total: 0,
       title: '',
       firstLoad: true,
+      query: '',
     };
   }
 
@@ -75,8 +76,8 @@ class GenericView extends Component {
       key = skillKey;
       mainCategory = 0;
     }
-    this.setState({categoryId: this.props.categoryId, title: this.props.title}, () => {
-      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.state.page, this.state.scrollId, this.props.query, this.props.auth.token);
+    this.setState({categoryId: this.props.categoryId, title: this.props.title, query: this.props.query}, () => {
+      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.state.page, this.state.scrollId, this.state.query, this.props.auth.token);
     });
   }
 
@@ -99,7 +100,7 @@ class GenericView extends Component {
         loading: true,
         firstLoad: true,
       }, () => {
-        this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.state.page, this.state.scrollId, this.props.query, this.props.auth.token);
+        this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, this.state.page, this.state.scrollId, this.state.query, this.props.auth.token);
       });
     }
   };
@@ -169,8 +170,8 @@ class GenericView extends Component {
   }
 
   onChangeCategory = (index, value) => {
-    this.setState({requestLoading: true, firstLoad: true, categoryId: key[index], page: 1, scrollId: '', total: 0, data: [], title: name[index]}, () => {
-      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, 1, '', this.props.query, this.props.auth.token);
+    this.setState({requestLoading: true, firstLoad: true, categoryId: key[index], page: 1, scrollId: '', total: 0, data: [], title: name[index], query: ''}, () => {
+      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, 1, '', this.state.query, this.props.auth.token);
     });
   }
 
@@ -198,7 +199,7 @@ class GenericView extends Component {
 
   _onRefresh = () => {
     this.setState({requestLoading: true, refreshing: true, firstLoad: true, page: 1, scrollId: '', data: [], total: 0}, () => {
-      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, 1, '', this.props.query, this.props.auth.token);
+      this.props.getCatList(this.state.categoryId, mainCategory, this.props.profile.location, 1, '', this.state.query, this.props.auth.token);
     });
   }
 

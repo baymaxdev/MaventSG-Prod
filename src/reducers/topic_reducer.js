@@ -5,6 +5,7 @@ import {
   GET_TOPICS_ERROR,
   CREATE_TOPIC,
   CREATE_TOPIC_ERROR,
+  SET_LIKE_REQUEST,
   SET_LIKE,
   SET_LIKE_ERROR,
   GET_COMMENTS,
@@ -32,10 +33,12 @@ export default function (state = INITIAL_STATE, action) {
       return { ...state };
     case CREATE_TOPIC_ERROR:
       return { ...state, error: action.error };      
+    case SET_LIKE_REQUEST:
+      return { ...state, likeLoading: true };
     case SET_LIKE:
-      return { ...state, };
+      return { ...state, likeLoading: false, likeSuccess: true };
     case SET_LIKE_ERROR:
-      return { ...state, error: action.error };
+      return { ...state, error: action.error, likeLoading: false, likeSuccess: false };
     case GET_COMMENTS:
       return { ...state, comments: action.comments };
     case GET_COMMENTS_ERROR:

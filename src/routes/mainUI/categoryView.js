@@ -84,7 +84,6 @@ class CategoryView extends Component {
     }
 
     _handleNotification = (notification) => {
-        console.log(notification);
         if (notification.origin === 'selected') {
             if (Actions.currentScene === 'chatPage') {
                 if (this.props.explore.maven.maven._id === notification.data.maven) {

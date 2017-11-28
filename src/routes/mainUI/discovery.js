@@ -71,13 +71,13 @@ class Discovery extends React.Component {
             Animated.timing(animated, {
               toValue: 1.5,
               duration: 2500,
-              // useNativeDriver: Platform.OS === 'android',
+            //   useNativeDriver: Platform.OS === 'android',
               // delay: 100
             }),
             Animated.timing(opacityA, {
               toValue: 0,
               duration: 2500,
-              // useNativeDriver: Platform.OS === 'android',
+            //   useNativeDriver: Platform.OS === 'android',
               delay: 300
             })
           ])
@@ -87,13 +87,13 @@ class Discovery extends React.Component {
             Animated.timing(animated2, {
               toValue: 1.5,
               duration: 2800,
-              // useNativeDriver: Platform.OS === 'android',
+            //   useNativeDriver: Platform.OS === 'android',
               // delay: 100
             }),
             Animated.timing(opacityA2, {
               toValue: 0,
               duration: 2500,
-              // useNativeDriver: Platform.OS === 'android',
+            //   useNativeDriver: Platform.OS === 'android',
               // delay: 100
             })
           ])
@@ -176,7 +176,7 @@ class Discovery extends React.Component {
             {
                 toValue: value,
                 duration: 300,
-                easing: Easing.linear
+                easing: Easing.linear,
             }
         ).start(cb);
     }
@@ -249,26 +249,26 @@ class Discovery extends React.Component {
                 }
                 <View pointerEvents="none" style={{ height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center', position:'absolute'}}>
                     <Animated.View pointerEvents="none" style={{
-                      backgroundColor: 'rgba(0,122,255,0.4)',
-                       borderWidth:1,
+                        backgroundColor: 'rgba(0,122,255,0.4)',
+                        borderWidth:1,
                         borderColor:'rgba(0,112,255,0.7)',
-                         width: this.state.radius,
-                          height: this.state.radius,
-                           borderRadius: this.state.radius/2,
-                            opacity: opacityA,
-                             transform: [{ scale: animated }]
-                            }}>
-                            <Animated.View pointerEvents="none" style={{
-                              backgroundColor: 'rgba(51,149,255,0.4)',
-                               borderWidth:1,
-                                 width: this.state.radius,
-                                  height: this.state.radius,
-                                   borderRadius: this.state.radius/2,
-                                    opacity: opacityA2,
-                                     transform: [{ scale: animated2 }]
-                                    }}>
-                          </Animated.View>
-                  </Animated.View>
+                        width: this.state.radius,
+                        height: this.state.radius,
+                        borderRadius: this.state.radius/2,
+                        opacity: opacityA,
+                        transform: [{ scale: animated }]
+                    }}>
+                        <Animated.View pointerEvents="none" style={{
+                            backgroundColor: 'rgba(51,149,255,0.4)',
+                            borderWidth:1,
+                            width: this.state.radius,
+                            height: this.state.radius,
+                            borderRadius: this.state.radius/2,
+                            opacity: opacityA2,
+                            transform: [{ scale: animated2 }]
+                        }}>
+                        </Animated.View>
+                    </Animated.View>
                 </View>
                 <View pointerEvents="none" style={{position:'absolute', height: 0.3 * SCREEN_H, width: SCREEN_W, alignItems: 'center', justifyContent:'center'}}>
                     <Animated.Image style={{ width: 32, height: 32, marginTop: movingMargin}} source={require('../../../assets/icons/pin.png')}/>

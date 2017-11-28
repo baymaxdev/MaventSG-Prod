@@ -29,5 +29,8 @@
     "android": {
       "package": "com.okdev.mavent"
     },
+    "notification": {
+      "icon": "./assets/mavent_logo4.png"
+    }
   }
 }

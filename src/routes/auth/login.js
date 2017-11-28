@@ -95,21 +95,21 @@ class Login extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-      if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn){
+      if (this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn) {
         this.props.getMyProfileInfo(nextProps.auth.token);
         if (this.props.auth.autoLogin !== true) {
             this.saveToken(nextProps.auth.token);
         }
         Actions.main();
       }
-      if(this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn){
+      if (this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn) {
         if (nextProps.auth.status === 404) {
             Actions.signup({from: 'fb'});
-        } else if(nextProps.auth.status === 401) {
+        } else if (nextProps.auth.status === 401) {
             Actions.OTP({phoneState: "2", userId: nextProps.auth.userId});
         }
-        else{
-            alert('Invalid User');
+        else {
+            alert(nextProps.auth.error);
         }
       }
   }
