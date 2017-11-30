@@ -15,6 +15,7 @@ import StarRating from 'react-native-star-rating';
 var isFirstLoad = true;
 var isMavenActivities = true;
 var isBookingMessage = true;
+var archivedActId = undefined;
 
 class Chat extends Component {
   state = {
@@ -55,7 +56,7 @@ class Chat extends Component {
 
   componentWillReceiveProps(nextProps) {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
-      this.props.getMavenActivities(this.state.maven._id, this.props.auth.token);
+      this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, archivedActId);
       if (Actions.currentScene === 'chatPage') {
         setTimeout(() => {
           this.setState({successModalVisible: true}, () => {
@@ -97,6 +98,7 @@ class Chat extends Component {
                 if (nextProps.activity.notificationActId) {
                   if (ma[i].userID._id === this.props.userID._id && ma[i]._id === nextProps.activity.notificationActId) {
                     activity = ma[i];
+                    archivedActId = activity._id;
                     break;
                   }
                 } else {
@@ -118,6 +120,7 @@ class Chat extends Component {
                 if (nextProps.activity.notificationActId) {
                   if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === nextProps.activity.notificationActId) {
                     activity = ma[i];
+                    archivedActId = activity._id;
                     break;
                   }
                 } else {
@@ -248,6 +251,7 @@ class Chat extends Component {
       user = this.props.profile.myInfo;
       user._id = user.userId;
     }
+    archivedActId = actId;
     this.props.archiveActivity(actId, this.props.auth.token);
     this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: actId, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
     this.setState({modalVisible: false});
@@ -289,6 +293,7 @@ class Chat extends Component {
         if (isMaven) {
 
         } else {
+          archivedActId = activity._id;
           this.props.archiveActivity(activity._id, this.props.auth.token);
           this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }
@@ -314,6 +319,7 @@ class Chat extends Component {
         }
         break;
       case 8:         // Both Reviewed
+        archivedActId = activity._id;
         this.props.archiveActivity(activity._id, this.props.auth.token);
         this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
@@ -361,9 +367,9 @@ class Chat extends Component {
       chatEditable = false;
     }
     console.log('status', activity.status);
-    console.log(chatEditable);
     
-    if (activity.status !== undefined && (this.props.from === 'activity' || activity.status !== 9)) {
+    if (activity.status !== undefined && (this.props.from === 'activity' || activity.status !== 9 || archivedActId !== undefined)) {
+      console.log('inside');
       switch (activity.status) {
         case 1:         // Offered
           if (isMaven) {
