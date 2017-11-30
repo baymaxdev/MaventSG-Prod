@@ -102,7 +102,7 @@ export default function (state = INITIAL_STATE, action) {
     case REVIEW_ACTIVITY_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case GET_MAVEN_ACTIVITIES:
-      return { ...state, mavenActivities: action.activities };
+      return { ...state, mavenActivities: action.activities, notificationActId: action.notificationActId };
     case GET_MAVEN_ACTIVITIES_ERROR:
       return { ...state, error: action.error };
     case REFRESH_ACTIVITIES_REQUEST:

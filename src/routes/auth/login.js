@@ -37,6 +37,7 @@ class Login extends Component {
        modalVisible: false,
        tutorModalVisible: false,
        loading: true,
+       loginLoading: false,
     };
   }
 
@@ -52,6 +53,9 @@ class Login extends Component {
   componentDidMount() {
     this.getLocationAsync();
     NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectivityChange);
+  }
+
+  componentWillUnmount () {
   }
 
   async getToken() {
@@ -96,20 +100,30 @@ class Login extends Component {
 
   componentWillReceiveProps(nextProps) {
       if (this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && nextProps.auth.loggedIn) {
-        this.props.getMyProfileInfo(nextProps.auth.token);
-        if (this.props.auth.autoLogin !== true) {
-            this.saveToken(nextProps.auth.token);
-        }
-        Actions.main();
+        this.setState({loginLoading: false}, () => {
+            this.props.getMyProfileInfo(nextProps.auth.token);
+            if (this.props.auth.autoLogin !== true) {
+                this.saveToken(nextProps.auth.token);
+            }
+            Actions.main();
+        });
       }
       if (this.props.auth.loginLoading !== nextProps.auth.loginLoading && !nextProps.auth.loginLoading && !nextProps.auth.loggedIn) {
         if (nextProps.auth.status === 404) {
-            Actions.signup({from: 'fb'});
+            this.setState({loginLoading: false}, () => {
+                Actions.signup({from: 'fb'});
+            });
         } else if (nextProps.auth.status === 401) {
-            Actions.OTP({phoneState: "2", userId: nextProps.auth.userId});
+            this.setState({loginLoading: false}, () => {
+                Actions.OTP({phoneState: "2", userId: nextProps.auth.userId});
+            });
         }
         else {
-            alert(nextProps.auth.error);
+            setTimeout(() => {
+                this.setState({loginLoading: false}, () => {
+                    alert(nextProps.auth.error);
+                });
+            }, 1000);
         }
       }
   }
@@ -141,7 +155,7 @@ class Login extends Component {
             alert("Please input correct email");
             return;
         }
-      this.setState({showLoginModal:false});
+      this.setState({showLoginModal:false, loginLoading: true});
       this.props.requestLogin(this.state.email, this.state.password);
   }
 
@@ -250,7 +264,7 @@ class Login extends Component {
             </Container>
             <Text style={{alignSelf:'center', padding:10}}>Beta v 1.0.0</Text>
             {
-             this.props.auth.loginLoading &&
+             this.state.loginLoading &&
                 <LoadingComponent/>
             }
             <Modal1

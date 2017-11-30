@@ -42,7 +42,7 @@ class ItemRow extends React.Component {
                 starColor="#FFA838"
                 starStyle={{paddingHorizontal:2}}
               />
-              <Text style={{ color:'#b5b5b5'}}>({provider.rating})</Text>
+              <Text style={{ color:'#b5b5b5'}}>({Math.round(provider.rating * 10) / 10})</Text>
             </View>
           </View>
           <View style={{ justifyContent: 'space-around', flex: 1, alignItems: 'flex-end', paddingHorizontal:10 }}>

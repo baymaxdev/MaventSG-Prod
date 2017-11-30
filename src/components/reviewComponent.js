@@ -13,12 +13,12 @@ const ReviewComponent = (props) => {
         <StarRating
           disabled
           maxStars={5}
-          rating={parseInt(props.data.rating, 10)}
+          rating={Math.round(props.data.rating * 10) / 10}
           starSize={16}
           starColor="#FFA838"
           starStyle={{paddingHorizontal:2}}
         />
-        <Text style={{ color:'#b5b5b5'}}>({props.data.rating})</Text>
+        <Text style={{ color:'#b5b5b5'}}>({Math.round(props.data.rating * 10) / 10})</Text>
       </View>
       <Text style={{ color:'#b5b5b5', fontSize:14 }}>{props.data.description}</Text>
     </View>

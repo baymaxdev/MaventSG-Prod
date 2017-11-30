@@ -106,7 +106,7 @@ const RateComponent = (props) => {
           <View style={styles.container}>
             <View style={{ flexDirection: 'row',flex:1, justifyContent:'flex-start', alignItems: 'center' }}>
               <View style={{ backgroundColor: 'rgba(196, 219, 231, 0.9)', justifyContent: 'center', alignItems: 'center', width: 50, height: 50, borderRadius: 17 }}>
-                <Text style={{ color: '#2399E6' }} >{props.data.rating}</Text>
+                <Text style={{ color: '#2399E6' }} >{Math.round(props.data.rating * 10) / 10}</Text>
               </View>
               <Text style={{ fontSize: 15, paddingLeft: 10, color: '#515151' }}>{props.data.title}</Text>
               <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#7F7F7F', alignSelf: 'flex-start'}}></View>

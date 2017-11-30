@@ -1,7 +1,7 @@
 import React from 'react';
 import { Scene, Router, Actions, Reducer } from 'react-native-router-flux';
 import { connect } from 'react-redux';
-import { View, Text, TouchableOpacity, Image, Platform, Button } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Platform, Button, BackHandler, ToastAndroid } from 'react-native';
 import { Icon } from 'native-base';
 
 import Login from './auth/login';
@@ -78,11 +78,42 @@ const renderLeftButton = () => {
   </TouchableOpacity>
 }
 
+var backButtonPressedOnce = false;
+
 class RouterComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
     };
+  }
+
+  componentDidMount() {
+    BackHandler.addEventListener('hardwareBackPress', () => this.onBackPress());
+  }
+
+  componentWillUnmount () {
+    BackHandler.removeEventListener('hardwareBackPress', () => this.onBackPress());
+  }
+
+  onBackPress = () => {
+    if (Actions.currentScene === '_categoryView') {
+        if (backButtonPressedOnce === true) {
+            Actions.pop();
+            Actions.pop();
+        } else {
+            ToastAndroid.show('Press one more time to go back', ToastAndroid.SHORT);
+            backButtonPressedOnce = true;
+            setTimeout(function() {
+                backButtonPressedOnce = false;
+            }, 2000);
+        }
+        return true;
+    } else if (Actions.currentScene === 'login') {
+        BackHandler.exitApp();
+        return true;
+    }
+    Actions.pop();
+    return true;
   }
 
   render() {

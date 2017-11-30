@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Dimensions, Platform, Text, Image, BackHandler, ToastAndroid } from 'react-native';
+import { StyleSheet, View, Dimensions, Platform, Text, Image } from 'react-native';
 import { Container, Content } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import RenderItem from '../../components/categoryItem';
@@ -34,7 +34,6 @@ const imageDetails = [
     },
 ];
 
-var backButtonPressedOnce = false;
 var isFirstLoad = true;
 
 class CategoryView extends Component {
@@ -76,54 +75,42 @@ class CategoryView extends Component {
             this.registerForPushNotificationsAsync();
             this._notificationSubscription = Notifications.addListener(this._handleNotification);
         }
-        BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
     }
 
     componentWillUnmount () {
-        BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
     }
 
     _handleNotification = (notification) => {
         if (notification.origin === 'selected') {
             if (Actions.currentScene === 'chatPage') {
                 if (this.props.explore.maven.maven._id === notification.data.maven) {
-                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token);
+                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token, notification.data.activity);
                 } else {
                     this.props.getMavenDetails(notification.data.maven, this.props.profile.location, this.props.auth.token);
                     Actions.pop();
-                    Actions.chatPage({title: this.props.title, userID: notification.data.user});
+                    if (notification.data.activity) {
+                        Actions.chatPage({title: notification.data.title, userID: notification.data.user, from: 'notification', actId: notification.data.activity});
+                    } else {
+                        Actions.chatPage({title: notification.data.title, userID: notification.data.user});
+                    }
                 }
             } else {
                 this.props.getMavenDetails(notification.data.maven, this.props.profile.location, this.props.auth.token);
-                Actions.chatPage({title: this.props.title, userID: notification.data.user});
+                if (notification.data.activity) {
+                    Actions.chatPage({title: notification.data.title, userID: notification.data.user, from: 'notification', actId: notification.data.activity});
+                } else {
+                    Actions.chatPage({title: notification.data.title, userID: notification.data.user});
+                }
             }
         } else if (notification.origin === 'received') {
             if (Actions.currentScene === 'chatPage') {
                 if (this.props.explore.maven.maven._id === notification.data.maven) {
-                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token);
+                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token, notification.data.activity);
                 }
             } else {
                 this.props.refreshActivities();
             }
         }
-    }
-
-    onBackPress () {
-        if (Actions.currentScene === '_categoryView') {
-            if (backButtonPressedOnce === true) {
-                Actions.pop();
-                Actions.pop();
-            } else {
-                ToastAndroid.show('Press one more time to go back', ToastAndroid.SHORT);
-                backButtonPressedOnce = true;
-                setTimeout(function() {
-                    backButtonPressedOnce = false;
-                }, 2000);
-            }
-            return true;
-        }
-        Actions.pop();
-        return true;
     }
 
     render() {
@@ -168,7 +155,7 @@ const mapDispatchToProps = (dispatch) =>({
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     savePushToken: (pushToken, token) => dispatch(actions.savePushToken(pushToken, token)),
     getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-    getMavenActivities: (mavenId, token, next) => dispatch(actions.getMavenActivities(mavenId, token, next)),
+    getMavenActivities: (mavenId, token, isNotification) => dispatch(actions.getMavenActivities(mavenId, token, isNotification)),
     refreshActivities: () => dispatch(actions.refreshActivities()),
     actions: bindActionCreators(actions, dispatch)
 });

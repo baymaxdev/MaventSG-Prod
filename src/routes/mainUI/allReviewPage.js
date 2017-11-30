@@ -220,7 +220,9 @@ class AllReviewPage extends Component {
 
   render() {
     var data = [];
-    if (this.state.selectedIndex === 0) {
+    if (this.props.from === 'skillpage') {
+      data = this.state.mavenReviews;
+    } else if (this.state.selectedIndex === 0) {
       data = this.state.mavenReviews.concat(this.state.consumerReviews);
     } else if (this.state.selectedIndex === 1) {
       data = this.state.mavenReviews;
@@ -238,6 +240,8 @@ class AllReviewPage extends Component {
 
     return (
       <View style={styles.container}>
+      {
+        this.props.from !== 'skillpage' &&
         <View style={{paddingHorizontal: 50, paddingVertical: 10, justifyContent: 'center', alignItems: 'center'}}>
           <SegmentedControlTab
             values={['All', 'All Maven', 'All User']}
@@ -249,6 +253,7 @@ class AllReviewPage extends Component {
             tabTextStyle={{color: '#0B486B'}}
             />
         </View>
+      }
         <Container>
           {
               this.state.requestLoading?this.renderPlaceholder():null

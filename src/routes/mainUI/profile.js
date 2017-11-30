@@ -252,7 +252,7 @@ class Profile extends Component {
                   <View style={{ padding: 10, flexDirection:'row', alignItems:'center', justifyContent:'space-between' }}>
                     <View style={{  flexDirection: 'row', alignItems:'center' }}>
                       <Text style={{ fontSize: 16, color:'#515151' }}>Reviews</Text>
-                      <Text style={{color:'#b5b5b5'}}> (</Text><Text style={{color:'#b5b5b5'}}>{user.mavenReviews.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
+                      <Text style={{color:'#b5b5b5'}}> (</Text><Text style={{color:'#b5b5b5'}}>{this.state.reviewData.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
                     </View>
                     <TouchableOpacity onPress={() => {
                       Actions.allReviewPage({userId: this.props.userId});
@@ -262,7 +262,7 @@ class Profile extends Component {
                   </View>
                   <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <FlatList
-                      data={this.state.reviewData.slice(0, 4)}
+                      data={this.state.reviewData.slice(0, 5)}
                       renderItem={ ({item, index}) => {
                         return <ReviewComponent key={index} data={item}/>
                       }}

@@ -18,7 +18,7 @@ import * as actions from '../../actions';
 import IconBadge from 'react-native-icon-badge';
 import { connect } from 'react-redux';
 import LoadingComponent from '../../components/loadingComponent';
-// import ImageResizer from 'react-native-image-resizer';
+
 class TermsScreen extends Component {
     constructor(props) {
         super(props);

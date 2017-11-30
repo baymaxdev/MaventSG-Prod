@@ -28,7 +28,6 @@ import LoadingComponent from '../../components/loadingComponent';
 import ActionSheet from 'react-native-actionsheet';
 import Modal from 'react-native-modal';
 import GalleryComponent from '../../components/galleryComponent';
-import ImageResizer from 'react-native-image-resizer';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -107,8 +106,15 @@ class SkillPage extends Component {
         else
           avt[i].value = false;
       }
+
+      var reviewData = m.reviews;
+      reviewData.sort(function(a, b) {
+        da = new Date(a.createdDate);
+        db = new Date(b.createdDate);
+        return db.getTime() - da.getTime();
+      });
       this.setState({maven: m, user: m.userID, distance: nextProps.maven.distance, description: m.description, price: m.price, title: m.title, 
-        rating: m.rating, availability: av, availableTime:avt, reviewData: m.reviews, picUrl: m.pictures, requestLoading: false, refreshing: false, idVerified: m.userID.idVerified});
+        rating: m.rating, availability: av, availableTime:avt, reviewData: reviewData, picUrl: m.pictures, requestLoading: false, refreshing: false, idVerified: m.userID.idVerified});
 
       if (nextProps.activity.mySkills !== undefined) {
         var temp = nextProps.activity.mySkills;
@@ -143,7 +149,6 @@ class SkillPage extends Component {
 
   async addPhoto (image) {
     if (!image.cancelled) {
-      // let res = await ImageResizer.createResizedImage(image.uri, 800, 600, 'JPEG', 80);
       let pictures = this.state.picUrl;
       pictures[this.state.picNumber] = image.uri;
       this.setState({picUrl: pictures, requestLoading: true});
@@ -348,23 +353,33 @@ class SkillPage extends Component {
                 </View>
             </View>
             <View style={ styles.viewContainer }>
-              <View style={{ flexDirection:'row', justifyContent:'space-between'}}>
-                <Text style={ styles.subjectText }>Ratings and Reviews</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                  <StarRating
-                    disabled
-                    maxStars={5}
-                    rating={this.state.rating}
-                    starSize={15}
-                    starColor="#FFA838"
-                    starStyle={{paddingHorizontal:2}}
-                  />
-                  <Text style={{ color:'#b5b5b5'}}>{'('+this.state.rating+')'}</Text>
+              <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'column' }}>
+                  <View style={{ flexDirection: 'row', alignItems:'center' }}>
+                    <Text style={ styles.subjectText }>Ratings and Reviews</Text>
+                    <Text style={{ color:'#b5b5b5' }}> (</Text><Text style={{color:'#b5b5b5'}}>{this.state.reviewData.length}</Text><Text style={{color:'#b5b5b5'}}>)</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center'}}>
+                    <StarRating
+                      disabled
+                      maxStars={5}
+                      rating={this.state.rating}
+                      starSize={15}
+                      starColor="#FFA838"
+                      starStyle={{paddingHorizontal:2}}
+                    />
+                    <Text style={{ color:'#b5b5b5'}}>{'('+Math.round(this.state.rating * 10) / 10+')'}</Text>
+                  </View>
                 </View>
+                <TouchableOpacity onPress={() => {
+                  Actions.allReviewPage({userId: this.props.isMe?undefined:this.state.user._id, from: 'skillpage'});
+                  }}>
+                  <Text style={{ color:'#FFA838' }} >View all</Text>
+                </TouchableOpacity>
               </View>
             </View>
             <FlatList
-              data={this.state.reviewData}
+              data={this.state.reviewData.slice(0, 5)}
               renderItem={ ({item, index}) => {
                 return <ReviewComponent data={item}/>
               }}

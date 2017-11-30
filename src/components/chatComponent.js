@@ -88,29 +88,43 @@ class Chat extends Component {
         if (ma !== undefined) {
           if (this.props.userID !== undefined ) {
             for (var i = 0; i < ma.length; i ++) {
-              if (this.props.from === 'activity') {
-                if (ma[i].userID._id === this.props.userID._id) {
+              if (this.props.from === 'activity' || this.props.from === 'notification') {
+                if (ma[i].userID._id === this.props.userID._id && ma[i]._id === this.props.actId) {
                   activity = ma[i];
                   break;
                 }
               } else {
-                if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
-                  activity = ma[i];
-                  break;
+                if (nextProps.activity.notificationActId) {
+                  if (ma[i].userID._id === this.props.userID._id && ma[i]._id === nextProps.activity.notificationActId) {
+                    activity = ma[i];
+                    break;
+                  }
+                } else {
+                  if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
+                    activity = ma[i];
+                    break;
+                  }
                 }
               }
             }
           } else {
             for (var i = 0; i < ma.length; i ++) {
-              if (this.props.from === 'activity') {
-                if (ma[i].userID._id === this.props.profile.myInfo.userId) {
+              if (this.props.from === 'activity' || this.props.from === 'notification') {
+                if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === this.props.actId) {
                   activity = ma[i];
                   break;
                 }
               } else {
-                if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
-                  activity = ma[i];
-                  break;
+                if (nextProps.activity.notificationActId) {
+                  if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === nextProps.activity.notificationActId) {
+                    activity = ma[i];
+                    break;
+                  }
+                } else {
+                  if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
+                    activity = ma[i];
+                    break;
+                  }
                 }
               }
             }
@@ -180,12 +194,12 @@ class Chat extends Component {
           Firebase.pushMessage(m);
           if (this.props.userID !== undefined) {
             Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
-            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven}, this.props.auth.token);
+            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
           } else {
             Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
             var user = this.props.profile.myInfo;
             user._id = user.userId;
-            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user}, this.props.auth.token);
+            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
           }
         });
       } else {
@@ -199,12 +213,12 @@ class Chat extends Component {
         Firebase.pushMessage(m);
         if (this.props.userID !== undefined) {
           Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
-          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven}, this.props.auth.token);
+          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
           Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
           var user = this.props.profile.myInfo;
           user._id = user.userId;
-          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user}, this.props.auth.token);
+          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }
       }
     }
@@ -235,7 +249,7 @@ class Chat extends Component {
       user._id = user.userId;
     }
     this.props.archiveActivity(actId, this.props.auth.token);
-    this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+    this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: actId, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
     this.setState({modalVisible: false});
   }
 
@@ -256,19 +270,19 @@ class Chat extends Component {
       case 1:          // Offered
         if (isMaven) {
           this.props.rejectOffer(activity._id, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' rejected your offer.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' rejected your offer.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
           this.props.cancelOffer(activity._id, 0, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id}, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }
         break;
       case 2:         // Accepted
         if (isMaven) {
           this.props.cancelOffer(activity._id, 1, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
           this.props.cancelOffer(activity._id, 0, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id}, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }  
         break;
       case 3:         // Rejected
@@ -276,7 +290,7 @@ class Chat extends Component {
 
         } else {
           this.props.archiveActivity(activity._id, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id}, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }
         break;
       case 4:         // Cancelled
@@ -301,7 +315,7 @@ class Chat extends Component {
         break;
       case 8:         // Both Reviewed
         this.props.archiveActivity(activity._id, this.props.auth.token);
-        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
       default:
         break;
@@ -321,14 +335,14 @@ class Chat extends Component {
       case 1:          // Offered
         if (isMaven) {
           this.props.acceptOffer(activity._id, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' accepted your offer.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' accepted your offer.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
           this.showEditOfferModal(activity);
         }
         break;
       case 2:         // Accepted
         this.props.endJob(activity._id, this.props.auth.token);
-        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
       case 3:         // Rejected
         this.showEditOfferModal(activity);
@@ -346,6 +360,8 @@ class Chat extends Component {
     if (activity.status === 9) {
       chatEditable = false;
     }
+    console.log('status', activity.status);
+    console.log(chatEditable);
     
     if (activity.status !== undefined && (this.props.from === 'activity' || activity.status !== 9)) {
       switch (activity.status) {
@@ -538,7 +554,7 @@ class Chat extends Component {
                     user = this.props.profile.myInfo;
                     user._id = user.userId;
                   }
-                  this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' edited offer.', {type: 'chat', maven: this.state.maven._id, user: user}, this.props.auth.token);
+                  this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' edited offer.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
                 }}>
                   <Text style={styles.btnText}>Submit</Text>
                 </TouchableOpacity>
@@ -601,7 +617,7 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
   getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   initChat: (mavenId, token, next) => dispatch(actions.initChat(mavenId, token, next)),
-  getMavenActivities: (mavenId, token, next) => dispatch(actions.getMavenActivities(mavenId, token, next)),
+  getMavenActivities: (mavenId, token) => dispatch(actions.getMavenActivities(mavenId, token)),
   acceptOffer: (actId, token) => dispatch(actions.acceptOffer(actId, token)),
   rejectOffer: (actId, token) => dispatch(actions.rejectOffer(actId, token)),
   cancelOffer: (actId, type, token) => dispatch(actions.cancelOffer(actId, type, token)),

@@ -293,7 +293,7 @@ export const reviewActivity = (actId, type, rating, description, token, next) =>
   }
 }
 
-export const getMavenActivities = (mavenId, token, next) => {
+export const getMavenActivities = (mavenId, token, notificationActId) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -305,8 +305,7 @@ export const getMavenActivities = (mavenId, token, next) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result });
-        next(res.result);
+        dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result, notificationActId: notificationActId });
       }
       else {
         dispatch({ type: GET_MAVEN_ACTIVITIES_ERROR, error: res.msg });

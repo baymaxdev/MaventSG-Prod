@@ -22,7 +22,7 @@ import { ImagePicker } from 'expo';
 import DatePicker from 'react-native-datepicker'
 import { connect } from 'react-redux';
 import LoadingComponent from '../../components/loadingComponent';
-// import ImageResizer from 'react-native-image-resizer';
+
 class resetPassword extends Component {
     constructor(props) {
         super(props);
