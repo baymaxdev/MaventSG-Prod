@@ -33,6 +33,7 @@ import {
   GET_MAVEN_ACTIVITIES_ERROR,
   REFRESH_ACTIVITIES,
   REFRESH_ACTIVITIES_REQUEST,
+  REMOVE_NOTIFICATION_ACTIVITY_ID,
 } from '../actions/types';
   
 const INITIAL_STATE = {
@@ -56,59 +57,61 @@ export default function (state = INITIAL_STATE, action) {
     case CREATE_OFFER_REQUEST:
       return { ...state, activityLoading: true };
     case CREATE_OFFER:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case CREATE_OFFER_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case ACCEPT_OFFER_REQUEST:
       return { ...state, activityLoading: true };
     case ACCEPT_OFFER:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case ACCEPT_OFFER_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case REJECT_OFFER_REQUEST:
       return { ...state, activityLoading: true };
     case REJECT_OFFER:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case REJECT_OFFER_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case CANCEL_OFFER_REQUEST:
       return { ...state, activityLoading: true };
     case CANCEL_OFFER:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case CANCEL_OFFER_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case EDIT_OFFER_REQUEST:
       return { ...state, activityLoading: true };
     case EDIT_OFFER:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case EDIT_OFFER_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case END_JOB_REQUEST:
       return { ...state, activityLoading: true };
     case END_JOB:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case END_JOB_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case ARCHIVE_ACTIVITY_REQUEST:
       return { ...state, activityLoading: true };
     case ARCHIVE_ACTIVITY:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case ARCHIVE_ACTIVITY_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case REVIEW_ACTIVITY_REQUEST:
       return { ...state, activityLoading: true };
     case REVIEW_ACTIVITY:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: true };
     case REVIEW_ACTIVITY_ERROR:
       return { ...state, error: action.error, activityLoading: false, activitySuccess: false };
     case GET_MAVEN_ACTIVITIES:
-      return { ...state, mavenActivities: action.activities, notificationActId: action.notificationActId };
+      return { ...state, mavenActivities: action.activities };
     case GET_MAVEN_ACTIVITIES_ERROR:
       return { ...state, error: action.error };
     case REFRESH_ACTIVITIES_REQUEST:
       return { ...state, activityLoading: true };
     case REFRESH_ACTIVITIES:
-      return { ...state, activityLoading: false, activitySuccess: true };
+      return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: false, notificationActId: action.notificationActId };
+    case REMOVE_NOTIFICATION_ACTIVITY_ID:
+      return { ...state, notificationActId: undefined };  
     default:
       return state;
   }

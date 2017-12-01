@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Dimensions, Platform, Text, Image } from 'react-native';
+import { StyleSheet, View, Dimensions, Platform, Text, Image, AsyncStorage } from 'react-native';
 import { Container, Content } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 import RenderItem from '../../components/categoryItem';
@@ -67,12 +67,24 @@ class CategoryView extends Component {
         // Get the token that uniquely identifies this device
         let token = await Notifications.getExpoPushTokenAsync();
         this.props.savePushToken(token, this.props.auth.token);
+        await AsyncStorage.setItem('pushToken', token);
+    }
+
+    async savePushTokenToAsyncStorage() {
+        try {
+            const token = await AsyncStorage.getItem('pushToken');
+            if (token === null) {
+                this.registerForPushNotificationsAsync();
+            }
+        } catch (error) {
+    
+        }
     }
 
     componentDidMount() {
         if (isFirstLoad) {
             isFirstLoad = false;
-            this.registerForPushNotificationsAsync();
+            this.savePushTokenToAsyncStorage();
             this._notificationSubscription = Notifications.addListener(this._handleNotification);
         }
     }
@@ -81,32 +93,29 @@ class CategoryView extends Component {
     }
 
     _handleNotification = (notification) => {
-        console.log('Notification', notification);
         if (notification.origin === 'selected') {
             if (Actions.currentScene === 'chatPage') {
                 if (this.props.explore.maven.maven._id === notification.data.maven) {
-                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token, notification.data.activity);
+                    this.props.refreshActivities();
                 } else {
-                    this.props.getMavenDetails(notification.data.maven, this.props.profile.location, this.props.auth.token);
                     Actions.pop();
                     if (notification.data.activity) {
-                        Actions.chatPage({title: notification.data.title, userID: notification.data.user, from: 'notification', actId: notification.data.activity});
+                        Actions.chatPage({mavenId: notification.data.maven, title: notification.data.title, userID: notification.data.user, from: 'notification', actId: notification.data.activity});
                     } else {
-                        Actions.chatPage({title: notification.data.title, userID: notification.data.user});
+                        Actions.chatPage({mavenId: notification.data.maven, title: notification.data.title, userID: notification.data.user});
                     }
                 }
             } else {
-                this.props.getMavenDetails(notification.data.maven, this.props.profile.location, this.props.auth.token);
                 if (notification.data.activity) {
-                    Actions.chatPage({title: notification.data.title, userID: notification.data.user, from: 'notification', actId: notification.data.activity});
+                    Actions.chatPage({mavenId: notification.data.maven, title: notification.data.title, userID: notification.data.user, from: 'notification', actId: notification.data.activity});
                 } else {
-                    Actions.chatPage({title: notification.data.title, userID: notification.data.user});
+                    Actions.chatPage({mavenId: notification.data.maven, title: notification.data.title, userID: notification.data.user});
                 }
             }
         } else if (notification.origin === 'received') {
             if (Actions.currentScene === 'chatPage') {
                 if (this.props.explore.maven.maven._id === notification.data.maven) {
-                    this.props.getMavenActivities(notification.data.maven, this.props.auth.token, notification.data.activity);
+                    this.props.refreshActivities();
                 }
             } else {
                 this.props.refreshActivities();
@@ -155,8 +164,6 @@ const mapStateToProps = (state) =>({
 const mapDispatchToProps = (dispatch) =>({
     getMyProfileInfo: (token) => dispatch(actions.getMyProfileInfo(token)),
     savePushToken: (pushToken, token) => dispatch(actions.savePushToken(pushToken, token)),
-    getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
-    getMavenActivities: (mavenId, token, isNotification) => dispatch(actions.getMavenActivities(mavenId, token, isNotification)),
     refreshActivities: () => dispatch(actions.refreshActivities()),
     actions: bindActionCreators(actions, dispatch)
 });

@@ -42,13 +42,15 @@ class RequestedSkills extends Component {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
       if (Actions.currentScene === '_RequestedSkills') {
         this.refreshItem();
-        setTimeout(() => {
-          this.setState({successModalVisible: true}, () => {
-            setTimeout(() => {
-              this.setState({successModalVisible: false});
-            }, 1000);
-          });
-        }, 500);
+        if (nextProps.activity.showSuccessModal === true) {
+          setTimeout(() => {
+            this.setState({successModalVisible: true}, () => {
+              setTimeout(() => {
+                this.setState({successModalVisible: false});
+              }, 1000);
+            });
+          }, 500);
+        }
       }
     }
     

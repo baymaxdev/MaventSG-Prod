@@ -13,9 +13,8 @@ import DatePicker from 'react-native-datepicker';
 import StarRating from 'react-native-star-rating';
 
 var isFirstLoad = true;
-var isMavenActivities = true;
 var isBookingMessage = true;
-var archivedActId = undefined;
+var currentActId = undefined;
 
 class Chat extends Component {
   state = {
@@ -43,21 +42,33 @@ class Chat extends Component {
     </View>
   }
 
-  componentWillMount() {
-    isFirstLoad = true;
-    isMavenActivities = true;
-    isBookingMessage = true;
-    Firebase.initialize();
-  }
-
   componentDidMount() {
+    isFirstLoad = true;
+    isBookingMessage = true;
+    currentActId = undefined;
+    Firebase.initialize();
     Actions.refresh({right: this.renderChatRightButton});
+    this.props.getMavenDetails(this.props.mavenId, this.props.profile.location, this.props.auth.token, (m) => {
+      var maven = m.maven;
+      var user = maven.userID;
+      if (this.props.userID !== undefined) {
+        user = this.props.userID;
+      }
+      var rating = this.props.userID?user.consumerRating:maven.rating;
+      this.setState({maven: maven, user: user, rating: rating, requestLoading: false}, () => {
+        this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
+          this.setActivityFromMaven(mavenActivities);
+        });
+      });
+    });
   }
 
   componentWillReceiveProps(nextProps) {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
-      this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, archivedActId);
-      if (Actions.currentScene === 'chatPage') {
+      this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
+        this.setActivityFromMaven(mavenActivities);
+      });
+      if (Actions.currentScene === 'chatPage' && nextProps.activity.showSuccessModal === true) {
         setTimeout(() => {
           this.setState({successModalVisible: true}, () => {
             setTimeout(() => {
@@ -71,121 +82,100 @@ class Chat extends Component {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && !nextProps.activity.activitySuccess) {
       alert(nextProps.activity.error);
     }
+  }
 
-    if (nextProps.maven != undefined) {
-      var maven = nextProps.maven.maven;
-      var user = maven.userID;
-      var activity = {};
-      if (this.props.userID !== undefined) {
-        user = this.props.userID;
-      }
-      var rating = this.props.userID?user.consumerRating:maven.rating;
-
-      if (isMavenActivities) {
-        isMavenActivities = false;
-        this.props.getMavenActivities(maven._id, this.props.auth.token);
-      } else {
-        var ma = nextProps.activity.mavenActivities;
-        if (ma !== undefined) {
-          if (this.props.userID !== undefined ) {
-            for (var i = 0; i < ma.length; i ++) {
-              if (this.props.from === 'activity' || this.props.from === 'notification') {
-                if (ma[i].userID._id === this.props.userID._id && ma[i]._id === this.props.actId) {
-                  activity = ma[i];
-                  break;
-                }
-              } else {
-                if (nextProps.activity.notificationActId) {
-                  if (ma[i].userID._id === this.props.userID._id && ma[i]._id === nextProps.activity.notificationActId) {
-                    activity = ma[i];
-                    archivedActId = activity._id;
-                    break;
-                  }
-                } else {
-                  if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
-                    activity = ma[i];
-                    break;
-                  }
-                }
-              }
+  setActivityFromMaven = (ma) => {
+    var activity = {};
+    if (this.props.userID !== undefined ) {
+      for (var i = 0; i < ma.length; i ++) {
+        if (this.props.from === 'activity' || this.props.from === 'notification') {
+          if (ma[i].userID._id === this.props.userID._id && ma[i]._id === this.props.actId) {
+            activity = ma[i];
+            break;
+          }
+        } else {
+          if (currentActId) {
+            if (ma[i].userID._id === this.props.userID._id && ma[i]._id === currentActId) {
+              activity = ma[i];
+              break;
             }
           } else {
-            for (var i = 0; i < ma.length; i ++) {
-              if (this.props.from === 'activity' || this.props.from === 'notification') {
-                if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === this.props.actId) {
-                  activity = ma[i];
-                  break;
-                }
-              } else {
-                if (nextProps.activity.notificationActId) {
-                  if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === nextProps.activity.notificationActId) {
-                    activity = ma[i];
-                    archivedActId = activity._id;
-                    break;
-                  }
-                } else {
-                  if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
-                    activity = ma[i];
-                    break;
-                  }
-                }
-              }
+            if (ma[i].userID._id === this.props.userID._id && ma[i].status !== 9) {
+              activity = ma[i];
+              break;
             }
           }
-          this.setState({ activity });
         }
       }
-
-      this.setState({maven: maven, user: user, rating: rating, requestLoading: false});
-
-      if (isMavenActivities === false) {
-        if (activity._id !== undefined && this.props.bookingMessage && isBookingMessage === true) {
-          isBookingMessage = false;
-          var bm = this.props.bookingMessage;
-          bm.activity = activity._id;
-          Firebase.pushMessage(bm);
-          Firebase.setLastMessage(bm.maven, bm.sender, bm.activity, bm.text);
-        }
-
-        if (activity._id !== undefined && isFirstLoad === true) {
-          isFirstLoad = false;
-          Firebase.getMessages((snapshot) => {
-            var m = {};
-            let val = snapshot.val();
-            if (val.maven === maven._id && val.activity === activity._id && 
-              ((val.sender === this.props.profile.myInfo.userId && val.receiver === user._id) || (val.sender === user._id && val.receiver === this.props.profile.myInfo.userId))) {
-                if (this.props.from === 'activity' || activity.status !== 9) {
-                  m._id = snapshot.key;
-                  m.text = val.text;
-                  m.createdAt = new Date(val.createdAt);
-                  if (val.sender === this.props.profile.myInfo.userId) {
-                    var u = {};
-                    u._id = val.sender;
-                    u.name = this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName;
-                    u.avatar = this.props.profile.myInfo.displayPicture;
-                    m.user = u;
-                  } else if (val.sender === user._id) {
-                    var u = {};
-                    u._id = val.sender;
-                    u.name = user.firstName + ' ' + user.lastName;
-                    u.avatar = user.displayPicture;
-                    m.user = u;
-                  }
-                  this.setState((previousState) => ({
-                    messages: GiftedChat.append(previousState.messages, m),
-                  }));
-                }
+    } else {
+      for (var i = 0; i < ma.length; i ++) {
+        if (this.props.from === 'activity' || this.props.from === 'notification') {
+          if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === this.props.actId) {
+            activity = ma[i];
+            break;
+          }
+        } else {
+          if (currentActId) {
+            if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === currentActId) {
+              activity = ma[i];
+              break;
             }
-          });
+          } else {
+            if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 9) {
+              activity = ma[i];
+              break;
+            }
+          }
         }
       }
+    }
+    this.setState({ activity });
+
+    if (activity._id !== undefined && this.props.bookingMessage && isBookingMessage === true) {
+      isBookingMessage = false;
+      var bm = this.props.bookingMessage;
+      bm.activity = activity._id;
+      Firebase.pushMessage(bm);
+      Firebase.setLastMessage(bm.maven, bm.sender, bm.activity, bm.text);
+    }
+
+    if (activity._id !== undefined && isFirstLoad === true) {
+      isFirstLoad = false;
+      currentActId = activity._id;
+      Firebase.getMessages((snapshot) => {
+        var m = {};
+        let val = snapshot.val();
+        if (val.maven === this.props.mavenId && val.activity === activity._id && 
+          ((val.sender === this.props.profile.myInfo.userId && val.receiver === this.state.user._id) || (val.sender === this.state.user._id && val.receiver === this.props.profile.myInfo.userId))) {
+            if (this.props.from === 'activity' || this.props.from === 'notification' || activity.status !== 9) {
+              m._id = snapshot.key;
+              m.text = val.text;
+              m.createdAt = new Date(val.createdAt);
+              if (val.sender === this.props.profile.myInfo.userId) {
+                var u = {};
+                u._id = val.sender;
+                u.name = this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName;
+                u.avatar = this.props.profile.myInfo.displayPicture;
+                m.user = u;
+              } else if (val.sender === this.state.user._id) {
+                var u = {};
+                u._id = val.sender;
+                u.name = this.state.user.firstName + ' ' + this.state.user.lastName;
+                u.avatar = this.state.user.displayPicture;
+                m.user = u;
+              }
+              this.setState((previousState) => ({
+                messages: GiftedChat.append(previousState.messages, m),
+              }));
+            }
+        }
+      });
     }
   }
 
   onSend(messages = []) {
     if (this.state.activity.status !== 9) {
       if (this.state.messages.length === 0) {
-        isMavenActivities = true;
         this.props.initChat(this.state.maven._id, this.props.auth.token, (actId) => {
           var m = {};
           m.sender = this.props.profile.myInfo.userId;
@@ -251,7 +241,6 @@ class Chat extends Component {
       user = this.props.profile.myInfo;
       user._id = user.userId;
     }
-    archivedActId = actId;
     this.props.archiveActivity(actId, this.props.auth.token);
     this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: actId, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
     this.setState({modalVisible: false});
@@ -293,7 +282,6 @@ class Chat extends Component {
         if (isMaven) {
 
         } else {
-          archivedActId = activity._id;
           this.props.archiveActivity(activity._id, this.props.auth.token);
           this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }
@@ -319,7 +307,6 @@ class Chat extends Component {
         }
         break;
       case 8:         // Both Reviewed
-        archivedActId = activity._id;
         this.props.archiveActivity(activity._id, this.props.auth.token);
         this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
@@ -366,10 +353,8 @@ class Chat extends Component {
     if (activity.status === 9) {
       chatEditable = false;
     }
-    console.log('status', activity.status);
     
-    if (activity.status !== undefined && (this.props.from === 'activity' || activity.status !== 9 || archivedActId !== undefined)) {
-      console.log('inside');
+    if (activity.status !== undefined) {
       switch (activity.status) {
         case 1:         // Offered
           if (isMaven) {
@@ -621,9 +606,9 @@ const mapStateToProps = (state) =>({
 });
 
 const mapDispatchToProps = (dispatch) =>({
-  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
+  getMavenDetails: (mavenId, location, token, callback) => dispatch(actions.getMavenDetails(mavenId, location, token, callback)),
   initChat: (mavenId, token, next) => dispatch(actions.initChat(mavenId, token, next)),
-  getMavenActivities: (mavenId, token) => dispatch(actions.getMavenActivities(mavenId, token)),
+  getMavenActivities: (mavenId, token, callback) => dispatch(actions.getMavenActivities(mavenId, token, callback)),
   acceptOffer: (actId, token) => dispatch(actions.acceptOffer(actId, token)),
   rejectOffer: (actId, token) => dispatch(actions.rejectOffer(actId, token)),
   cancelOffer: (actId, type, token) => dispatch(actions.cancelOffer(actId, type, token)),
@@ -631,6 +616,7 @@ const mapDispatchToProps = (dispatch) =>({
   endJob: (actId, token) => dispatch(actions.endJob(actId, token)),
   archiveActivity: (actId, token) => dispatch(actions.archiveActivity(actId, token)),
   sendPushNotification: (ids, message, data, token) => dispatch(actions.sendPushNotification(ids, message, data, token)),
+  removeNotificationActId: () => dispatch(actions.removeNotificationActId()),
   actions: bindActionCreators(actions, dispatch)
 });
 

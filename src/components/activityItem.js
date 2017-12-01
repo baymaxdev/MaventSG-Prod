@@ -242,11 +242,10 @@ class ActivityItem extends Component {
     return (
       <View key={provider._id} style = {{ paddingHorizontal:10, backgroundColor:'#fff' }}>
         <TouchableOpacity key={provider._id} style={{ paddingVertical:10, flexDirection: 'row', borderBottomWidth:1, borderBottomColor: '#ececec' }} onPress={() => {
-          this.props.getMavenDetails(provider.mavenID._id, this.props.profile.location, this.props.auth.token);
           isMaven?
-          Actions.chatPage({ title: name, userID: provider.userID, from: 'activity', actId: provider._id })
+          Actions.chatPage({ mavenId: provider.mavenID._id, title: name, userID: provider.userID, from: 'activity', actId: provider._id })
           :
-          Actions.chatPage({ title: name, from: 'activity', actId: provider._id })
+          Actions.chatPage({ mavenId: provider.mavenID._id, title: name, from: 'activity', actId: provider._id })
         }}>
           <View style={{ justifyContent: 'flex-start', flex: 1, alignItems: 'center', paddingTop:5 }}>
           {
@@ -417,7 +416,6 @@ const mapStateToProps = (state) =>({
   activity: state.activity,
 });
 const mapDispatchToProps = (dispatch) =>({
-  getMavenDetails: (mavenId, location, token) => dispatch(actions.getMavenDetails(mavenId, location, token)),
   acceptOffer: (actId, token) => dispatch(actions.acceptOffer(actId, token)),
   rejectOffer: (actId, token) => dispatch(actions.rejectOffer(actId, token)),
   cancelOffer: (actId, type, token) => dispatch(actions.cancelOffer(actId, type, token)),

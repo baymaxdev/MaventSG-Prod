@@ -52,7 +52,7 @@ export const getCatList = (category, mainCategory, location, page, scrollId, que
   }
 }
 
-export const getMavenDetails = (mavenId, location, token) => {
+export const getMavenDetails = (mavenId, location, token, callback) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -64,7 +64,8 @@ export const getMavenDetails = (mavenId, location, token) => {
     request(url, option)
     .then(res => {   
       if (res.status === 200) {
-        dispatch({ type: GET_MAVEN_DETAILS, maven: res.result });   
+        dispatch({ type: GET_MAVEN_DETAILS, maven: res.result }); 
+        callback(res.result);  
       }
       else dispatch({ type: GET_MAVEN_DETAILS_ERROR, error: res.msg });
     })

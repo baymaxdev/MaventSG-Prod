@@ -422,8 +422,7 @@ class SkillPage extends Component {
               <Text style={styles.btnText}>SKILL REQUEST</Text>
             </TouchableOpacity>
             <TouchableOpacity style={ [styles.btnView, {backgroundColor:'#fc912f'}] } onPress={()=>{
-              this.props.getMavenDetails(this.state.maven._id, this.props.profile.location, this.props.auth.token);
-              Actions.chatPage({title: this.props.title, from: 'skillpage'});
+              Actions.chatPage({mavenId: this.state.maven._id, title: this.props.title, from: 'skillpage'});
             }} >
               <Text style={styles.btnText}>CHAT</Text>
             </TouchableOpacity>

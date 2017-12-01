@@ -34,6 +34,7 @@ import {
   GET_MAVEN_ACTIVITIES_ERROR,
   REFRESH_ACTIVITIES,
   REFRESH_ACTIVITIES_REQUEST,
+  REMOVE_NOTIFICATION_ACTIVITY_ID,
 } from './types';
 
 export const getActivities = (mode, token, next) => {
@@ -293,7 +294,7 @@ export const reviewActivity = (actId, type, rating, description, token, next) =>
   }
 }
 
-export const getMavenActivities = (mavenId, token, notificationActId) => {
+export const getMavenActivities = (mavenId, token, callback) => {
   let option = { 
     method: 'GET',
     headers: {
@@ -305,7 +306,8 @@ export const getMavenActivities = (mavenId, token, notificationActId) => {
     request(url, option)
     .then(res => {
       if (res.status === 200) {
-        dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result, notificationActId: notificationActId });
+        callback(res.result);
+        dispatch({ type: GET_MAVEN_ACTIVITIES, activities: res.result });
       }
       else {
         dispatch({ type: GET_MAVEN_ACTIVITIES_ERROR, error: res.msg });
@@ -317,9 +319,15 @@ export const getMavenActivities = (mavenId, token, notificationActId) => {
   }
 }
 
-export const refreshActivities = () => {
+export const refreshActivities = (notificationActId) => {
   return dispatch => {
     dispatch({ type: REFRESH_ACTIVITIES_REQUEST });
-    dispatch({ type: REFRESH_ACTIVITIES });
+    dispatch({ type: REFRESH_ACTIVITIES, notificationActId: notificationActId });
+  }
+}
+
+export const removeNotificationActId = () => {
+  return dispatch => {
+    dispatch({ type: REMOVE_NOTIFICATION_ACTIVITY_ID });
   }
 }

@@ -357,8 +357,7 @@ class GenericView extends Component {
                         <Text style={{ color:'#b5b5b5', fontWeight:'400', fontSize:12 }}>/hr</Text>
                       </View>
                       <TouchableOpacity style={{flexDirection:'row', justifyContent:'flex-end', alignItems:'center'}} onPress={() => {
-                        this.props.getMavenDetails(item.mavenID, this.props.profile.location, this.props.auth.token);
-                        Actions.chatPage({ title: `${item.firstName} ${item.lastName}` })
+                        Actions.chatPage({ mavenId: item.mavenID, title: `${item.firstName} ${item.lastName}` });
                       }}>
                         <Icon name = "ios-chatbubbles-outline" style={{ fontSize: 29, color:'#3F6A86', paddingRight:5 }}/>
                         <Icon name = "ios-arrow-forward" style={{ fontSize: 18, color:'#BFD9E7', paddingLeft:5 }}/>
