@@ -135,39 +135,37 @@ class Chat extends Component {
       isBookingMessage = false;
       var bm = this.props.bookingMessage;
       bm.activity = activity._id;
-      Firebase.pushMessage(bm);
-      Firebase.setLastMessage(bm.maven, bm.sender, bm.activity, bm.text);
+      Firebase.pushMessage(bm, false);
     }
 
     if (activity._id !== undefined && isFirstLoad === true) {
       isFirstLoad = false;
       currentActId = activity._id;
-      Firebase.getMessages((snapshot) => {
+      let user = this.props.userID!==undefined?this.state.user._id:this.props.profile.myInfo.userId;
+      let node = this.props.mavenId + '-' + user + '-' + activity._id; 
+      Firebase.getMessages(node, (snapshot) => {
         var m = {};
         let val = snapshot.val();
-        if (val.maven === this.props.mavenId && val.activity === activity._id && 
-          ((val.sender === this.props.profile.myInfo.userId && val.receiver === this.state.user._id) || (val.sender === this.state.user._id && val.receiver === this.props.profile.myInfo.userId))) {
-            if (this.props.from === 'activity' || this.props.from === 'notification' || activity.status !== 9) {
-              m._id = snapshot.key;
-              m.text = val.text;
-              m.createdAt = new Date(val.createdAt);
-              if (val.sender === this.props.profile.myInfo.userId) {
-                var u = {};
-                u._id = val.sender;
-                u.name = this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName;
-                u.avatar = this.props.profile.myInfo.displayPicture;
-                m.user = u;
-              } else if (val.sender === this.state.user._id) {
-                var u = {};
-                u._id = val.sender;
-                u.name = this.state.user.firstName + ' ' + this.state.user.lastName;
-                u.avatar = this.state.user.displayPicture;
-                m.user = u;
-              }
-              this.setState((previousState) => ({
-                messages: GiftedChat.append(previousState.messages, m),
-              }));
-            }
+        if (this.props.from === 'activity' || this.props.from === 'notification' || activity.status !== 9) {
+          m._id = snapshot.key;
+          m.text = val.text;
+          m.createdAt = new Date(val.createdAt);
+          if (val.sender === this.props.profile.myInfo.userId) {
+            var u = {};
+            u._id = val.sender;
+            u.name = this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName;
+            u.avatar = this.props.profile.myInfo.displayPicture;
+            m.user = u;
+          } else if (val.sender === this.state.user._id) {
+            var u = {};
+            u._id = val.sender;
+            u.name = this.state.user.firstName + ' ' + this.state.user.lastName;
+            u.avatar = this.state.user.displayPicture;
+            m.user = u;
+          }
+          this.setState((previousState) => ({
+            messages: GiftedChat.append(previousState.messages, m),
+          }));
         }
       });
     }
@@ -184,12 +182,15 @@ class Chat extends Component {
           m.activity = actId;
           m.text = messages[0].text;
           m.createdAt = messages[0].createdAt.toISOString();
-          Firebase.pushMessage(m);
+          currentActId = actId;
+          this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
+            this.setActivityFromMaven(mavenActivities);
+          });
           if (this.props.userID !== undefined) {
-            Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
+            Firebase.pushMessage(m, true);
             this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
           } else {
-            Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
+            Firebase.pushMessage(m, false);
             var user = this.props.profile.myInfo;
             user._id = user.userId;
             this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
@@ -203,12 +204,11 @@ class Chat extends Component {
         m.activity = this.state.activity._id;
         m.text = messages[0].text;
         m.createdAt = messages[0].createdAt.toISOString();
-        Firebase.pushMessage(m);
         if (this.props.userID !== undefined) {
-          Firebase.setLastMessage(m.maven, m.receiver, m.activity, m.text);
+          Firebase.pushMessage(m, true);
           this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
-          Firebase.setLastMessage(m.maven, m.sender, m.activity, m.text);
+          Firebase.pushMessage(m, false);
           var user = this.props.profile.myInfo;
           user._id = user.userId;
           this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);

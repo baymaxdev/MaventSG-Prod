@@ -34,16 +34,20 @@ class Firebase {
         });
     }
 
-    static getMessages(callback) {
-      firebase.database().ref('/messages').on('child_added', (snapshot) => {callback(snapshot)});
+    static getMessages(node, callback) {
+        firebase.database().ref('/messages/' + node).on('child_added', (snapshot) => {callback(snapshot)});
     }
 
-    static pushMessage(message, callback) {
-      firebase.database().ref('/messages').push(message, callback);
+    static pushMessage(message, isMaven, callback) {
+        let user = isMaven?message.receiver:message.sender;
+        let node = message.maven + '-' + user + '-' + message.activity;
+        console.log(node);
+        firebase.database().ref('/messages/' + node).push(message, callback);
+        this.setLastMessage(node, message.text);
     }
 
-    static setLastMessage(maven, user, activity, text, callback) {
-      firebase.database().ref('/lastMessages/' + maven + '-' + user + '-' + activity).set({text: text});
+    static setLastMessage(node, text, callback) {
+      firebase.database().ref('/lastMessages/' + node).set({text: text});
     }
 
     static getLastMessages(data, callback) {
