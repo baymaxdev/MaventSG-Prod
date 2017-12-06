@@ -7,126 +7,170 @@ import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { bindActionCreators } from 'redux';
 import * as actions from '../actions';
+import Modal from 'react-native-modal';
+import { Icon } from 'native-base';
 
-const RateComponent = (props) => {
-  const user = props.isMe?props.profile.myInfo:props.profile.user
+class RateComponent extends React.Component {
 
-  return <View style={styles.container}>
-    {
-      props.data.active == 1 && 
+  constructor() {
+    super();
+    this.state = {
+      modalVisible: false,
+    };
+  }
 
-      <SwipeRow
-        ref={component => this._row1 = component}
-        rightOpenValue={-100}
-        disableRightSwipe={true}
-        disableLeftSwipe={!props.isMe}
-      >
-        <View style={styles.standaloneRowBack}>
-          <TouchableOpacity style={{width: 100}} onPress={() => {
-            this._row1.closeRow();
-            props.deactivateMaven(props.data._id, props.auth.token, () => {
-                props.onSuccessModal();
-            });
-            
-          }}>
-            <View style={{backgroundColor: '#7F7F7F', flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={styles.backTextWhite}>Set Offline</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.standaloneRowFront}>
-          <TouchableOpacity style={styles.standaloneRowFront} onPress={() => {
-              props.getMavenDetails(props.data._id, props.profile.location, props.auth.token);
-              Actions.skillPage({ title: `${user.firstName} ${user.lastName}`, isMe: props.isMe, from: 'profile'})
-          }}>
-          <View style={styles.container}>
-            <View style={{ flexDirection: 'row',flex:1, justifyContent:'flex-start', alignItems: 'center' }}>
-              <View style={{ backgroundColor: 'rgba(196, 219, 231, 0.9)', justifyContent: 'center', alignItems: 'center', width: 50, height: 50, borderRadius: 17 }}>
-                <Text style={{ color: '#2399E6' }} >{Math.round(props.data.rating * 10) / 10}</Text>
+  onPressModalBtn1(actId) {
+    this._row2.closeRow();
+    this.setState({modalVisible: false}, () => {
+      this.props.deleteMaven(this.props.data._id, this.props.auth.token, () => {
+        this.props.onSuccessModal();
+      });
+    });
+  }
+
+  onPressModalBtn2() {
+    this.setState({modalVisible: false});
+  }
+
+  render () {
+    const user = this.props.isMe?this.props.profile.myInfo:this.props.profile.user
+    
+    return (
+    <View style={styles.container}>
+      {
+        this.props.data.active == 1 && 
+  
+        <SwipeRow
+          ref={component => this._row1 = component}
+          rightOpenValue={-100}
+          disableRightSwipe={true}
+          disableLeftSwipe={!this.props.isMe}
+        >
+          <View style={styles.standaloneRowBack}>
+            <TouchableOpacity style={{width: 100}} onPress={() => {
+              this._row1.closeRow();
+              this.props.deactivateMaven(this.props.data._id, this.props.auth.token, () => {
+                  this.props.onSuccessModal();
+              });
+              
+            }}>
+              <View style={{backgroundColor: '#7F7F7F', flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                <Text style={styles.backTextWhite}>Set Offline</Text>
               </View>
-              <Text style={{ fontSize: 15, paddingLeft: 10, color: '#515151' }}>{props.data.title}</Text>
-              {
-                props.isMe?
-                <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#55AE58', alignSelf: 'flex-start'}}></View>
-                :
-                null
-              }
-            </View>
-            <View style={{flexDirection: 'row',flex:1, justifyContent:'flex-end'}}>
-            <StarRating
-              disabled
-              maxStars={5}
-              rating={props.data.rating}
-              starSize={20}
-              starColor="#FFA838"
-              starStyle={{ paddingHorizontal: 2 }}
-            />
-            </View>
+            </TouchableOpacity>
           </View>
-          </TouchableOpacity>
-        </View>
-      </SwipeRow>
-    }
-    {
-      props.data.active == 0 && props.isMe &&
-      <SwipeRow
-        ref={component => this._row2 = component}
-        rightOpenValue={-150}
-        disableRightSwipe={true}
-        disableLeftSwipe={!props.isMe}
-      >
-        <View style={styles.standaloneRowBack}>
-          <TouchableOpacity style={{width: 100}} onPress={() => {
-            this._row2.closeRow();
-            props.activateMaven(props.data._id, props.auth.token, () => {
-                props.onSuccessModal();
-            });
-          }}>
-            <View style={{backgroundColor: '#55AE58', flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={styles.backTextWhite}>Set Online</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={{width: 50}} onPress={() => {
-            this._row2.closeRow();
-            props.deleteMaven(props.data._id, props.auth.token, () => {
-                props.onSuccessModal();
-            });
-          }}>
-            <View style={{backgroundColor: '#EB4C36', flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Image source={require('../../assets/icons/trash.png')} style={{width: 25, height: 25, tintColor: '#FFFFFF'}}/>
-            </View>
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.standaloneRowFront}>
-          <TouchableOpacity style={styles.standaloneRowFront} onPress={() => {
-            props.getMavenDetails(props.data._id, props.profile.location, props.auth.token);
-            Actions.skillPage({ title: `${user.firstName} ${user.lastName}`, isMe: props.isMe, })
-          }}>
-          <View style={styles.container}>
-            <View style={{ flexDirection: 'row',flex:1, justifyContent:'flex-start', alignItems: 'center' }}>
-              <View style={{ backgroundColor: 'rgba(196, 219, 231, 0.9)', justifyContent: 'center', alignItems: 'center', width: 50, height: 50, borderRadius: 17 }}>
-                <Text style={{ color: '#2399E6' }} >{Math.round(props.data.rating * 10) / 10}</Text>
+          <View style={styles.standaloneRowFront}>
+            <TouchableOpacity style={styles.standaloneRowFront} onPress={() => {
+                this.props.getMavenDetails(this.props.data._id, this.props.profile.location, this.props.auth.token);
+                Actions.skillPage({ title: `${user.firstName} ${user.lastName}`, isMe: this.props.isMe, from: 'profile'})
+            }}>
+            <View style={styles.container}>
+              <View style={{ flexDirection: 'row',flex:1, justifyContent:'flex-start', alignItems: 'center' }}>
+                <View style={{ backgroundColor: 'rgba(196, 219, 231, 0.9)', justifyContent: 'center', alignItems: 'center', width: 50, height: 50, borderRadius: 17 }}>
+                  <Text style={{ color: '#2399E6' }} >{Math.round(this.props.data.rating * 10) / 10}</Text>
+                </View>
+                <Text style={{ fontSize: 15, paddingLeft: 10, color: '#515151' }}>{this.props.data.title}</Text>
+                {
+                  this.props.isMe?
+                  <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#55AE58', alignSelf: 'flex-start'}}></View>
+                  :
+                  null
+                }
               </View>
-              <Text style={{ fontSize: 15, paddingLeft: 10, color: '#515151' }}>{props.data.title}</Text>
-              <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#7F7F7F', alignSelf: 'flex-start'}}></View>
+              <View style={{flexDirection: 'row',flex:1, justifyContent:'flex-end'}}>
+              <StarRating
+                disabled
+                maxStars={5}
+                rating={this.props.data.rating}
+                starSize={20}
+                starColor="#FFA838"
+                starStyle={{ paddingHorizontal: 2 }}
+              />
+              </View>
             </View>
-            <View style={{flexDirection: 'row',flex:1, justifyContent:'flex-end'}}>
-            <StarRating
-              disabled
-              maxStars={5}
-              rating={props.data.rating}
-              starSize={20}
-              starColor="#FFA838"
-              starStyle={{ paddingHorizontal: 2 }}
-            />
-            </View>
+            </TouchableOpacity>
           </View>
+        </SwipeRow>
+      }
+      {
+        this.props.data.active == 0 && this.props.isMe &&
+        <SwipeRow
+          ref={component => this._row2 = component}
+          rightOpenValue={-150}
+          disableRightSwipe={true}
+          disableLeftSwipe={!this.props.isMe}
+        >
+          <View style={styles.standaloneRowBack}>
+            <TouchableOpacity style={{width: 100}} onPress={() => {
+              this._row2.closeRow();
+              this.props.activateMaven(this.props.data._id, this.props.auth.token, () => {
+                  this.props.onSuccessModal();
+              });
+            }}>
+              <View style={{backgroundColor: '#55AE58', flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                <Text style={styles.backTextWhite}>Set Online</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={{width: 50}} onPress={() => {
+              this.setState({modalVisible: true});
+            }}>
+              <View style={{backgroundColor: '#EB4C36', flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                <Image source={require('../../assets/icons/trash.png')} style={{width: 25, height: 25, tintColor: '#FFFFFF'}}/>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.standaloneRowFront}>
+            <TouchableOpacity style={styles.standaloneRowFront} onPress={() => {
+              this.props.getMavenDetails(this.props.data._id, this.props.profile.location, this.props.auth.token);
+              Actions.skillPage({ title: `${user.firstName} ${user.lastName}`, isMe: this.props.isMe, })
+            }}>
+            <View style={styles.container}>
+              <View style={{ flexDirection: 'row',flex:1, justifyContent:'flex-start', alignItems: 'center' }}>
+                <View style={{ backgroundColor: 'rgba(196, 219, 231, 0.9)', justifyContent: 'center', alignItems: 'center', width: 50, height: 50, borderRadius: 17 }}>
+                  <Text style={{ color: '#2399E6' }} >{Math.round(this.props.data.rating * 10) / 10}</Text>
+                </View>
+                <Text style={{ fontSize: 15, paddingLeft: 10, color: '#515151' }}>{this.props.data.title}</Text>
+                <View style={{marginLeft: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#7F7F7F', alignSelf: 'flex-start'}}></View>
+              </View>
+              <View style={{flexDirection: 'row',flex:1, justifyContent:'flex-end'}}>
+              <StarRating
+                disabled
+                maxStars={5}
+                rating={this.props.data.rating}
+                starSize={20}
+                starColor="#FFA838"
+                starStyle={{ paddingHorizontal: 2 }}
+              />
+              </View>
+            </View>
+            </TouchableOpacity>
+          </View>
+        </SwipeRow>
+      }
+      <Modal
+        isVisible={this.state.modalVisible}
+        >
+        <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+          <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+            this.setState({modalVisible: false});
+            }}>
+              <Icon name='close' style={{fontSize:40}}/>
           </TouchableOpacity>
+          <Text style={{fontSize: 20}}>Delete?</Text>
+          <View style={{flexDirection: 'row'}}>
+            <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn1()}}>
+              <Text style={styles.btnText}>Yes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn2()}}>
+              <Text style={styles.btnText}>No</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </SwipeRow>
-    }
-  </View>
+      </Modal>
+    </View>
+    );
+  }
 
 };
 const styles = StyleSheet.create({
@@ -201,14 +245,26 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     paddingVertical: 10,
     width: 100,
-  }
+  },
+  btnText: {fontWeight: 'bold', fontSize: 15, color: '#fff'},
+  modalBtn:{
+    flex:1, padding:10, marginBottom:10, marginTop: 30, marginHorizontal: 10, flexDirection:'row', alignItems:'center',
+    justifyContent:'center', borderRadius:10, backgroundColor:'#0B486B',
+    height: 50,
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    shadowOffset: {
+      width: 0,
+      height: 1
+    }
+  },
 })
 
-const mapStateToProps = (state) =>({
+const mapStateToprops = (state) =>({
   auth: state.auth,
   profile: state.profile
 });
-const mapDispatchToProps = (dispatch) =>({
+const mapDispatchToprops = (dispatch) =>({
   activateMaven: (mavenId, token, next) => dispatch(actions.activateMaven(mavenId, token, next)),
   deactivateMaven: (mavenId, token, next) => dispatch(actions.deactivateMaven(mavenId, token, next)),
   deleteMaven: (mavenId, token, next) => dispatch(actions.deleteMaven(mavenId, token, next)),
@@ -217,4 +273,4 @@ const mapDispatchToProps = (dispatch) =>({
   actions: bindActionCreators(actions, dispatch)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(RateComponent);
+export default connect(mapStateToprops, mapDispatchToprops)(RateComponent);
