@@ -94,7 +94,7 @@ class GenericView extends Component {
   };
 
   handleLoadMore = () => {
-    if (this.state.total > 10) {
+    if (this.state.total > 10 && this.state.data.length < this.state.total && this.state.firstLoad !== true) {
       this.setState({
         page: this.state.page + 1,
         loading: true,
