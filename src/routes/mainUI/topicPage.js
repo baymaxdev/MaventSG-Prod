@@ -82,12 +82,7 @@ class TopicPage extends Component {
   }
 
   onclickLike = (index) => {
-    this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token, () => {
-      var sortedData = this.state.data.slice();
-      sortedData[index].liked = !sortedData[index].liked;
-      sortedData[index].heart = sortedData[index].liked ? sortedData[index].heart + 1 : sortedData[index].heart - 1;
-      this.setState({data: sortedData});
-    });
+    this.props.setLike(this.state.data[index].topicID, 0, this.props.auth.token);
   }
 
   onClickAdd = () => {
@@ -197,7 +192,7 @@ class TopicPage extends Component {
 
   renderItem(item, index) {
     return (
-      <View key={index} style = {{flex:1, borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginVertical: 6, marginHorizontal: 10 }}>
+      <View style = {{flex:1, borderWidth: 1, borderRadius: 8, borderColor: '#c9c9c9', marginVertical: 6, marginHorizontal: 10 }}>
         <View style = {{flexDirection: "row", justifyContent: 'space-between', padding: 10}}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Image source = {item.userID.displayPicture?{uri: item.userID.displayPicture}:require('../../../assets/images/avatar.png')} style = {{ width: 55, height: 55, borderRadius: 17 }}/>

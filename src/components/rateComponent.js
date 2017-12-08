@@ -12,8 +12,8 @@ import { Icon } from 'native-base';
 
 class RateComponent extends React.Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       modalVisible: false,
     };

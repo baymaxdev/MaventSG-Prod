@@ -36,6 +36,7 @@ const data = [{pic: require('../../../assets/images/profile.png'), name: 'Laura 
               {pic: require('../../../assets/images/profile.png'), name: 'Eric Lou', day: '4d ago', comments: 1, likes:14,
               content: 'I am a dedicated person. I enjoy reading, and the knowledge and perspective that my reading gives me has strengthened my teaching skills' },
             ]
+var tempTopic = {};
 class CommentsPage extends Component {
   constructor(props) {
     super(props);
@@ -50,11 +51,18 @@ class CommentsPage extends Component {
 
   componentWillMount() {
     this.props.getComments(this.props.data.topicID, this.props.auth.token);
+    tempTopic = this.props.data;
     this.setState({topic: this.props.data});
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({comments: nextProps.topic.comments, requestLoading: false, refreshing: false, commentText: ''});
+    if (nextProps.topic.likeLoading !== this.props.topic.likeLoading && !nextProps.topic.likeLoading && nextProps.topic.likeSuccess) {
+      this.setState({comments: [], topic: {}}, () => {
+        this.props.getComments(this.props.data.topicID, this.props.auth.token);
+        return;
+      });
+    }
+    this.setState({comments: nextProps.topic.comments, requestLoading: false, refreshing: false, commentText: '', topic: tempTopic});
   }
 
   getStringFromDate(date) {
@@ -148,18 +156,12 @@ class CommentsPage extends Component {
 
   onclickLike = () => {
     this.props.setLike(this.state.topic.topicID, 0, this.props.auth.token);
-    let temp = this.state.topic;
-    temp.liked = !temp.liked;
-    temp.heart = temp.liked ? temp.heart + 1 : temp.heart - 1;
-    this.setState({topic: temp});
+    tempTopic.liked = !tempTopic.liked;
+    tempTopic.heart = tempTopic.liked ? tempTopic.heart + 1 : tempTopic.heart - 1;
   }
 
   onLikeList = (index) =>{
     this.props.setLike(this.state.comments[index].commentID, 1, this.props.auth.token);
-    let temp = this.state.comments;
-    temp[index].liked = !temp[index].liked;
-    temp[index].heart = temp[index].liked ? temp[index].heart + 1 : temp[index].heart - 1;
-    this.setState({comments: temp});
   }
 
   renderPlaceholder() {
@@ -224,11 +226,11 @@ class CommentsPage extends Component {
                 <FlatList
                   data={this.state.comments}
                   renderItem={ ({item, index}) => {
-                    return <View key={index}>
+                    return <View>
                             {this.renderItem(item, index)}
                           </View>
                   }}
-                  keyExtractor={item => item._id}
+                  keyExtractor={item => item.commentID}
                   ItemSeparatorComponent={null}
                   >
                 </FlatList>
