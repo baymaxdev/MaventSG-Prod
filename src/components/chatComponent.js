@@ -21,7 +21,7 @@ class Chat extends Component {
     messages: [],
     requestLoading: true,
     activity: {},
-    modalVisible: false,
+    modalVisible: '',
     editOfferModalVisible: false,
     successModalVisible: false,
     serviceDate: '',
@@ -217,8 +217,8 @@ class Chat extends Component {
     }
   }
 
-  showModal() {
-    this.setState({modalVisible: true});
+  showModal(type) {
+    this.setState({modalVisible: type});
   }
 
   showEditOfferModal(activity) {
@@ -234,20 +234,18 @@ class Chat extends Component {
     Actions.push('reviewPage', {actId: this.state.activity._id, type: type, mavenId: this.state.maven._id, userId: this.state.user._id, user: user});
   }
 
-  onPressModalBtn1(actId) {
-    let isMaven = this.props.userID !== undefined?true:false;
-    var user = undefined;
-    if (isMaven === false) {
-      user = this.props.profile.myInfo;
-      user._id = user.userId;
+  onPressModalBtn() {
+    if (this.state.modalVisible === 'grey' || this.state.modalVisible === 'blue') {
+      let isMaven = this.props.userID !== undefined?true:false;
+      var user = undefined;
+      if (isMaven === false) {
+        user = this.props.profile.myInfo;
+        user._id = user.userId;
+      }
+      this.props.archiveActivity(this.state.activity._id, this.props.auth.token);
+      this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: this.state.activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
     }
-    this.props.archiveActivity(actId, this.props.auth.token);
-    this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: actId, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
-    this.setState({modalVisible: false});
-  }
-
-  onPressModalBtn2() {
-    this.setState({modalVisible: false});
+    this.setState({modalVisible: ''});
   }
 
   onPressBtn1() {
@@ -260,6 +258,13 @@ class Chat extends Component {
     }
 
     switch (activity.status) {
+      case 0:          // Messaged
+        if (isMaven) {
+          this.showModal('grey');
+        } else {
+          this.showModal('blue');
+        }
+        break;
       case 1:          // Offered
         if (isMaven) {
           this.props.rejectOffer(activity._id, this.props.auth.token);
@@ -270,45 +275,98 @@ class Chat extends Component {
         }
         break;
       case 2:         // Accepted
-        if (isMaven) {
-          this.props.cancelOffer(activity._id, 1, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
-        } else {
-          this.props.cancelOffer(activity._id, 0, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
-        }  
+        this.props.endJob(activity._id, this.props.auth.token);
+        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
       case 3:         // Rejected
         if (isMaven) {
-
+          this.showModal('grey');
         } else {
-          this.props.archiveActivity(activity._id, this.props.auth.token);
-          this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+          this.showModal('blue');
         }
         break;
       case 4:         // Cancelled
-        this.showModal();
+        if (isMaven) {
+          this.showModal('grey');
+        } else {
+          this.showModal('blue');
+        }
         break;
-      case 5:         // Completed
+      case 500:         // Completed
         if (isMaven) {
           this.navigateToReview(1);
         } else {
           this.navigateToReview(0);
         }
         break;
-      case 6:         // CReviewed
+      case 510:         // Maven Review
         if (isMaven) {
-          this.navigateToReview(1);
-        }
-        break;
-      case 7:         // MReviewed
-        if (!isMaven) {
+          this.showModal('grey');
+        } else {
           this.navigateToReview(0);
         }
         break;
-      case 8:         // Both Reviewed
-        this.props.archiveActivity(activity._id, this.props.auth.token);
-        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: this.state.maven._id, user: user, activity: activity._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+      case 501:         // Customer Review
+        if (isMaven) {
+          this.navigateToReview(1);
+        } else {
+          this.showModal('blue');
+        }
+        break;
+      case 520:         // Maven Archive
+        if (isMaven) {
+          this.showModal('white');
+        } else {
+          this.showModal('blue');
+        }
+        break;
+      case 502:         // Customer Archive
+        if (isMaven) {
+          this.showModal('grey');
+        } else {
+          this.showModal('white');
+        }
+        break;
+      case 511:         // Maven Review + Customer Review
+        if (isMaven) {
+          this.showModal('grey');
+        } else {
+          this.showModal('blue');
+        }
+        break;
+      case 521:         // Maven Archive + Customer Review
+        if (isMaven) {
+          this.showModal('white');
+        } else {
+          this.showModal('blue');
+        }
+        break;
+      case 512:         // Maven Review + Customer Archive
+        if (isMaven) {
+          this.showModal('grey');
+        } else {
+          this.showModal('white');
+        }
+        break;
+      case 522:         // Maven Archive + Customer Archive
+        this.showModal('white');
+        break;
+      case 610:         // MavenArchived_NR
+        if (isMaven) {
+          this.showModal('white');
+        } else {
+          this.showModal('blue');
+        }
+        break;
+      case 601:         // CustomerArchived_NR
+        if (isMaven) {
+          this.showModal('grey');
+        } else {
+          this.showModal('white');
+        }
+        break;
+      case 611:         // BothArchived)NR
+        this.showModal('white');
         break;
       default:
         break;
@@ -325,6 +383,13 @@ class Chat extends Component {
     }
 
     switch (activity.status) {
+      case 0:          // Messaged
+        if (isMaven) {
+
+        } else {
+          Actions.pop();
+          Actions.genericBooking({ title: this.props.title, maven: this.state.maven });
+        }
       case 1:          // Offered
         if (isMaven) {
           this.props.acceptOffer(activity._id, this.props.auth.token);
@@ -334,12 +399,36 @@ class Chat extends Component {
         }
         break;
       case 2:         // Accepted
-        this.props.endJob(activity._id, this.props.auth.token);
-        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        if (isMaven) {
+
+        } else {
+          this.showEditOfferModal(activity);
+        }
         break;
       case 3:         // Rejected
         this.showEditOfferModal(activity);
-        break;    
+        break;
+      case 4:         // Cancelled
+        Actions.pop();
+        Actions.genericBooking({ title: this.props.title, maven: this.state.maven });
+        break;
+      case 500:         // Completed
+        this.showModal('red');
+        break;
+      case 510:         // Maven Review
+        if (isMaven) {
+
+        } else {
+          this.showModal('red');
+        }
+        break;
+      case 501:         // Customer Review
+        if (isMaven) {
+          this.showModal('red');
+        } else {
+
+        }
+        break;
       default:
         break;
     }
@@ -347,15 +436,20 @@ class Chat extends Component {
 
   render() {
     let activity = this.state.activity;
+    console.log('activity', activity.status);
     let isMaven = this.props.userID !== undefined?true:false;
-    var btnText1 = btnText2 = '', boxDisabled = false;
-    var chatEditable = true;
-    if (activity.status === 9) {
-      chatEditable = false;
-    }
+    var btnText1 = btnText2 = '', chatDisabled = false;
     
     if (activity.status !== undefined) {
       switch (activity.status) {
+        case 0:         // Messaged
+          if (isMaven) {
+            btnText1 = 'Archive Chat';
+          } else {
+            btnText1 = 'Archive Chat';
+            btnText2 = 'Create Offer';
+          }
+          break;
         case 1:         // Offered
           if (isMaven) {
             btnText1 = 'Reject';
@@ -366,50 +460,144 @@ class Chat extends Component {
           }
           break;
         case 2:         // Accepted
-          btnText1 = 'Cancel Offer';
-          btnText2 = 'Completed?';
+          if (isMaven) {
+            btnText1 = 'Completed';
+          } else {
+            btnText1 = 'Completed';
+            btnText2 = 'Edit Offer';
+          }
           break;
         case 3:         // Rejected
           if (isMaven) {
-            btnText1 = 'You rejected the Offer~';
-            boxDisabled = true;
+            btnText1 = 'Archive Chat';
           } else {
-            btnText1 = 'Archive';
+            btnText1 = 'Archive Chat';
             btnText2 = 'Edit Offer';
           }
           break;
         case 4:         // Cancelled
-          btnText1 = 'Job Cancelled';
-          break;
-        case 5:         // Completed
-          btnText1 = 'Please leave a Review~';
-          break;
-        case 6:         // CReviewed
           if (isMaven) {
-            btnText1 = 'Please leave a Review~';
+            btnText1 = 'Archive Chat';
           } else {
-            btnText1 = 'Review received';
-            boxDisabled = true;
+            btnText1 = 'Archive Chat';
+            btnText2 = 'Make new Offer';
           }
           break;
-        case 7:         // MReviewed
-          if (!isMaven) {
-            btnText1 = 'Please leave a Review~';
+        case 500:         // Completed
+          if (isMaven) {
+            btnText1 = 'Leave Review';
+            btnText2 = 'Archive Chat';
           } else {
-            btnText1 = 'Review received';
-            boxDisabled = true;
+            btnText1 = 'Leave Review';
+            btnText2 = 'Archive Chat';
           }
           break;
-        case 8:         // Both Reviewed
-          btnText1 = 'Archive?';
+        case 510:         // Maven Review
+          if (isMaven) {
+            btnText1 = 'Archive Chat';
+          } else {
+            btnText1 = 'Leave Review';
+            btnText2 = 'Archive Chat';
+          }
           break;
-        case 9:         // Archived
-          btnText1 = 'Archived';
-          boxDisabled = true;
+        case 501:         // Customer Review
+          if (isMaven) {
+            btnText1 = 'Leave Review';
+            btnText2 = 'Archive Chat';
+          } else {
+            btnText1 = 'Archive Chat';
+          }
+          break;
+        case 520:         // Maven Archive
+          if (isMaven) {
+            btnText1 = 'Chat Archived';
+            chatDisabled = true;
+          } else {
+            btnText1 = 'Archive Chat';
+          }
+          break;
+        case 502:         // Customer Archive
+          if (isMaven) {
+            btnText1 = 'Archive Chat';
+          } else {
+            btnText1 = 'Chat Archived';
+            chatDisabled = true;
+          }
+          break;
+        case 511:         // Maven Review + Customer Review
+          if (isMaven) {
+            btnText1 = 'Archive Chat';
+          } else {
+            btnText1 = 'Archive Chat';
+          }
+          break;
+        case 521:         // Maven Archive + Customer Review
+          if (isMaven) {
+            btnText1 = 'Chat Archived';
+            chatDisabled = true;
+          } else {
+            btnText1 = 'Archive Chat';
+          }
+          break;
+        case 512:         // Maven Review + Customer Archive
+          if (isMaven) {
+            btnText1 = 'Archive Chat';
+          } else {
+            btnText1 = 'Chat Archived';
+            chatDisabled = true;
+          }
+          break;
+        case 522:         // Maven Archive + Customer Archive
+          btnText1 = 'Chat Archived';
+          chatDisabled = true;
+          break;
+        case 610:         // MavenArchived_NR
+          if (isMaven) {
+            btnText1 = 'Chat Archived';
+            chatDisabled = true;
+          } else {
+            btnText1 = 'Archive Chat';
+          }
+          break;
+        case 601:         // CustomerArchived_NR
+          if (isMaven) {
+            btnText1 = 'Archive Chat';
+          } else {
+            btnText1 = 'Chat Archived';
+            chatDisabled = true;
+          }
+          break;
+        case 611:         // BothArchived_NR
+          btnText1 = 'Chat Archived';
+          chatDisabled = true;
           break;
         default:
           break;
       }
+    }
+
+    let modalVisible = this.state.modalVisible === 'red' || this.state.modalVisible === 'grey' || this.state.modalVisible === 'blue' || this.state.modalVisible === 'white';
+    var modalTitle = '';
+    var modalBtnTitle = '';
+    switch (this.state.modalVisible) {
+      case 'grey':
+        modalTitle = 'After you archive already, you all cannot send anymore messages to each other for this thread already, but your customer can create a fresh new thread by messaging this listing again! Confirm chop want to archive?';
+        modalBtnTitle = 'Confirm';
+        break;
+      case 'blue':
+        modalTitle = 'After you archive already, you all cannot send anymore messages to each other for this thread already, but you can easily create a fresh new thread by messaging this listing again! Confirm chop want to archive?';
+        modalBtnTitle = 'Confirm';
+        break;
+      case 'red':
+        modalTitle = 'To archive this chat, please leave a review first!';
+        modalBtnTitle = 'Okay';
+        break;
+      case 'white':
+        modalTitle = 'Chat already archive liao, you will no longer be able to send messages in this chat, to send this listing a message, send a new chat to the listing!';
+        modalBtnTitle = 'Okay';
+        break;
+      default:
+        break;
     }
 
     return (
@@ -454,7 +642,7 @@ class Chat extends Component {
         {
           btnText1 !== ''?
           <View style={{height: 50, flexDirection: 'row'}}>
-            <TouchableOpacity style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#90939B'}} disabled={boxDisabled} onPress={this.onPressBtn1.bind(this)}>
+            <TouchableOpacity style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#90939B'}} onPress={this.onPressBtn1.bind(this)}>
               <Text style={{color: 'white'}}>{btnText1}</Text>
             </TouchableOpacity>
             {
@@ -479,24 +667,21 @@ class Chat extends Component {
             // _id: this.props.profile.myInfo.userID,
             _id: this.props.profile.myInfo.userId
           }}
-          textInputProps={{editable: chatEditable}}
+          textInputProps={{editable: !chatDisabled}}
         />
         <Modal
-          isVisible={this.state.modalVisible}
+          isVisible={modalVisible}
           >
           <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
             <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
-              this.setState({modalVisible: false});
+              this.setState({modalVisible: ''});
               }}>
                 <Icon name='close' style={{fontSize:40}}/>
             </TouchableOpacity>
-            <Text style={{fontSize: 20}}>Archive?</Text>
+            <Text style={{fontSize: 20}}>{modalTitle}</Text>
             <View style={{flexDirection: 'row'}}>
-              <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn1(activity._id)}}>
-                <Text style={styles.btnText}>Yes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn2()}}>
-                <Text style={styles.btnText}>No</Text>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn()}}>
+                <Text style={styles.btnText}>{modalBtnTitle}</Text>
               </TouchableOpacity>
             </View>
           </View>

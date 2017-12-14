@@ -30,6 +30,7 @@ import ReviewPage from './mainUI/reviewPage';
 import TabIcon from '../components/tabIcon';
 import Chat from '../components/chatComponent';
 import Feedback from '../components/feedback';
+import SavedMavenPage from './mainUI/savedMavenPage';
 import BlankPage from './mainUI/BlankView';
 import reducerCreate from '../reducers/router_reducer'
 
@@ -173,6 +174,7 @@ class RouterComponent extends React.Component {
             <Scene key="allReviewPage" component={AllReviewPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="All Reviews" />
             <Scene key="viewChats" component={MySkills} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Chats" />
             <Scene key="reviewPage" component={ReviewPage} rightButtonImage={null} renderRightButton={null} rightTitle='Submit' back={Platform.OS === "android" ? false : true} title="Review" />
+            <Scene key="savedMavenPage" component={SavedMavenPage} rightButtonImage={null} renderRightButton={null} back={Platform.OS === "android" ? false : true} title="Saved Mavens" />
             <Scene key="blankView" component={BlankPage} back={Platform.OS === "android" ? false : true} title="ChatPage" />
           </Scene>
 

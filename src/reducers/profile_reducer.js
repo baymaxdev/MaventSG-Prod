@@ -35,6 +35,8 @@ import {
   UPDATE_PROFILE_IMAGE_ERROR,
   GIVE_APP_FEEDBACK,
   GIVE_APP_FEEDBACK_ERROR,
+  GET_SAVED_MAVENS,
+  GET_SAVED_MAVENS_ERROR,
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -119,6 +121,10 @@ export default function (state = INITIAL_STATE, action) {
     case GIVE_APP_FEEDBACK:
       return { ...state };
     case GIVE_APP_FEEDBACK_ERROR:
+      return { ...state, error: action.error };
+    case GET_SAVED_MAVENS:
+      return { ...state, savedMavens: action.savedMavens };
+    case GET_SAVED_MAVENS_ERROR:
       return { ...state, error: action.error };
 
     default:

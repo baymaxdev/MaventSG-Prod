@@ -62,6 +62,12 @@ class ActivityItem extends Component {
     Actions.push('reviewPage', {actId: this.props.provider._id, type: type, userId: userId, mavenId: mavenId, user: user});
   }
 
+  archiveChat() {
+    let provider = this.props.provider;
+    this.props.archiveActivity(provider._id, this.props.auth.token);
+    this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user, activity: provider._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+  }
+
   onPressBtn1() {
     this.setState({modalVisible: false});
 
@@ -71,6 +77,9 @@ class ActivityItem extends Component {
     let user = isMaven?undefined:provider.userID;
 
     switch (provider.status) {
+      case 0:          // Messaged
+        this.archiveChat();
+        break;
       case 1:          // Offered
         this.props.cancelOffer(provider._id, 0, this.props.auth.token);
         this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
@@ -80,19 +89,13 @@ class ActivityItem extends Component {
         this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: provider.mavenID._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
       case 3:         // Rejected
-        this.props.archiveActivity(provider._id, this.props.auth.token);
-        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user, activity: provider._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        this.archiveChat();
         break;
       case 4:         // Cancelled
-        this.props.archiveActivity(provider._id, this.props.auth.token);
-        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user, activity: provider._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        this.archiveChat();
         break;
       case 5:         // Completed
-        if (isMaven) {
-          this.navigateToReview(1, userId, provider.mavenID._id, user);
-        } else {
-          this.navigateToReview(0, userId, provider.mavenID._id, user);
-        }
+        
         break;
       case 6:         // CReviewed
         if (isMaven) {
@@ -105,8 +108,80 @@ class ActivityItem extends Component {
         }
         break;
       case 8:         // Both Reviewed
-        this.props.archiveActivity(provider._id, this.props.auth.token);
-        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user, activity: provider._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        this.archiveChat();
+        break;
+      case 500:         // Completed
+        if (isMaven) {
+          this.navigateToReview(1, userId, provider.mavenID._id, user);
+        } else {
+          this.navigateToReview(0, userId, provider.mavenID._id, user);
+        }
+        break;
+      case 510:         // Maven Review
+        if (isMaven) {
+          this.archiveChat();
+        } else {
+          this.navigateToReview(0, userId, provider.mavenID._id, user);
+        }
+        break;
+      case 501:         // Customer Review
+        if (isMaven) {
+          this.navigateToReview(1, userId, provider.mavenID._id, user);
+        } else {
+          this.archiveChat();
+        }
+        break;
+      case 520:         // Maven Archive
+        if (isMaven) {
+          
+        } else {
+          this.archiveChat();
+        }
+        break;
+      case 502:         // Customer Archive
+        if (isMaven) {
+          this.archiveChat();
+        } else {
+          
+        }
+        break;
+      case 511:         // Maven Review + Customer Review
+        this.archiveChat();
+        break;
+      case 521:         // Maven Archive + Customer Review
+        if (isMaven) {
+          
+        } else {
+          this.archiveChat();
+        }
+        break;
+      case 512:         // Maven Review + Customer Archive
+        if (isMaven) {
+          this.archiveChat();
+        } else {
+          
+        }
+        break;
+      case 522:         // Maven Archive + Customer Archive
+        
+        break;
+      case 610:         // MavenArchived_NR
+        if (isMaven) {
+          
+        } else {
+          this.archiveChat();
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 601:         // CustomerArchived_NR
+        if (isMaven) {
+          this.archiveChat();
+        } else {
+          
+        }
+        break;
+      case 611:         // BothArchived_NR
+        
         break;
       default:
         break;
@@ -122,6 +197,13 @@ class ActivityItem extends Component {
     let user = isMaven?undefined:provider.userID;
 
     switch (provider.status) {
+      case 0:          // Messaged
+        if (!isMaven) {
+          var maven = provider.mavenID;
+          maven.userID = provider.mavenUserID;
+          Actions.genericBooking({ title: provider.userID.firstName + ' ' + provider.userID.lastName, maven: maven });
+        }
+        break;
       case 1:          // Offered
         setTimeout(() => {
           this.showEditOfferModal();
@@ -129,17 +211,29 @@ class ActivityItem extends Component {
         break;
       case 2:         // Accepted
         if (isMaven) {
-          this.props.cancelOffer(provider._id, 1, this.props.auth.token);
+          
         } else {
-          this.props.cancelOffer(provider._id, 0, this.props.auth.token);
+          setTimeout(() => {
+            this.showEditOfferModal();
+          }, 500);
         }
-        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
       case 3:         // Rejected
-        setTimeout(() => {
-          this.showEditOfferModal();
-        }, 500);
-        break;    
+        if (isMaven) {
+          
+        } else {
+          setTimeout(() => {
+            this.showEditOfferModal();
+          }, 500);
+        }
+        break;
+      case 4:          // Cancelled
+        if (!isMaven) {
+          var maven = provider.mavenID;
+          maven.userID = provider.mavenUserID;
+          Actions.genericBooking({ title: provider.userID.firstName + ' ' + provider.userID.lastName, maven: maven });
+        }
+        break;
       default:
         break;
     }
@@ -155,9 +249,18 @@ class ActivityItem extends Component {
     let user = isMaven?undefined:provider.userID;
 
     switch (provider.status) {
+      case 0:
+        modalText = '0: Messaged';
+        btnText1 = 'Archive Chat';
+        if (!isMaven) {
+          btnText2 = 'Create Offer';
+        }
+        boxText = 'Messaged'
+        boxColor = '#7F7F7F';
+        break;
       case 1:         // Offered
         if (!isMaven) {
-          modalText = 'What do you want to do?';
+          modalText = '1: Offered';
           btnText1 = 'Cancel Offer';
           btnText2 = 'Edit Offer';
           boxText = 'Offered';
@@ -165,16 +268,20 @@ class ActivityItem extends Component {
         }
         break;
       case 2:         // Accepted
-        modalText = '"Job completed?" or "Cancel job?"';
+        modalText = '2: Accepted';
         btnText1 = 'Completed';
-        btnText2 = 'Cancel job';
+        if (!isMaven) {
+          btnText2 = 'Edit Offer';
+        }
         boxText = 'Accepted';
         boxColor = '#54AD57';
         break;
       case 3:         // Rejected
-        modalText = 'What do you want to do?';
-        btnText1 = 'Archive';
-        btnText2 = 'Edit Offer';
+        modalText = '3: Rejected';
+        btnText1 = 'Archive Chat';
+        if (!isMaven) {
+          btnText2 = 'Edit Offer';
+        }
         boxText = 'Rejected';
         boxColor = '#DA3832';
         if (isMaven) {
@@ -182,58 +289,128 @@ class ActivityItem extends Component {
         }
         break;
       case 4:         // Cancelled
-        modalText = 'Archive Job?';
-        btnText1 = 'Yes';
-        btnText2 = 'No';
+        modalText = '4: Cancelled';
+        btnText1 = 'Archive Chat';
+        if (!isMaven) {
+          btnText2 = 'Make new Offer';
+        }
         boxText = 'Cancelled';
         boxColor = '#EE8640';
         break;
-      case 5:         // Completed
-        modalText = 'Give Review?';
-        btnText1 = 'Yes';
-        btnText2 = 'No';
+      case 500:         // Completed
+        modalText = '500: Completed';
+        btnText1 = 'Leave Review';
+        btnText2 = 'Archive Chat';
         boxText = 'Completed';
         boxColor = '#7F7F7F';
         break;
-      case 6:         // CReviewed
+      case 510:         // Maven Review
+        modalText = '510: Maven Review';
         if (isMaven) {
-          modalText = 'Please leave some review for your customer!';
-          btnText1 = 'Yes';
-          btnText2 = 'No';
-          boxText = 'Completed';
-          boxColor = '#7F7F7F';
+          btnText1 = 'Archive Chat';
+          boxText = 'Reviewed';
         } else {
-          modalText = "Pending Maven's review...";
-          btnText1 = 'Got it';
+          btnText1 = 'Leave Review';
+          btnText2 = 'Archive Chat';
           boxText = 'Completed';
-          boxColor = '#7F7F7F';
         }
-        break;
-      case 7:         // MReviewed
-        if (isMaven) {
-          modalText = 'Pending customer review...';
-          btnText1 = 'Got it';
-          boxText = 'Completed';
-          boxColor = '#7F7F7F';
-        } else {
-          modalText = 'Please leave some review for your maven!';
-          btnText1 = 'Yes';
-          btnText2 = 'No';
-          boxText = 'Completed';
-          boxColor = '#7F7F7F';
-        }
-        break;
-      case 8:         // Both Reviewed
-        modalText = 'Archive Job';
-        btnText1 = 'Yes';
-        btnText2 = 'No';
-        boxText = 'Completed';
         boxColor = '#7F7F7F';
         break;
-      case 9:         // Archived
+      case 501:         // Customer Review
+        modalText = '501: Customer Review';
+        if (isMaven) {
+          btnText1 = 'Leave Review';
+          btnText2 = 'Archive Chat';
+          boxText = 'Completed';
+        } else {
+          btnText1 = 'Archive Chat';
+          boxText = 'Reviewed';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 520:         // Maven Archive
+        modalText = '520: Maven Archive';
+        if (isMaven) {
+          btnText1 = 'Chat Archived';
+          boxText = 'Archived';
+        } else {
+          btnText1 = 'Archive Chat';
+          boxText = 'Completed';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 502:         // Customer Archive
+        modalText = '502: Customer Archive';
+        if (isMaven) {
+          btnText1 = 'Archive Chat';
+          boxText = 'Completed';
+        } else {
+          btnText1 = 'Chat Archived';
+          boxText = 'Archived';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 511:         // Maven Review + Customer Review
+        modalText = '511: Maven Review + Customer Review';
+        btnText1 = 'Archive Chat';
+        boxText = 'Reviewed';
+        boxColor = '#7F7F7F';
+        break;
+      case 521:         // Maven Archive + Customer Review
+        modalText = '521: Maven Archive + Customer Review';
+        if (isMaven) {
+          btnText1 = 'Chat Archived';
+          boxText = 'Archived';
+        } else {
+          btnText1 = 'Archive Chat';
+          boxText = 'Reviewed';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 512:         // Maven Review + Customer Archive
+        modalText = '502: Maven Review + Customer Archive';
+        if (isMaven) {
+          btnText1 = 'Archive Chat';
+          boxText = 'Reviewed';
+        } else {
+          btnText1 = 'Chat Archived';
+          boxText = 'Archived';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 522:         // Maven Archive + Customer Archive
+        modalText = '522: Maven Archive + Customer Archive';
+        btnText1 = 'Chat Archived';
         boxText = 'Archived';
-        boxColor = '#C3C3C3';
-        boxDisabled = true;
+        boxColor = '#7F7F7F';
+        break;
+      case 610:         // MavenArchived_NR
+        modalText = '610: MavenArchived_NR';
+        if (isMaven) {
+          btnText1 = 'Chat Archived';
+          boxText = 'Archived';
+        } else {
+          btnText1 = 'Archive Chat';
+          boxText = 'Archive';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 601:         // CustomerArchived_NR
+        modalText = '610: CustomerArchived_NR';
+        if (isMaven) {
+          btnText1 = 'Archive Chat';
+          boxText = 'Archive';
+        } else {
+          btnText1 = 'Chat Archived';
+          boxText = 'Archived';
+        }
+        boxColor = '#7F7F7F';
+        break;
+      case 611:         // BothArchived_NR
+        modalText = '611: BothArchived_NR';
+        btnText1 = 'Chat Archived';
+        boxText = 'Archived';
+        boxColor = '#7F7F7F';
         break;
       default:
         break;

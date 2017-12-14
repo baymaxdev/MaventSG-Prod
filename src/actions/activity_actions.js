@@ -253,6 +253,7 @@ export const archiveActivity = (actId, token) => {
   return dispatch => {
     dispatch({ type: ARCHIVE_ACTIVITY_REQUEST });
     const url = `activity/archive?actID=${actId}`;
+    console.log(url);
     request(url, option)
     .then(res => {
       if (res.status === 200) {

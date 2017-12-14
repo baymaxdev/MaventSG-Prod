@@ -36,6 +36,8 @@ import {
   UPDATE_PROFILE_IMAGE_ERROR,
   GIVE_APP_FEEDBACK,
   GIVE_APP_FEEDBACK_ERROR,
+  GET_SAVED_MAVENS,
+  GET_SAVED_MAVENS_ERROR,
 } from './types';
 
 export const getMyProfileInfo = (token) => {
@@ -520,6 +522,29 @@ export const feedback = ( rating, message, token, next ) => {
     })
     .catch(err => {
       dispatch({ type: GIVE_APP_FEEDBACK_ERROR, error: err });
+    })  
+  }
+}
+
+export const getSavedMavens = (token) => {
+  let option = { 
+    method: 'GET',
+    headers: {
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    const url = `user/saved-mavens`;
+    request(url, option)
+    .then(res => {   
+      if (res.status === 200) {
+        dispatch({ type: GET_SAVED_MAVENS, savedMavens: res.result });
+        next();
+      }
+      else dispatch({ type: GET_SAVED_MAVENS_ERROR, error: res.msg });
+    })
+    .catch(err => {
+      dispatch({ type: GET_SAVED_MAVENS_ERROR, error: err });
     })  
   }
 }

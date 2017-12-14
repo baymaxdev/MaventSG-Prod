@@ -215,12 +215,11 @@ class Profile extends Component {
                 <Text style={styles.socialTextTitle}>Jobs Offer</Text>
               </View>
               {
-                this.state.isMe?
-                <View style={{flex:1, justifyContent: 'center', padding: 5, alignItems: 'center' }}>
+                this.state.isMe &&
+                <TouchableOpacity style={{flex:1, justifyContent: 'center', padding: 5, alignItems: 'center' }} onPress={() => {Actions.savedMavenPage()}}>
                   <Text style={styles.socialTextValue}>88</Text>
                   <Text style={styles.socialTextTitle}>Saved</Text>
-                </View>
-                :null
+                </TouchableOpacity>
               }
             </View>
           </View>
