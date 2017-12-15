@@ -64,6 +64,10 @@ class ActivityItem extends Component {
 
   archiveChat() {
     let provider = this.props.provider;
+    let isMaven = this.props.profile.myInfo.userId === provider.mavenUserID._id?true:false;
+    let userId = isMaven?provider.userID._id:provider.mavenUserID._id;
+    let user = isMaven?undefined:provider.userID;
+
     this.props.archiveActivity(provider._id, this.props.auth.token);
     this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' archived job.', {type: 'chat', maven: provider.mavenID._id, user: user, activity: provider._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
   }
@@ -201,6 +205,7 @@ class ActivityItem extends Component {
         if (!isMaven) {
           var maven = provider.mavenID;
           maven.userID = provider.mavenUserID;
+          Actions.pop();
           Actions.genericBooking({ title: provider.userID.firstName + ' ' + provider.userID.lastName, maven: maven });
         }
         break;
@@ -229,9 +234,9 @@ class ActivityItem extends Component {
         break;
       case 4:          // Cancelled
         if (!isMaven) {
-          var maven = provider.mavenID;
-          maven.userID = provider.mavenUserID;
-          Actions.genericBooking({ title: provider.userID.firstName + ' ' + provider.userID.lastName, maven: maven });
+          setTimeout(() => {
+            this.showEditOfferModal();
+          }, 500);
         }
         break;
       default:
@@ -458,10 +463,6 @@ class ActivityItem extends Component {
           </View>
           <View style={{ flex: 1, alignItems: 'flex-end', paddingRight:10 }}>
             {
-              provider.status === 0?
-              <View style={styles.container}>
-              </View>
-              :
               (provider.status === 1 && isMaven)?
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <TouchableOpacity onPress={() => {

@@ -40,6 +40,7 @@ class SavedMavenPage extends Component {
     return (
       <View style = {{padding: 10}}>
         <TouchableOpacity style = {{ paddingHorizontal:10, backgroundColor:'#fff' }} onPress={() => {
+          this.props.getMavenDetails(item._id, this.props.profile.location, this.props.auth.token);
           Actions.skillPage({ title: `${item.userID.firstName} ${item.userID.lastName}`, isMe: false })
         }}>
           <View style={{ flex: 1, paddingVertical:5, flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -156,6 +157,7 @@ const mapStateToProps = (state) =>({
 });
 const mapDispatchToProps = (dispatch) =>({
   getSavedMavens: (token) => dispatch(actions.getSavedMavens(token)),
+  getMavenDetails: (mavenId, location, token, callback) => dispatch(actions.getMavenDetails(mavenId, location, token, callback)),
   actions: bindActionCreators(actions, dispatch)
 });
 
