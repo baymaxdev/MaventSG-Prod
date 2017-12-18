@@ -8,6 +8,7 @@ import {Actions} from 'react-native-router-flux';
 import {Container, Content, Icon, Form} from 'native-base';
 import StarRating from 'react-native-star-rating';
 import Modal from 'react-native-modal';
+import Firebase from '../../helper/firebasehelper';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -25,9 +26,18 @@ class ReviewPage extends Component {
   // This is to remove fb token for retry purposes
   componentDidMount() {
     Actions.refresh({onRight: this.onSubmit.bind(this)});
+    Firebase.initialize();
   }
 
   onSubmit() {
+    var m = {};
+    m.sender = this.props.profile.myInfo.userId;
+    m.receiver = this.props.userId;
+    m.maven = this.props.mavenId;
+    m.activity = this.props.actId;
+    m.text = this.props.type===1?'Maven left a review!':'Customer left a review!';
+    m.createdAt = new Date().toISOString();
+    Firebase.pushMessage(m, this.props.type);
     this.props.reviewActivity(this.props.actId, this.props.type, this.state.rating, this.state.message, this.props.auth.token, () => {});
     this.props.sendPushNotification([this.props.userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' left review.', {type: 'chat', maven: this.props.mavenId, user: this.props.user}, this.props.auth.token);
     Actions.pop();

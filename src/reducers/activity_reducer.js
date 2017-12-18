@@ -34,6 +34,9 @@ import {
   REFRESH_ACTIVITIES,
   REFRESH_ACTIVITIES_REQUEST,
   REMOVE_NOTIFICATION_ACTIVITY_ID,
+  UPLOAD_CHAT_IMAGE,
+  UPLOAD_CHAT_IMAGE_ERROR,
+  UPLOAD_CHAT_IMAGE_REQUEST,
 } from '../actions/types';
   
 const INITIAL_STATE = {
@@ -111,7 +114,13 @@ export default function (state = INITIAL_STATE, action) {
     case REFRESH_ACTIVITIES:
       return { ...state, activityLoading: false, activitySuccess: true, showSuccessModal: false, notificationActId: action.notificationActId };
     case REMOVE_NOTIFICATION_ACTIVITY_ID:
-      return { ...state, notificationActId: undefined };  
+      return { ...state, notificationActId: undefined };
+    case UPLOAD_CHAT_IMAGE_REQUEST:
+      return { ...state, uploadedUrl: undefined };
+    case UPLOAD_CHAT_IMAGE:
+      return { ...state, uploadedUrl: action.uploadedUrl };
+    case UPLOAD_CHAT_IMAGE_ERROR:
+      return { ...state, error: action.error };
     default:
       return state;
   }

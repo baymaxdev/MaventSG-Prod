@@ -38,9 +38,7 @@ class ArchivedSkills extends Component {
 
   componentWillReceiveProps(nextProps) {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
-      if (Actions.currentScene === '_Archived') {
-        this.refreshItem();
-      }
+      this.refreshItem();
     }
   }
 

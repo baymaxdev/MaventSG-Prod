@@ -11,10 +11,13 @@ import Firebase from '../helper/firebasehelper';
 import Modal from 'react-native-modal';
 import DatePicker from 'react-native-datepicker';
 import StarRating from 'react-native-star-rating';
+import ActionSheet from 'react-native-actionsheet';
+import { ImagePicker } from 'expo';
 
 var isFirstLoad = true;
 var isBookingMessage = true;
 var currentActId = undefined;
+var chatDisabled = false;
 
 class Chat extends Component {
   state = {
@@ -24,6 +27,7 @@ class Chat extends Component {
     modalVisible: '',
     editOfferModalVisible: false,
     successModalVisible: false,
+    cancelMocalVisible: false,
     serviceDate: '',
     price: '',
     rating: 0,
@@ -46,6 +50,7 @@ class Chat extends Component {
     isFirstLoad = true;
     isBookingMessage = true;
     currentActId = undefined;
+    chatDisabled = false;
     Firebase.initialize();
     Actions.refresh({right: this.renderChatRightButton});
     this.props.getMavenDetails(this.props.mavenId, this.props.profile.location, this.props.auth.token, (m) => {
@@ -64,6 +69,50 @@ class Chat extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    if (this.props.activity.uploadedUrl !== nextProps.activity.uploadedUrl && nextProps.activity.uploadedUrl) {
+      if (this.state.messages.length === 0) {
+        this.props.initChat(this.state.maven._id, this.props.auth.token, (actId) => {
+          var m = {};
+          m.sender = this.props.profile.myInfo.userId;
+          m.receiver = this.state.user._id;
+          m.maven = this.state.maven._id;
+          m.activity = actId;
+          m.image = nextProps.activity.uploadedUrl;
+          m.createdAt = new Date().toISOString();
+          currentActId = actId;
+          this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
+            this.setActivityFromMaven(mavenActivities);
+          });
+          if (this.props.userID !== undefined) {
+            Firebase.pushMessage(m, true);
+            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+          } else {
+            Firebase.pushMessage(m, false);
+            var user = this.props.profile.myInfo;
+            user._id = user.userId;
+            this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+          }
+        });
+      } else {
+        var m = {};
+        m.sender = this.props.profile.myInfo.userId;
+        m.receiver = this.state.user._id;
+        m.maven = this.state.maven._id;
+        m.activity = this.state.activity._id;
+        m.image = nextProps.activity.uploadedUrl;
+        m.createdAt = new Date().toISOString();
+        if (this.props.userID !== undefined) {
+          Firebase.pushMessage(m, true);
+          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        } else {
+          Firebase.pushMessage(m, false);
+          var user = this.props.profile.myInfo;
+          user._id = user.userId;
+          this.props.sendPushNotification([m.receiver], 'New Message from ' + this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName, {type: 'chat', maven: m.maven, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        }
+      }
+    }
+
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
       this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
         this.setActivityFromMaven(mavenActivities);
@@ -134,7 +183,11 @@ class Chat extends Component {
         let val = snapshot.val();
         if (this.props.from === 'activity' || this.props.from === 'notification' || (activity.status !== 601 && activity.status !== 611 && activity.status !== 502 && activity.status !== 512 && activity.status !== 522)) {
           m._id = snapshot.key;
-          m.text = val.text;
+          if (val.image) {
+            m.image = val.image;
+          } else {
+            m.text = val.text;
+          }
           m.createdAt = new Date(val.createdAt);
           if (val.sender === this.props.profile.myInfo.userId) {
             var u = {};
@@ -218,6 +271,17 @@ class Chat extends Component {
     Actions.push('reviewPage', {actId: this.state.activity._id, type: type, mavenId: this.state.maven._id, userId: this.state.user._id, user: user});
   }
 
+  sendOfferEventMessage(text) {
+    var m = {};
+    m.sender = this.props.profile.myInfo.userId;
+    m.receiver = this.state.user._id;
+    m.maven = this.state.maven._id;
+    m.activity = this.state.activity._id;
+    m.text = text;
+    m.createdAt = new Date().toISOString();
+    Firebase.pushMessage(m, this.props.userID!==undefined);
+  }
+
   onPressModalBtn() {
     if (this.state.modalVisible === 'grey' || this.state.modalVisible === 'blue') {
       let isMaven = this.props.userID !== undefined?true:false;
@@ -251,14 +315,17 @@ class Chat extends Component {
         break;
       case 1:          // Offered
         if (isMaven) {
+          this.sendOfferEventMessage('Offer Rejected');
           this.props.rejectOffer(activity._id, this.props.auth.token);
           this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' rejected your offer.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
+          this.sendOfferEventMessage('Offer Cancelled');
           this.props.cancelOffer(activity._id, 0, this.props.auth.token);
           this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         }
         break;
       case 2:         // Accepted
+        this.sendOfferEventMessage('Gig Completed');
         this.props.endJob(activity._id, this.props.auth.token);
         this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' completed job.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
@@ -376,6 +443,7 @@ class Chat extends Component {
         }
       case 1:          // Offered
         if (isMaven) {
+          this.sendOfferEventMessage('Offer Accepted');
           this.props.acceptOffer(activity._id, this.props.auth.token);
           this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' accepted your offer.', {type: 'chat', maven: this.state.maven._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         } else {
@@ -383,11 +451,9 @@ class Chat extends Component {
         }
         break;
       case 2:         // Accepted
-        if (isMaven) {
-
-        } else {
-          this.showEditOfferModal(activity);
-        }
+        this.sendOfferEventMessage('Offer Cancelled');
+        this.props.cancelOffer(activity._id, 0, this.props.auth.token);
+        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
         break;
       case 3:         // Rejected
         this.showEditOfferModal(activity);
@@ -418,11 +484,42 @@ class Chat extends Component {
     }
   }
 
+  renderActions() {
+    return (
+      <TouchableOpacity disabled={chatDisabled} style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: 26, height: 26, marginLeft: 10 }} onPress={() => {
+        this.ActionSheet.show();
+      }}>
+        <Icon name="md-images" style={{ fontSize: 25, color: '#90939B' }} />
+      </TouchableOpacity>
+    );
+  }
+
+  handlePress = (i) => {
+    if (i === 1)
+      this._openCameraRoll();
+    else if (i === 2)
+      this.takePhoto();
+  }
+
+  _openCameraRoll = async () => {
+    let image = await ImagePicker.launchImageLibraryAsync();
+    if (!image.cancelled) {
+      this.props.uploadImage(image.uri, this.props.auth.token);
+    }
+  }
+
+  takePhoto = async () => {
+    let image = await ImagePicker.launchCameraAsync();
+    if (!image.cancelled) {
+      this.props.uploadImage(image.uri, this.props.auth.token);
+    }
+  }
+
   render() {
     let activity = this.state.activity;
-    console.log('activity', activity.status);
+    console.log(activity.status);
     let isMaven = this.props.userID !== undefined?true:false;
-    var btnText1 = btnText2 = '', chatDisabled = false;
+    var btnText1 = btnText2 = '';
     
     if (activity.status !== undefined) {
       switch (activity.status) {
@@ -446,9 +543,10 @@ class Chat extends Component {
         case 2:         // Accepted
           if (isMaven) {
             btnText1 = 'Completed';
+            btnText2 = 'Cancel Offer';
           } else {
             btnText1 = 'Completed';
-            btnText2 = 'Edit Offer';
+            btnText2 = 'Cancel Offer';
           }
           break;
         case 3:         // Rejected
@@ -652,6 +750,7 @@ class Chat extends Component {
             _id: this.props.profile.myInfo.userId
           }}
           textInputProps={{editable: !chatDisabled}}
+          renderActions={this.renderActions.bind(this)}
         />
         <Modal
           isVisible={modalVisible}
@@ -666,6 +765,33 @@ class Chat extends Component {
             <View style={{flexDirection: 'row'}}>
               <TouchableOpacity style={styles.modalBtn} onPress={() => {this.onPressModalBtn()}}>
                 <Text style={styles.btnText}>{modalBtnTitle}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          isVisible={this.state.cancelMocalVisible}
+          >
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+              this.setState({cancelMocalVisible: false});
+              }}>
+                <Icon name='close' style={{fontSize:40}}/>
+            </TouchableOpacity>
+            <Text style={{fontSize: 20}}>Cancel only if you are sure.</Text>
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({cancelMocalVisible: false})
+                this.sendOfferEventMessage('Offer Cancelled');
+                this.props.cancelOffer(activity._id, isMaven?1:0, this.props.auth.token);
+                this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+              }}>
+                <Text style={styles.btnText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({cancelMocalVisible: false})
+                }}>
+                <Text style={styles.btnText}>No</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -738,6 +864,13 @@ class Chat extends Component {
             <Text>Success!</Text>
           </View>
         </Modal>
+        <ActionSheet
+            ref={o => this.ActionSheet = o}
+            title={null}
+            options={['Cancel', 'Choose from Library...', 'Take a picture...']}
+            cancelButtonIndex={0}
+            onPress={this.handlePress}
+        />
       </View>
     );
   }
@@ -786,6 +919,7 @@ const mapDispatchToProps = (dispatch) =>({
   archiveActivity: (actId, token) => dispatch(actions.archiveActivity(actId, token)),
   sendPushNotification: (ids, message, data, token) => dispatch(actions.sendPushNotification(ids, message, data, token)),
   removeNotificationActId: () => dispatch(actions.removeNotificationActId()),
+  uploadImage: (imageUrl, token) => dispatch(actions.uploadImage(imageUrl, token)),
   actions: bindActionCreators(actions, dispatch)
 });
 

@@ -35,6 +35,9 @@ import {
   REFRESH_ACTIVITIES,
   REFRESH_ACTIVITIES_REQUEST,
   REMOVE_NOTIFICATION_ACTIVITY_ID,
+  UPLOAD_CHAT_IMAGE_REQUEST,
+  UPLOAD_CHAT_IMAGE,
+  UPLOAD_CHAT_IMAGE_ERROR,
 } from './types';
 
 export const getActivities = (mode, token, next) => {
@@ -253,7 +256,6 @@ export const archiveActivity = (actId, token) => {
   return dispatch => {
     dispatch({ type: ARCHIVE_ACTIVITY_REQUEST });
     const url = `activity/archive?actID=${actId}`;
-    console.log(url);
     request(url, option)
     .then(res => {
       if (res.status === 200) {
@@ -330,5 +332,38 @@ export const refreshActivities = (notificationActId) => {
 export const removeNotificationActId = () => {
   return dispatch => {
     dispatch({ type: REMOVE_NOTIFICATION_ACTIVITY_ID });
+  }
+}
+
+export const uploadImage = ( imageUrl, token ) => {
+  let formData = new FormData();
+  let filename = imageUrl.split('/').pop();
+  let match = /\.(\w+)$/.exec(filename);
+  let type = match ? match[1] : '';
+  let file = { uri: imageUrl, name: _generateUUID() + `.${type}`, type: `image/${type}`};
+  formData.append(`image`, file);
+  let option = { 
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `JWT ${token}`,
+    },
+  };
+  return dispatch => {
+    dispatch({ type: UPLOAD_CHAT_IMAGE_REQUEST });
+    const url = `activity/upload-image`;
+    request(url, option)
+    .then(res => {
+      if (res.status === 200) {
+        dispatch({ type: UPLOAD_CHAT_IMAGE, uploadedUrl: res.url });
+      }
+      else {
+        dispatch({ type: UPLOAD_CHAT_IMAGE_ERROR, error: res.msg });
+      }
+    })
+    .catch(err => {
+      dispatch({ type: UPLOAD_CHAT_IMAGE_ERROR, error: err });
+    })  
   }
 }

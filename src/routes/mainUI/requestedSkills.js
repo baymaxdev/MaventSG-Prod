@@ -40,8 +40,8 @@ class RequestedSkills extends Component {
 
   componentWillReceiveProps(nextProps) {
     if(this.props.activity.activityLoading !== nextProps.activity.activityLoading && !nextProps.activity.activityLoading && nextProps.activity.activitySuccess) {
+      this.refreshItem();
       if (Actions.currentScene === '_RequestedSkills') {
-        this.refreshItem();
         if (nextProps.activity.showSuccessModal === true) {
           setTimeout(() => {
             this.setState({successModalVisible: true}, () => {

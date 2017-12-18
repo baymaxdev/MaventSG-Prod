@@ -16,24 +16,6 @@ class Firebase {
         firebase.initializeApp(firebaseConfig);
     }
 
-    static signup(email, password, callback) {
-        firebase.auth().createUserWithEmailAndPassword(email, password).then(function() {
-            callback(null);
-        })
-        .catch(function(error) {
-            callback(error.message);
-        });
-    }
-
-    static login(email, password, callback) {
-        firebase.auth().signInWithEmailAndPassword(email, password).then(function() {
-            callback(null);
-        })
-        .catch(function(error) {
-            callback(error.message);
-        });
-    }
-
     static getMessages(node, callback) {
         firebase.database().ref('/messages/' + node).on('child_added', (snapshot) => {callback(snapshot)});
     }
@@ -41,9 +23,8 @@ class Firebase {
     static pushMessage(message, isMaven, callback) {
         let user = isMaven?message.receiver:message.sender;
         let node = message.maven + '-' + user + '-' + message.activity;
-        console.log(node);
         firebase.database().ref('/messages/' + node).push(message, callback);
-        this.setLastMessage(node, message.text);
+        this.setLastMessage(node, message.image?'Image Transfered':message.text);
     }
 
     static setLastMessage(node, text, callback) {
