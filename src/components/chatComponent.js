@@ -27,7 +27,7 @@ class Chat extends Component {
     modalVisible: '',
     editOfferModalVisible: false,
     successModalVisible: false,
-    cancelMocalVisible: false,
+    cancelModalVisible: false,
     serviceDate: '',
     price: '',
     rating: 0,
@@ -368,12 +368,12 @@ class Chat extends Component {
         if (isMaven) {
           this.showModal('white');
         } else {
-          this.showModal('blue');
+          this.navigateToReview(1);
         }
         break;
       case 502:         // Customer Archive
         if (isMaven) {
-          this.showModal('grey');
+          this.navigateToReview(1);
         } else {
           this.showModal('white');
         }
@@ -451,9 +451,7 @@ class Chat extends Component {
         }
         break;
       case 2:         // Accepted
-        this.sendOfferEventMessage('Offer Cancelled');
-        this.props.cancelOffer(activity._id, 0, this.props.auth.token);
-        this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        this.setState({cancelModalVisible: true});
         break;
       case 3:         // Rejected
         this.showEditOfferModal(activity);
@@ -473,6 +471,20 @@ class Chat extends Component {
         }
         break;
       case 501:         // Customer Review
+        if (isMaven) {
+          this.showModal('red');
+        } else {
+
+        }
+        break;
+      case 520:         // Maven Archive
+        if (isMaven) {
+
+        } else {
+          this.showModal('red');
+        }
+        break;
+      case 502:         // Customer Archive
         if (isMaven) {
           this.showModal('red');
         } else {
@@ -595,12 +607,14 @@ class Chat extends Component {
             btnText1 = 'Chat Archived';
             chatDisabled = true;
           } else {
-            btnText1 = 'Archive Chat';
+            btnText1 = 'Leave Review';
+            btnText2 = 'Archive Chat';
           }
           break;
         case 502:         // Customer Archive
           if (isMaven) {
-            btnText1 = 'Archive Chat';
+            btnText1 = 'Leave Review';
+            btnText2 = 'Archive Chat';
           } else {
             btnText1 = 'Chat Archived';
             chatDisabled = true;
@@ -770,18 +784,18 @@ class Chat extends Component {
           </View>
         </Modal>
         <Modal
-          isVisible={this.state.cancelMocalVisible}
+          isVisible={this.state.cancelModalVisible}
           >
           <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
             <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
-              this.setState({cancelMocalVisible: false});
+              this.setState({cancelModalVisible: false});
               }}>
                 <Icon name='close' style={{fontSize:40}}/>
             </TouchableOpacity>
             <Text style={{fontSize: 20}}>Cancel only if you are sure.</Text>
             <View style={{flexDirection: 'row'}}>
               <TouchableOpacity style={styles.modalBtn} onPress={() => {
-                this.setState({cancelMocalVisible: false})
+                this.setState({cancelModalVisible: false})
                 this.sendOfferEventMessage('Offer Cancelled');
                 this.props.cancelOffer(activity._id, isMaven?1:0, this.props.auth.token);
                 this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
@@ -789,7 +803,7 @@ class Chat extends Component {
                 <Text style={styles.btnText}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalBtn} onPress={() => {
-                this.setState({cancelMocalVisible: false})
+                this.setState({cancelModalVisible: false})
                 }}>
                 <Text style={styles.btnText}>No</Text>
               </TouchableOpacity>
@@ -834,6 +848,7 @@ class Chat extends Component {
             <View style={{flexDirection: 'row'}}>
                 <TouchableOpacity style={styles.modalBtn} onPress={() => {
                   this.setState({editOfferModalVisible: false});
+                  this.sendOfferEventMessage('Re-Offer');
                   this.props.editOffer(activity._id, this.state.price, this.state.serviceDate, this.props.auth.token);
                   var user = undefined;
                   if (isMaven === false) {

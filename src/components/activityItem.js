@@ -46,6 +46,7 @@ class ActivityItem extends Component {
     this.state = {
       modalVisible: false,
       editOfferModalVisible: false,
+      cancelModalVisible: false,
       serviceDate: '',
       price: '',
     };
@@ -218,9 +219,7 @@ class ActivityItem extends Component {
         }, 500);
         break;
       case 2:         // Accepted
-        this.sendOfferEventMessage('Offer Cancelled');
-        this.props.cancelOffer(provider._id, 0, this.props.auth.token);
-        this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+        this.setState({cancelModalVisible: true});
         break;
       case 3:         // Rejected
         if (isMaven) {
@@ -539,6 +538,33 @@ class ActivityItem extends Component {
             </View>
           </View>
         </Modal>
+        <Modal
+          isVisible={this.state.cancelModalVisible}
+          >
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+              this.setState({cancelModalVisible: false});
+              }}>
+                <Icon name='close' style={{fontSize:40}}/>
+            </TouchableOpacity>
+            <Text style={{fontSize: 20}}>Cancel only if you are sure.</Text>
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({cancelModalVisible: false})
+                this.sendOfferEventMessage('Offer Cancelled');
+                this.props.cancelOffer(activity._id, isMaven?1:0, this.props.auth.token);
+                this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+              }}>
+                <Text style={styles.btnText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({cancelModalVisible: false})
+                }}>
+                <Text style={styles.btnText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
         <Modal isVisible={this.state.editOfferModalVisible}>
           <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%'}}>
             <Text style={{ fontSize: 16, fontWeight: '600' }}>Date</Text>
@@ -577,6 +603,7 @@ class ActivityItem extends Component {
             <View style={{flexDirection: 'row'}}>
                 <TouchableOpacity style={styles.modalBtn} onPress={() => {
                   this.setState({editOfferModalVisible: false});
+                  this.sendOfferEventMessage('Re-Offer');
                   this.props.editOffer(provider._id, this.state.price, this.state.serviceDate, this.props.auth.token);
                   this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' edited offer.', {type: 'chat', maven: provider.mavenID._id, user: user, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
                 }}>
