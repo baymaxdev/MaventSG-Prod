@@ -47,6 +47,7 @@ class ActivityItem extends Component {
       modalVisible: false,
       editOfferModalVisible: false,
       cancelModalVisible: false,
+      archiveModalVisible: false,
       serviceDate: '',
       price: '',
     };
@@ -219,7 +220,9 @@ class ActivityItem extends Component {
         }, 500);
         break;
       case 2:         // Accepted
-        this.setState({cancelModalVisible: true});
+        setTimeout(() => {
+          this.setState({cancelModalVisible: true});
+        }, 500);
         break;
       case 3:         // Rejected
         if (isMaven) {
@@ -239,31 +242,37 @@ class ActivityItem extends Component {
         }
         break;
       case 500:
-        this.archiveChat();
+        this.showArchiveModal();
         break;
       case 510:
         if (!isMaven) {
-          this.archiveChat();
+          this.showArchiveModal();
         }
         break;
       case 501:
         if (isMaven) {
-          this.archiveChat();
+          this.showArchiveModal();
         }
         break;
       case 520:
         if (!isMaven) {
-          this.archiveChat();
+          this.showArchiveModal();
         }
         break;
       case 502:
         if (isMaven) {
-          this.archiveChat();
+          this.showArchiveModal();
         }
         break;
       default:
         break;
     }
+  }
+
+  showArchiveModal() {
+    setTimeout(() => {
+      this.setState({archiveModalVisible: true});
+    }, 500);
   }
 
   render() {
@@ -552,8 +561,8 @@ class ActivityItem extends Component {
               <TouchableOpacity style={styles.modalBtn} onPress={() => {
                 this.setState({cancelModalVisible: false})
                 this.sendOfferEventMessage('Offer Cancelled');
-                this.props.cancelOffer(activity._id, isMaven?1:0, this.props.auth.token);
-                this.props.sendPushNotification([this.state.user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: this.state.maven._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+                this.props.cancelOffer(provider._id, isMaven?1:0, this.props.auth.token);
+                this.props.sendPushNotification([user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
               }}>
                 <Text style={styles.btnText}>Yes</Text>
               </TouchableOpacity>
@@ -561,6 +570,25 @@ class ActivityItem extends Component {
                 this.setState({cancelModalVisible: false})
                 }}>
                 <Text style={styles.btnText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          isVisible={this.state.archiveModalVisible}
+          >
+          <View style={{backgroundColor:'#fff', paddingHorizontal:15, paddingVertical:10, borderWidth:1, borderRadius:10, width:'100%', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity style={{alignSelf:'flex-end'}} onPress={(e)=>{
+              this.setState({archiveModalVisible: false});
+              }}>
+                <Icon name='close' style={{fontSize:40}}/>
+            </TouchableOpacity>
+            <Text style={{fontSize: 20}}>To archive this chat, please leave a review first!</Text>
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity style={styles.modalBtn} onPress={() => {
+                this.setState({archiveModalVisible: false})
+              }}>
+                <Text style={styles.btnText}>Okay</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -368,7 +368,7 @@ class Chat extends Component {
         if (isMaven) {
           this.showModal('white');
         } else {
-          this.navigateToReview(1);
+          this.navigateToReview(0);
         }
         break;
       case 502:         // Customer Archive
