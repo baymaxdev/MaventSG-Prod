@@ -135,35 +135,38 @@ class Chat extends Component {
 
   setActivityFromMaven = (ma) => {
     var activity = {};
-    if (this.props.userID !== undefined ) {
-      for (var i = 0; i < ma.length; i ++) {
-        if (ma[i].userID._id === this.props.userID._id && ma[i]._id === this.props.actId) {
-          activity = ma[i];
-          break;
-        }
-      }
-    } else {
+    // if (this.props.userID !== undefined ) {
+    //   for (var i = 0; i < ma.length; i ++) {
+    //     if (ma[i].userID._id === this.props.userID._id && ma[i]._id === this.props.actId) {
+    //       activity = ma[i];
+    //       break;
+    //     }
+    //   }
+    // } else {
+      let compareUserId = this.props.userID?this.props.userID._id:this.props.profile.myInfo.userId;
       for (var i = 0; i < ma.length; i ++) {
         if (this.props.from === 'activity' || this.props.from === 'notification') {
-          if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === this.props.actId) {
+          if (ma[i].userID._id === compareUserId && ma[i]._id === this.props.actId) {
             activity = ma[i];
             break;
           }
         } else {
           if (currentActId) {
-            if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i]._id === currentActId) {
+            if (ma[i].userID._id === compareUserId && ma[i]._id === currentActId) {
               activity = ma[i];
               break;
             }
           } else {
-            if (ma[i].userID._id === this.props.profile.myInfo.userId && ma[i].status !== 601 && ma[i].status !== 611 && ma[i].status !== 502 && ma[i].status !== 512 && ma[i].status !== 522) {
+            console.log(ma[i].userID._id, compareUserId);
+            console.log('Status', ma[i].status);
+            if (ma[i].userID._id === compareUserId && ma[i].status !== 601 && ma[i].status !== 611 && ma[i].status !== 502 && ma[i].status !== 512 && ma[i].status !== 522) {
               activity = ma[i];
               break;
             }
           }
         }
       }
-    }
+    // }
     this.setState({ activity });
 
     if (activity._id !== undefined && this.props.bookingMessage && isBookingMessage === true) {
@@ -529,7 +532,6 @@ class Chat extends Component {
 
   render() {
     let activity = this.state.activity;
-    console.log(activity.status);
     let isMaven = this.props.userID !== undefined?true:false;
     var btnText1 = btnText2 = '';
     

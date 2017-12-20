@@ -562,7 +562,7 @@ class ActivityItem extends Component {
                 this.setState({cancelModalVisible: false})
                 this.sendOfferEventMessage('Offer Cancelled');
                 this.props.cancelOffer(provider._id, isMaven?1:0, this.props.auth.token);
-                this.props.sendPushNotification([user._id], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
+                this.props.sendPushNotification([userId], this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName + ' cancelled job.', {type: 'chat', maven: provider.mavenID._id, title: this.props.profile.myInfo.firstName + ' ' + this.props.profile.myInfo.lastName}, this.props.auth.token);
               }}>
                 <Text style={styles.btnText}>Yes</Text>
               </TouchableOpacity>
