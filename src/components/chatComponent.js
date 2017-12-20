@@ -14,24 +14,29 @@ import StarRating from 'react-native-star-rating';
 import ActionSheet from 'react-native-actionsheet';
 import { ImagePicker } from 'expo';
 
-var isFirstLoad = true;
-var isBookingMessage = true;
-var currentActId = undefined;
-var chatDisabled = false;
-
 class Chat extends Component {
-  state = {
-    messages: [],
-    requestLoading: true,
-    activity: {},
-    modalVisible: '',
-    editOfferModalVisible: false,
-    successModalVisible: false,
-    cancelModalVisible: false,
-    serviceDate: '',
-    price: '',
-    rating: 0,
-  };
+
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      messages: [],
+      requestLoading: true,
+      activity: {},
+      modalVisible: '',
+      editOfferModalVisible: false,
+      successModalVisible: false,
+      cancelModalVisible: false,
+      serviceDate: '',
+      price: '',
+      rating: 0,
+    };
+
+    this.isFirstLoad = true;
+    this.isBookingMessage = true;
+    this.currentActId = undefined;
+    this.chatDisabled = false;
+  }
 
   renderChatRightButton = () => {
     return <View style={{flexDirection: 'row'}}>
@@ -47,12 +52,7 @@ class Chat extends Component {
   }
 
   componentDidMount() {
-    isFirstLoad = true;
-    isBookingMessage = true;
-    currentActId = undefined;
-    chatDisabled = false;
     Firebase.initialize();
-    Actions.refresh({right: this.renderChatRightButton});
     this.props.getMavenDetails(this.props.mavenId, this.props.profile.location, this.props.auth.token, (m) => {
       var maven = m.maven;
       var user = maven.userID;
@@ -79,7 +79,7 @@ class Chat extends Component {
           m.activity = actId;
           m.image = nextProps.activity.uploadedUrl;
           m.createdAt = new Date().toISOString();
-          currentActId = actId;
+          this.currentActId = actId;
           this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
             this.setActivityFromMaven(mavenActivities);
           });
@@ -135,50 +135,40 @@ class Chat extends Component {
 
   setActivityFromMaven = (ma) => {
     var activity = {};
-    // if (this.props.userID !== undefined ) {
-    //   for (var i = 0; i < ma.length; i ++) {
-    //     if (ma[i].userID._id === this.props.userID._id && ma[i]._id === this.props.actId) {
-    //       activity = ma[i];
-    //       break;
-    //     }
-    //   }
-    // } else {
-      let compareUserId = this.props.userID?this.props.userID._id:this.props.profile.myInfo.userId;
-      for (var i = 0; i < ma.length; i ++) {
-        if (this.props.from === 'activity' || this.props.from === 'notification') {
-          if (ma[i].userID._id === compareUserId && ma[i]._id === this.props.actId) {
+    let compareUserId = this.props.userID?this.props.userID._id:this.props.profile.myInfo.userId;
+    for (var i = 0; i < ma.length; i ++) {
+      if (this.props.from === 'activity' || this.props.from === 'notification') {
+        if (ma[i].userID._id === compareUserId && ma[i]._id === this.props.actId) {
+          activity = ma[i];
+          break;
+        }
+      } else {
+        if (this.currentActId) {
+          if (ma[i].userID._id === compareUserId && ma[i]._id === this.currentActId) {
             activity = ma[i];
             break;
           }
         } else {
-          if (currentActId) {
-            if (ma[i].userID._id === compareUserId && ma[i]._id === currentActId) {
-              activity = ma[i];
-              break;
-            }
-          } else {
-            console.log(ma[i].userID._id, compareUserId);
-            console.log('Status', ma[i].status);
-            if (ma[i].userID._id === compareUserId && ma[i].status !== 601 && ma[i].status !== 611 && ma[i].status !== 502 && ma[i].status !== 512 && ma[i].status !== 522) {
-              activity = ma[i];
-              break;
-            }
+          if (ma[i].userID._id === compareUserId && ma[i].status !== 601 && ma[i].status !== 611 && ma[i].status !== 502 && ma[i].status !== 512 && ma[i].status !== 522) {
+            activity = ma[i];
+            break;
           }
         }
       }
-    // }
+    }
     this.setState({ activity });
 
-    if (activity._id !== undefined && this.props.bookingMessage && isBookingMessage === true) {
-      isBookingMessage = false;
+    if (activity._id !== undefined && this.props.bookingMessage && this.isBookingMessage === true) {
+      this.isBookingMessage = false;
       var bm = this.props.bookingMessage;
       bm.activity = activity._id;
       Firebase.pushMessage(bm, false);
     }
 
-    if (activity._id !== undefined && isFirstLoad === true) {
-      isFirstLoad = false;
-      currentActId = activity._id;
+    if (activity._id !== undefined && this.isFirstLoad === true) {
+      Actions.refresh({right: this.renderChatRightButton});
+      this.isFirstLoad = false;
+      this.currentActId = activity._id;
       let user = this.props.userID!==undefined?this.state.user._id:this.props.profile.myInfo.userId;
       let node = this.props.mavenId + '-' + user + '-' + activity._id; 
       Firebase.getMessages(node, (snapshot) => {
@@ -223,7 +213,7 @@ class Chat extends Component {
         m.activity = actId;
         m.text = messages[0].text;
         m.createdAt = messages[0].createdAt.toISOString();
-        currentActId = actId;
+        this.currentActId = actId;
         this.props.getMavenActivities(this.state.maven._id, this.props.auth.token, (mavenActivities) => {
           this.setActivityFromMaven(mavenActivities);
         });
@@ -501,7 +491,7 @@ class Chat extends Component {
 
   renderActions() {
     return (
-      <TouchableOpacity disabled={chatDisabled} style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: 26, height: 26, marginLeft: 10 }} onPress={() => {
+      <TouchableOpacity disabled={this.chatDisabled} style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: 26, height: 26, marginLeft: 10 }} onPress={() => {
         this.ActionSheet.show();
       }}>
         <Icon name="md-images" style={{ fontSize: 25, color: '#90939B' }} />
@@ -607,7 +597,7 @@ class Chat extends Component {
         case 520:         // Maven Archive
           if (isMaven) {
             btnText1 = 'Chat Archived';
-            chatDisabled = true;
+            this.chatDisabled = true;
           } else {
             btnText1 = 'Leave Review';
             btnText2 = 'Archive Chat';
@@ -619,7 +609,7 @@ class Chat extends Component {
             btnText2 = 'Archive Chat';
           } else {
             btnText1 = 'Chat Archived';
-            chatDisabled = true;
+            this.chatDisabled = true;
           }
           break;
         case 511:         // Maven Review + Customer Review
@@ -632,7 +622,7 @@ class Chat extends Component {
         case 521:         // Maven Archive + Customer Review
           if (isMaven) {
             btnText1 = 'Chat Archived';
-            chatDisabled = true;
+            this.chatDisabled = true;
           } else {
             btnText1 = 'Archive Chat';
           }
@@ -642,17 +632,17 @@ class Chat extends Component {
             btnText1 = 'Archive Chat';
           } else {
             btnText1 = 'Chat Archived';
-            chatDisabled = true;
+            this.chatDisabled = true;
           }
           break;
         case 522:         // Maven Archive + Customer Archive
           btnText1 = 'Chat Archived';
-          chatDisabled = true;
+          this.chatDisabled = true;
           break;
         case 610:         // MavenArchived_NR
           if (isMaven) {
             btnText1 = 'Chat Archived';
-            chatDisabled = true;
+            this.chatDisabled = true;
           } else {
             btnText1 = 'Archive Chat';
           }
@@ -662,12 +652,12 @@ class Chat extends Component {
             btnText1 = 'Archive Chat';
           } else {
             btnText1 = 'Chat Archived';
-            chatDisabled = true;
+            this.chatDisabled = true;
           }
           break;
         case 611:         // BothArchived_NR
           btnText1 = 'Chat Archived';
-          chatDisabled = true;
+          this.chatDisabled = true;
           break;
         default:
           break;
@@ -765,7 +755,7 @@ class Chat extends Component {
             // _id: this.props.profile.myInfo.userID,
             _id: this.props.profile.myInfo.userId
           }}
-          textInputProps={{editable: !chatDisabled}}
+          textInputProps={{editable: !this.chatDisabled}}
           renderActions={this.renderActions.bind(this)}
         />
         <Modal

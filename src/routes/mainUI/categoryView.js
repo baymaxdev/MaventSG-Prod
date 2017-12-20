@@ -67,12 +67,13 @@ class CategoryView extends Component {
         // Get the token that uniquely identifies this device
         let token = await Notifications.getExpoPushTokenAsync();
         this.props.savePushToken(token, this.props.auth.token);
-        await AsyncStorage.setItem('pushToken', token);
+        // await AsyncStorage.setItem('pushToken', token);
     }
 
     async savePushTokenToAsyncStorage() {
         try {
             const token = await AsyncStorage.getItem('pushToken');
+            AsyncStorage.removeItem('pushToken');
             if (token === null) {
                 this.registerForPushNotificationsAsync();
             }

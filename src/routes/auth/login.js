@@ -32,7 +32,7 @@ class Login extends Component {
     super(props);
     this.state = {
        showLoginModal: false,
-       email: Platform.OS === 'android'?'demo3@gmail.com':'demo4@gmail.com',
+       email: Platform.OS === 'android'?'demo1@gmail.com':'demo2@gmail.com',
        password: 'password',
        modalVisible: false,
        tutorModalVisible: false,
